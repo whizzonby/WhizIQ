@@ -26,3 +26,9 @@ deploy-package/
 deployment-*.tar.gz
 *.tar.gz
 !backups/*.tar.gz
+
+# Exclude markdown documentation files
+*.md
+
+# Exclude backups folder
+/backups
