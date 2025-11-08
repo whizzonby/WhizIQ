@@ -5,6 +5,7 @@ namespace App\Filament\Dashboard\Pages;
 use App\Filament\Dashboard\Widgets\AIUsageWidget;
 use App\Filament\Dashboard\Widgets\BusinessMetricsOverviewWidget;
 use App\Filament\Dashboard\Widgets\FinancialKpiWidget;
+use App\Filament\Dashboard\Widgets\NaturalLanguageQueryWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
 
 class Dashboard extends BaseDashboard
@@ -20,9 +21,20 @@ class Dashboard extends BaseDashboard
      * - Tax widgets → TaxDashboardPage
      * - Appointment widgets → AppointmentAnalyticsDashboard
      */
+
+    /**
+     * Override to prevent auto-discovered widgets from appearing
+     * Only return widgets we explicitly want on the main dashboard
+     */
+    public function getWidgets(): array
+    {
+        return [];
+    }
+
     protected function getHeaderWidgets(): array
     {
         return [
+            NaturalLanguageQueryWidget::class,
             FinancialKpiWidget::class,
             AIUsageWidget::class,
         ];

@@ -68,7 +68,7 @@ class DashboardPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/dashboard/theme.css')
             // Widgets are now organized into specific dashboards
             // Auto-discovery is enabled so widgets can be resolved when used in dashboard pages
-            // Widgets won't appear on main dashboard unless explicitly added to Dashboard::getHeaderWidgets() or getFooterWidgets()
+            // Note: Widgets with $sort property will auto-appear on default dashboard unless we override it
             ->discoverWidgets(in: app_path('Filament/Dashboard/Widgets'), for: 'App\\Filament\\Dashboard\\Widgets')
             ->widgets([
                 //AccountWidget::class, //uncomment this to show the account widget in the dashboard

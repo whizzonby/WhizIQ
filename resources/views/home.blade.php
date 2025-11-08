@@ -74,14 +74,14 @@
             </p>
         </x-section.column>
 
-        <x-section.column>
-            <img src="{{URL::asset('/images/features/payments.png')}}" dir="right" ></img>
+        <x-section.column class="flex items-center justify-center">
+            <x-icon.fancy name="dashboard" class="w-64 h-64 mx-auto" />
         </x-section.column>
     </x-section.columns>
 
     <x-section.columns class="max-w-none md:max-w-6xl flex-wrap-reverse">
-        <x-section.column >
-            <img src="{{URL::asset('/images/features/colors.png')}}" />
+        <x-section.column class="flex items-center justify-center">
+            <x-icon.fancy name="users" class="w-64 h-64 mx-auto" />
         </x-section.column>
 
         <x-section.column>
@@ -116,14 +116,14 @@
             </p>
         </x-section.column>
 
-        <x-section.column>
-            <img src="{{URL::asset('/images/features/plans.png')}}" class="rounded-2xl"/>
+        <x-section.column class="flex items-center justify-center">
+            <x-icon.fancy name="user-dashboard" class="w-64 h-64 mx-auto" />
         </x-section.column>
     </x-section.columns>
 
     <x-section.columns class="max-w-none md:max-w-6xl mt-6 flex-wrap-reverse">
-        <x-section.column >
-            <img src="{{URL::asset('/images/features/checkout.png')}}" class="rounded-2xl" />
+        <x-section.column class="flex items-center justify-center">
+            <x-icon.fancy name="tool" class="w-64 h-64 mx-auto" />
         </x-section.column>
 
         <x-section.column>

@@ -32,3 +32,6 @@ deployment-*.tar.gz
 
 # Exclude backups folder
 /backups
+
+# Exclude Windows reserved file names
+nul

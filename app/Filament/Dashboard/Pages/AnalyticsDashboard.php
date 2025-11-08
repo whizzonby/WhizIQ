@@ -10,7 +10,6 @@ use App\Filament\Dashboard\Widgets\CashFlowChartWidget;
 use App\Filament\Dashboard\Widgets\CashFlowSummaryWidget;
 use App\Filament\Dashboard\Widgets\ExpenseBreakdownWidget;
 use App\Filament\Dashboard\Widgets\ExpenseInsightsWidget;
-use App\Filament\Dashboard\Widgets\NaturalLanguageQueryWidget;
 use App\Filament\Dashboard\Widgets\ProfitabilityRatiosWidget;
 use App\Filament\Dashboard\Widgets\RevenueInsightsWidget;
 use App\Filament\Dashboard\Widgets\RevenueSourcesWidget;
@@ -65,7 +64,6 @@ class AnalyticsDashboard extends Page
             // Business Risk & Intelligence
             RiskAssessmentWidget::class,
             SwotAnalysisDashboardWidget::class,
-            NaturalLanguageQueryWidget::class,
         ];
     }
 

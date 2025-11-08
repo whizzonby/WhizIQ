@@ -27,11 +27,12 @@ class SecureHeadersMiddleware
         // Content Security Policy (CSP)
         $csp = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://embed.tawk.to https://*.tawk.to https://www.googletagmanager.com https://www.google-analytics.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.tawk.to https://*.tawk.to",
             "font-src 'self' https://fonts.gstatic.com data:",
             "img-src 'self' data: https:",
-            "connect-src 'self'",
+            "connect-src 'self' https://*.tawk.to wss://*.tawk.to https://www.google-analytics.com",
+            "media-src 'self' https://embed.tawk.to https://*.tawk.to",
             "frame-ancestors 'self'",
         ];
 
