@@ -155,47 +155,29 @@ class ListExpenses extends ListRecords
                 ])
                 ->action(function (array $data) {
                     try {
-                        $service = app(ExpenseExportService::class);
                         $format = $data['format'] ?? 'csv';
 
-                        $filters = [];
-                        if (isset($data['from_date'])) {
-                            $filters['from_date'] = $data['from_date'];
+                        // Build query parameters for the download route
+                        $params = ['format' => $format];
+                        
+                        if (isset($data['from_date']) && !empty($data['from_date'])) {
+                            $params['from_date'] = is_string($data['from_date']) ? $data['from_date'] : $data['from_date']->format('Y-m-d');
                         }
-                        if (isset($data['until_date'])) {
-                            $filters['until_date'] = $data['until_date'];
+                        if (isset($data['until_date']) && !empty($data['until_date'])) {
+                            $params['until_date'] = is_string($data['until_date']) ? $data['until_date'] : $data['until_date']->format('Y-m-d');
                         }
-                        if (isset($data['category'])) {
-                            $filters['category'] = $data['category'];
+                        if (isset($data['category']) && !empty($data['category'])) {
+                            $params['category'] = is_array($data['category']) ? $data['category'] : [$data['category']];
                         }
-                        if (isset($data['is_tax_deductible'])) {
-                            $filters['is_tax_deductible'] = (bool) $data['is_tax_deductible'];
-                        }
-
-                        if ($format === 'excel') {
-                            $content = $service->exportToExcel(auth()->id(), $filters);
-                            $contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                        } else {
-                            $content = $service->exportToCsv(auth()->id(), $filters);
-                            $contentType = 'text/csv';
+                        if (isset($data['is_tax_deductible']) && $data['is_tax_deductible'] !== null && $data['is_tax_deductible'] !== '') {
+                            $params['is_tax_deductible'] = (bool) $data['is_tax_deductible'];
                         }
 
-                        if (empty($content)) {
-                            Notification::make()
-                                ->title('No Data to Export')
-                                ->body('No expenses found matching your criteria.')
-                                ->warning()
-                                ->send();
-                            return;
-                        }
+                        // Build the download URL with proper query string
+                        $url = route('expenses.export') . '?' . http_build_query($params);
 
-                        $filename = $service->getExportFilename($format);
-
-                        return Response::streamDownload(function () use ($content) {
-                            echo $content;
-                        }, $filename, [
-                            'Content-Type' => $contentType,
-                        ]);
+                        // Redirect to download route - browser will handle the download
+                        return redirect($url);
                     } catch (\Exception $e) {
                         Notification::make()
                             ->title('Export Failed')

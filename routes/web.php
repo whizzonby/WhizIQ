@@ -210,3 +210,9 @@ Route::get('/invoice/{invoice}/download-pdf', [
     App\Http\Controllers\InvoiceController::class,
     'downloadClientInvoicePDF',
 ])->name('invoice.download-pdf')->middleware('auth');
+
+// Expense Export Download
+Route::get('/expenses/export', [
+    App\Http\Controllers\ExpenseExportController::class,
+    'download',
+])->name('expenses.export')->middleware('auth');
