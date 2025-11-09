@@ -74,3 +74,35 @@ Schedule::command('tax:create-periods')
     ->yearlyOn(1, 1, '00:30') // January 1st at 12:30 AM
     ->name('create-tax-periods')
     ->withoutOverlapping();
+
+// Clear stale cache tags weekly (prevents file buildup)
+Schedule::command('cache:prune-stale-tags')
+    ->weekly()
+    ->sundays()
+    ->at('03:00')
+    ->name('prune-stale-cache')
+    ->withoutOverlapping();
+
+// Clear compiled view cache weekly
+Schedule::command('view:clear')
+    ->weekly()
+    ->sundays()
+    ->at('03:30')
+    ->name('clear-view-cache')
+    ->withoutOverlapping();
+
+// Clear route cache weekly
+Schedule::command('route:clear')
+    ->weekly()
+    ->sundays()
+    ->at('03:45')
+    ->name('clear-route-cache')
+    ->withoutOverlapping();
+
+// Clear config cache weekly
+Schedule::command('config:clear')
+    ->weekly()
+    ->sundays()
+    ->at('03:50')
+    ->name('clear-config-cache')
+    ->withoutOverlapping();

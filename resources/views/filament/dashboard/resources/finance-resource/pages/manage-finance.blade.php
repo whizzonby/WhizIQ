@@ -1,18 +1,12 @@
 <x-filament-panels::page>
     @php
         $platforms = [
+            // ✅ ACTIVE INTEGRATIONS - Currently Available
             'quickbooks' => [
                 'name' => 'QuickBooks',
                 'description' => 'Accounting & Financial Management',
                 'icon' => 'heroicon-o-calculator',
                 'color' => 'success',
-                'type' => 'oauth',
-            ],
-            'xero' => [
-                'name' => 'Xero',
-                'description' => 'Cloud Accounting Software',
-                'icon' => 'heroicon-o-cloud',
-                'color' => 'info',
                 'type' => 'oauth',
             ],
             'excel' => [
@@ -22,27 +16,39 @@
                 'color' => 'primary',
                 'type' => 'upload',
             ],
-            'stripe' => [
-                'name' => 'Stripe',
-                'description' => 'Payment Processing Platform',
-                'icon' => 'heroicon-o-credit-card',
-                'color' => 'warning',
-                'type' => 'oauth',
-            ],
-            'oracle' => [
-                'name' => 'Oracle Financials',
-                'description' => 'Enterprise Resource Planning',
-                'icon' => 'heroicon-o-building-office-2',
-                'color' => 'danger',
-                'type' => 'enterprise',
-            ],
-            'sap' => [
-                'name' => 'SAP',
-                'description' => 'Enterprise Business Software',
-                'icon' => 'heroicon-o-server-stack',
-                'color' => 'gray',
-                'type' => 'enterprise',
-            ],
+
+            // 🔒 HIDDEN INTEGRATIONS - Will be enabled when company expands
+            // Uncomment these sections below when ready to launch additional integrations
+            // DO NOT DELETE - Code preserved for future activation
+
+            // 'xero' => [
+            //     'name' => 'Xero',
+            //     'description' => 'Cloud Accounting Software',
+            //     'icon' => 'heroicon-o-cloud',
+            //     'color' => 'info',
+            //     'type' => 'oauth',
+            // ],
+            // 'stripe' => [
+            //     'name' => 'Stripe',
+            //     'description' => 'Payment Processing Platform',
+            //     'icon' => 'heroicon-o-credit-card',
+            //     'color' => 'warning',
+            //     'type' => 'oauth',
+            // ],
+            // 'oracle' => [
+            //     'name' => 'Oracle Financials',
+            //     'description' => 'Enterprise Resource Planning',
+            //     'icon' => 'heroicon-o-building-office-2',
+            //     'color' => 'danger',
+            //     'type' => 'enterprise',
+            // ],
+            // 'sap' => [
+            //     'name' => 'SAP',
+            //     'description' => 'Enterprise Business Software',
+            //     'icon' => 'heroicon-o-server-stack',
+            //     'color' => 'gray',
+            //     'type' => 'enterprise',
+            // ],
         ];
 
         $connections = $this->getConnections();

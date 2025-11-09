@@ -1,5 +1,5 @@
 <x-filament-panels::page>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="space-y-6">
         <!-- Left Side: Form -->
         <div class="space-y-6">
             <div class="border-b border-gray-200 dark:border-gray-700 pb-6">
@@ -56,8 +56,8 @@
             </div>
         </div>
 
-        <!-- Right Side: Live Preview -->
-        <div class="lg:sticky lg:top-6 lg:self-start">
+        <!-- Live Preview -->
+        <div>
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
                 <!-- Preview Header -->
                 <div class="bg-gradient-to-r from-gray-900 to-gray-700 px-6 py-4 flex items-center justify-between">

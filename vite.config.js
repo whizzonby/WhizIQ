@@ -17,4 +17,14 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    server: {
+        watch: {
+            ignored: [
+                '**/backups/**',
+                '**/node_modules/**',
+                '**/vendor/**',
+                '**/storage/**',
+            ],
+        },
+    },
 });
