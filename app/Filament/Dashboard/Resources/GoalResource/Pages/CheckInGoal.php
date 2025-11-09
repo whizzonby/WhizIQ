@@ -11,11 +11,14 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 
 class CheckInGoal extends Page implements HasForms
 {
     use InteractsWithForms;
+    use InteractsWithRecord;
 
     protected static string $resource = GoalResource::class;
 
@@ -23,8 +26,10 @@ class CheckInGoal extends Page implements HasForms
 
     public ?array $data = [];
 
-    public function mount(): void
+    public function mount(int|string $record): void
     {
+        $this->record = $this->resolveRecord($record);
+        
         $this->form->fill();
     }
 
@@ -32,7 +37,7 @@ class CheckInGoal extends Page implements HasForms
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make('Weekly Check-in')
+                Section::make('Weekly Check-in')
                     ->description('Update your progress and reflect on this week')
                     ->schema([
                         Forms\Components\Textarea::make('notes')
