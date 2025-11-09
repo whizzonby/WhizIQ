@@ -85,10 +85,17 @@ class OpenAIService
                 return $result;
             }
 
+            $errorBody = $response->json();
+
             Log::error('OpenAI API error', [
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
+
+            // Throw user-friendly error for quota/rate limit issues
+            if ($response->status() === 429) {
+                throw new \Exception('Our AI Server is busy, please try again in a few minutes.');
+            }
 
             return null;
         } catch (\Exception $e) {
