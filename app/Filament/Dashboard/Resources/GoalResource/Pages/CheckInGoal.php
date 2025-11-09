@@ -7,12 +7,16 @@ use App\Models\GoalCheckIn;
 use App\Services\OpenAIService;
 use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Schema;
 
-class CheckInGoal extends Page
+class CheckInGoal extends Page implements HasForms
 {
+    use InteractsWithForms;
+
     protected static string $resource = GoalResource::class;
 
     protected string $view = 'filament.dashboard.resources.goal-resource.check-in-goal';
