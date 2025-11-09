@@ -47,7 +47,7 @@ class RevenueSourceImportService
                 $validator = Validator::make($mappedData, [
                     'date' => 'required|date',
                     'source' => 'required|string|max:255',
-                    'amount' => 'required|numeric|min:0',
+                    'amount' => 'required|numeric|min:0.01',  // Must be greater than 0
                     'percentage' => 'nullable|numeric|min:0|max:100',
                 ]);
 
@@ -91,7 +91,7 @@ class RevenueSourceImportService
             'user_id' => $userId,
             'date' => $date,
             'source' => $csvData['source'] ?? $csvData['revenue source'] ?? $csvData['source name'] ?? '',
-            'amount' => $this->parseNumeric($csvData['amount'] ?? $csvData['revenue amount'] ?? $csvData['value'] ?? 0),
+            'amount' => $this->parseNumeric($csvData['amount'] ?? $csvData['revenue amount'] ?? $csvData['value'] ?? null),
             'percentage' => isset($csvData['percentage']) ? $this->parseNumeric($csvData['percentage']) : null,
         ];
 
