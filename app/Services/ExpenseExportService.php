@@ -44,6 +44,11 @@ class ExpenseExportService
      */
     protected function generateCsv(Collection $expenses): string
     {
+        // If no expenses, return empty to trigger notification
+        if ($expenses->isEmpty()) {
+            return '';
+        }
+
         $csv = [];
 
         // Header row
@@ -62,15 +67,15 @@ class ExpenseExportService
         // Data rows
         foreach ($expenses as $expense) {
             $csv[] = [
-                $expense->date->format('Y-m-d'),
-                $expense->category,
-                number_format($expense->amount, 2, '.', ''),
+                $expense->date?->format('Y-m-d') ?? '',
+                $expense->category ?? '',
+                $expense->amount ? number_format($expense->amount, 2, '.', '') : '0.00',
                 $expense->description ?? '',
                 $expense->is_tax_deductible ? 'Yes' : 'No',
                 $expense->deductible_amount ? number_format($expense->deductible_amount, 2, '.', '') : '',
                 $expense->taxCategory?->name ?? '',
                 $expense->tax_notes ?? '',
-                $expense->created_at->format('Y-m-d H:i:s'),
+                $expense->created_at?->format('Y-m-d H:i:s') ?? '',
             ];
         }
 
