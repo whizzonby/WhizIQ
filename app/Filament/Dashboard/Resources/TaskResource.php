@@ -68,7 +68,6 @@ class TaskResource extends Resource
 
                         Forms\Components\Select::make('priority')
                             ->label('Priority')
-                            ->required()
                             ->options([
                                 'urgent' => 'Urgent',
                                 'high' => 'High',
@@ -86,7 +85,6 @@ class TaskResource extends Resource
 
                         Forms\Components\Select::make('status')
                             ->label('Status')
-                            ->required()
                             ->options([
                                 'pending' => 'Pending',
                                 'in_progress' => 'In Progress',
