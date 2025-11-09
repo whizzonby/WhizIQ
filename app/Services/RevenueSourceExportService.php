@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\RevenueSource;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class RevenueSourceExportService
@@ -16,13 +17,19 @@ class RevenueSourceExportService
 
         // Apply filters if provided
         if ($filters) {
-            if (isset($filters['from_date'])) {
-                $query->whereDate('date', '>=', $filters['from_date']);
+            if (isset($filters['from_date']) && !empty($filters['from_date'])) {
+                $fromDate = is_string($filters['from_date']) 
+                    ? Carbon::parse($filters['from_date'])->startOfDay()
+                    : $filters['from_date'];
+                $query->whereDate('date', '>=', $fromDate);
             }
-            if (isset($filters['until_date'])) {
-                $query->whereDate('date', '<=', $filters['until_date']);
+            if (isset($filters['until_date']) && !empty($filters['until_date'])) {
+                $untilDate = is_string($filters['until_date']) 
+                    ? Carbon::parse($filters['until_date'])->endOfDay()
+                    : $filters['until_date'];
+                $query->whereDate('date', '<=', $untilDate);
             }
-            if (isset($filters['source'])) {
+            if (isset($filters['source']) && !empty($filters['source'])) {
                 if (is_array($filters['source'])) {
                     $query->whereIn('source', $filters['source']);
                 } else {
@@ -41,6 +48,11 @@ class RevenueSourceExportService
      */
     protected function generateCsv(Collection $revenueSources): string
     {
+        // If no revenue sources, return empty to trigger notification
+        if ($revenueSources->isEmpty()) {
+            return '';
+        }
+
         $csv = [];
 
         // Header row
@@ -55,22 +67,31 @@ class RevenueSourceExportService
         // Data rows
         foreach ($revenueSources as $revenueSource) {
             $csv[] = [
-                $revenueSource->date->format('Y-m-d'),
-                $revenueSource->source,
-                number_format($revenueSource->amount, 2, '.', ''),
+                $revenueSource->date?->format('Y-m-d') ?? '',
+                $revenueSource->source ?? '',
+                $revenueSource->amount ? number_format($revenueSource->amount, 2, '.', '') : '0.00',
                 $revenueSource->percentage ? number_format($revenueSource->percentage, 2, '.', '') : '',
-                $revenueSource->created_at->format('Y-m-d H:i:s'),
+                $revenueSource->created_at?->format('Y-m-d H:i:s') ?? '',
             ];
         }
 
         // Convert to CSV string
         $output = fopen('php://temp', 'r+');
+        if ($output === false) {
+            return '';
+        }
+
         foreach ($csv as $row) {
             fputcsv($output, $row);
         }
         rewind($output);
         $csvContent = stream_get_contents($output);
         fclose($output);
+
+        // Ensure we have valid content (at least headers)
+        if (empty($csvContent) || strlen(trim($csvContent)) === 0) {
+            return '';
+        }
 
         return $csvContent;
     }

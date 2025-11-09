@@ -146,35 +146,34 @@ class ListRevenueSources extends ListRecords
                         ->required(),
                 ])
                 ->action(function (array $data) {
-                    $service = app(RevenueSourceExportService::class);
-                    $format = $data['format'] ?? 'csv';
-                    
-                    $filters = [];
-                    if (isset($data['from_date'])) {
-                        $filters['from_date'] = $data['from_date'];
-                    }
-                    if (isset($data['until_date'])) {
-                        $filters['until_date'] = $data['until_date'];
-                    }
-                    if (isset($data['source'])) {
-                        $filters['source'] = $data['source'];
-                    }
+                    try {
+                        $format = $data['format'] ?? 'csv';
 
-                    if ($format === 'excel') {
-                        $content = $service->exportToExcel(auth()->id(), $filters);
-                        $contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                    } else {
-                        $content = $service->exportToCsv(auth()->id(), $filters);
-                        $contentType = 'text/csv';
+                        // Build query parameters for the download route
+                        $params = ['format' => $format];
+                        
+                        if (isset($data['from_date']) && !empty($data['from_date'])) {
+                            $params['from_date'] = is_string($data['from_date']) ? $data['from_date'] : $data['from_date']->format('Y-m-d');
+                        }
+                        if (isset($data['until_date']) && !empty($data['until_date'])) {
+                            $params['until_date'] = is_string($data['until_date']) ? $data['until_date'] : $data['until_date']->format('Y-m-d');
+                        }
+                        if (isset($data['source']) && !empty($data['source'])) {
+                            $params['source'] = is_array($data['source']) ? $data['source'] : [$data['source']];
+                        }
+
+                        // Build the download URL with proper query string
+                        $url = route('revenue-sources.export') . '?' . http_build_query($params);
+
+                        // Redirect to download route - browser will handle the download
+                        return redirect($url);
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Export Failed')
+                            ->body('Error: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
                     }
-
-                    $filename = $service->getExportFilename($format);
-
-                    return Response::streamDownload(function () use ($content) {
-                        echo $content;
-                    }, $filename, [
-                        'Content-Type' => $contentType,
-                    ]);
                 }),
 
             Actions\CreateAction::make(),

@@ -216,3 +216,9 @@ Route::get('/expenses/export', [
     App\Http\Controllers\ExpenseExportController::class,
     'download',
 ])->name('expenses.export')->middleware('auth');
+
+// Revenue Source Export Download
+Route::get('/revenue-sources/export', [
+    App\Http\Controllers\RevenueSourceExportController::class,
+    'download',
+])->name('revenue-sources.export')->middleware('auth');
