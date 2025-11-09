@@ -438,30 +438,34 @@ class InvoiceBuilderPage extends Page implements HasForms
         try {
             // Check invoice limit only for new invoices (not updates)
             if (!$this->invoiceId) {
-                $featureService = app(\App\Services\SubscriptionFeatureService::class);
                 $user = auth()->user();
 
-                // Get count of invoices created this month
-                $currentMonthCount = \App\Models\ClientInvoice::where('user_id', $user->id)
-                    ->whereYear('created_at', now()->year)
-                    ->whereMonth('created_at', now()->month)
-                    ->count();
+                // Admins bypass all limits
+                if (!$user->isAdmin()) {
+                    // Get count of invoices created this month
+                    $currentMonthCount = \App\Models\ClientInvoice::where('user_id', $user->id)
+                        ->whereYear('created_at', now()->year)
+                        ->whereMonth('created_at', now()->month)
+                        ->count();
 
-                $limit = $featureService->getFeatureValue($user, 'finance_invoices_limit', 50);
+                    // Get limit from subscription metadata
+                    $metadata = $user->subscriptionProductMetadata();
+                    $limit = $metadata['finance_invoices_limit'] ?? 50;
 
-                if ($limit !== 'unlimited' && $limit !== 'true' && $currentMonthCount >= (int)$limit) {
-                    Notification::make()
-                        ->warning()
-                        ->title('Invoice Limit Reached')
-                        ->body("You've reached your monthly limit of {$limit} invoices. Upgrade to Pro for unlimited invoices!")
-                        ->actions([
-                            \Filament\Notifications\Actions\Action::make('upgrade')
-                                ->label('View Plans')
-                                ->url(route('filament.dashboard.pages.plans'))
-                        ])
-                        ->persistent()
-                        ->send();
-                    return;
+                    if ($limit !== 'unlimited' && $limit !== 'true' && $currentMonthCount >= (int)$limit) {
+                        Notification::make()
+                            ->warning()
+                            ->title('Invoice Limit Reached')
+                            ->body("You've reached your monthly limit of {$limit} invoices. Upgrade to Pro for unlimited invoices!")
+                            ->actions([
+                                \Filament\Notifications\Actions\Action::make('upgrade')
+                                    ->label('View Plans')
+                                    ->url(route('filament.dashboard.pages.plans'))
+                            ])
+                            ->persistent()
+                            ->send();
+                        return;
+                    }
                 }
             }
 
@@ -562,30 +566,34 @@ class InvoiceBuilderPage extends Page implements HasForms
         try {
             // Check invoice limit only for new invoices (not updates)
             if (!$this->invoiceId) {
-                $featureService = app(\App\Services\SubscriptionFeatureService::class);
                 $user = auth()->user();
 
-                // Get count of invoices created this month
-                $currentMonthCount = \App\Models\ClientInvoice::where('user_id', $user->id)
-                    ->whereYear('created_at', now()->year)
-                    ->whereMonth('created_at', now()->month)
-                    ->count();
+                // Admins bypass all limits
+                if (!$user->isAdmin()) {
+                    // Get count of invoices created this month
+                    $currentMonthCount = \App\Models\ClientInvoice::where('user_id', $user->id)
+                        ->whereYear('created_at', now()->year)
+                        ->whereMonth('created_at', now()->month)
+                        ->count();
 
-                $limit = $featureService->getFeatureValue($user, 'finance_invoices_limit', 50);
+                    // Get limit from subscription metadata
+                    $metadata = $user->subscriptionProductMetadata();
+                    $limit = $metadata['finance_invoices_limit'] ?? 50;
 
-                if ($limit !== 'unlimited' && $limit !== 'true' && $currentMonthCount >= (int)$limit) {
-                    Notification::make()
-                        ->warning()
-                        ->title('Invoice Limit Reached')
-                        ->body("You've reached your monthly limit of {$limit} invoices. Upgrade to Pro for unlimited invoices!")
-                        ->actions([
-                            \Filament\Notifications\Actions\Action::make('upgrade')
-                                ->label('View Plans')
-                                ->url(route('filament.dashboard.pages.plans'))
-                        ])
-                        ->persistent()
-                        ->send();
-                    return;
+                    if ($limit !== 'unlimited' && $limit !== 'true' && $currentMonthCount >= (int)$limit) {
+                        Notification::make()
+                            ->warning()
+                            ->title('Invoice Limit Reached')
+                            ->body("You've reached your monthly limit of {$limit} invoices. Upgrade to Pro for unlimited invoices!")
+                            ->actions([
+                                \Filament\Notifications\Actions\Action::make('upgrade')
+                                    ->label('View Plans')
+                                    ->url(route('filament.dashboard.pages.plans'))
+                            ])
+                            ->persistent()
+                            ->send();
+                        return;
+                    }
                 }
             }
 
