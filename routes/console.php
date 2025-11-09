@@ -106,3 +106,9 @@ Schedule::command('config:clear')
     ->at('03:50')
     ->name('clear-config-cache')
     ->withoutOverlapping();
+
+// Refresh business metrics daily at midnight (keeps dashboard data accurate)
+Schedule::command('app:refresh-business-metrics')
+    ->dailyAt('00:05')
+    ->name('refresh-business-metrics')
+    ->withoutOverlapping();
