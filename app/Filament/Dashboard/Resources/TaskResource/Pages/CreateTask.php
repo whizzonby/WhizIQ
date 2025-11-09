@@ -29,6 +29,8 @@ class CreateTask extends CreateRecord
     {
         $data['user_id'] = auth()->id();
         $data['source'] = $data['source'] ?? 'manual';
+        $data['priority'] = $data['priority'] ?? 'medium';
+        $data['status'] = $data['status'] ?? 'pending';
 
         return $data;
     }
