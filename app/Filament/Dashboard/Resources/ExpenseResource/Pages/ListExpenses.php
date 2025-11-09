@@ -154,38 +154,55 @@ class ListExpenses extends ListRecords
                         ->required(),
                 ])
                 ->action(function (array $data) {
-                    $service = app(ExpenseExportService::class);
-                    $format = $data['format'] ?? 'csv';
-                    
-                    $filters = [];
-                    if (isset($data['from_date'])) {
-                        $filters['from_date'] = $data['from_date'];
-                    }
-                    if (isset($data['until_date'])) {
-                        $filters['until_date'] = $data['until_date'];
-                    }
-                    if (isset($data['category'])) {
-                        $filters['category'] = $data['category'];
-                    }
-                    if (isset($data['is_tax_deductible'])) {
-                        $filters['is_tax_deductible'] = (bool) $data['is_tax_deductible'];
-                    }
+                    try {
+                        $service = app(ExpenseExportService::class);
+                        $format = $data['format'] ?? 'csv';
 
-                    if ($format === 'excel') {
-                        $content = $service->exportToExcel(auth()->id(), $filters);
-                        $contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                    } else {
-                        $content = $service->exportToCsv(auth()->id(), $filters);
-                        $contentType = 'text/csv';
+                        $filters = [];
+                        if (isset($data['from_date'])) {
+                            $filters['from_date'] = $data['from_date'];
+                        }
+                        if (isset($data['until_date'])) {
+                            $filters['until_date'] = $data['until_date'];
+                        }
+                        if (isset($data['category'])) {
+                            $filters['category'] = $data['category'];
+                        }
+                        if (isset($data['is_tax_deductible'])) {
+                            $filters['is_tax_deductible'] = (bool) $data['is_tax_deductible'];
+                        }
+
+                        if ($format === 'excel') {
+                            $content = $service->exportToExcel(auth()->id(), $filters);
+                            $contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                        } else {
+                            $content = $service->exportToCsv(auth()->id(), $filters);
+                            $contentType = 'text/csv';
+                        }
+
+                        if (empty($content)) {
+                            Notification::make()
+                                ->title('No Data to Export')
+                                ->body('No expenses found matching your criteria.')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
+                        $filename = $service->getExportFilename($format);
+
+                        return Response::streamDownload(function () use ($content) {
+                            echo $content;
+                        }, $filename, [
+                            'Content-Type' => $contentType,
+                        ]);
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Export Failed')
+                            ->body('Error: ' . $e->getMessage())
+                            ->danger()
+                            ->send();
                     }
-
-                    $filename = $service->getExportFilename($format);
-
-                    return Response::streamDownload(function () use ($content) {
-                        echo $content;
-                    }, $filename, [
-                        'Content-Type' => $contentType,
-                    ]);
                 }),
 
             Actions\CreateAction::make(),
