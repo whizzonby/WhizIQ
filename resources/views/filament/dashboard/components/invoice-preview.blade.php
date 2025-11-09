@@ -33,8 +33,10 @@
         }
         return floatval($item['amount'] ?? 0);
     });
-    $taxAmount = ($subtotal * $taxRate) / 100;
-    $total = $subtotal + $taxAmount - $discountAmount;
+    // Apply discount first, then calculate tax on the discounted amount
+    $discountedSubtotal = $subtotal - $discountAmount;
+    $taxAmount = ($discountedSubtotal * $taxRate) / 100;
+    $total = $discountedSubtotal + $taxAmount;
 
     // Template colors
     $colors = [

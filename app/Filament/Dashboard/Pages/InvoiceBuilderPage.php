@@ -691,10 +691,11 @@ class InvoiceBuilderPage extends Page implements HasForms
                     $subtotal += $itemData['amount'];
                 }
 
-                // Calculate totals
+                // Calculate totals - apply discount first, then tax
                 $invoice->subtotal = $subtotal;
-                $invoice->tax_amount = ($subtotal * $invoice->tax_rate) / 100;
-                $invoice->total_amount = $subtotal + $invoice->tax_amount - $invoice->discount_amount;
+                $discountedSubtotal = $subtotal - $invoice->discount_amount;
+                $invoice->tax_amount = ($discountedSubtotal * $invoice->tax_rate) / 100;
+                $invoice->total_amount = $discountedSubtotal + $invoice->tax_amount;
                 $invoice->balance_due = $invoice->total_amount - $invoice->amount_paid;
                 $invoice->save();
 
@@ -771,10 +772,11 @@ class InvoiceBuilderPage extends Page implements HasForms
                     $invoice->setRelation('items', $items);
                 }
 
-                // Calculate totals
+                // Calculate totals - apply discount first, then tax
                 $invoice->subtotal = $subtotal;
-                $invoice->tax_amount = ($subtotal * $invoice->tax_rate) / 100;
-                $invoice->total_amount = $subtotal + $invoice->tax_amount - $invoice->discount_amount;
+                $discountedSubtotal = $subtotal - $invoice->discount_amount;
+                $invoice->tax_amount = ($discountedSubtotal * $invoice->tax_rate) / 100;
+                $invoice->total_amount = $discountedSubtotal + $invoice->tax_amount;
                 $invoice->balance_due = $invoice->total_amount;
 
                 if ($persist) {
