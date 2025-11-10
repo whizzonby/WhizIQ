@@ -96,21 +96,27 @@ class AppointmentResource extends Resource
                             ->label('Start Date & Time')
                             ->required()
                             ->native(false)
-                            ->reactive()
+                            ->live()
+                            ->seconds(false)
+                            ->displayFormat('M j, Y g:i A')
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 $typeId = $get('appointment_type_id');
                                 if ($typeId && $state) {
                                     $type = AppointmentType::find($typeId);
-                                    $start = \Carbon\Carbon::parse($state);
-                                    $end = $start->copy()->addMinutes($type->duration_minutes);
-                                    $set('end_datetime', $end);
+                                    if ($type) {
+                                        $start = \Carbon\Carbon::parse($state);
+                                        $end = $start->copy()->addMinutes($type->duration_minutes);
+                                        $set('end_datetime', $end);
+                                    }
                                 }
                             }),
 
                         Forms\Components\DateTimePicker::make('end_datetime')
                             ->label('End Date & Time')
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->seconds(false)
+                            ->displayFormat('M j, Y g:i A'),
 
                         Forms\Components\Select::make('appointment_format')
                             ->label('Format')
@@ -122,7 +128,6 @@ class AppointmentResource extends Resource
                             ])
                             ->default('online')
                             ->live()
-                            ->reactive()
                             ->helperText('Overrides appointment type format if needed'),
 
                         Forms\Components\TextInput::make('location')
@@ -141,7 +146,8 @@ class AppointmentResource extends Resource
                             ])
                             ->default('scheduled')
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->dehydrated(),
                     ])
                     ->columns(2),
 

@@ -31,6 +31,20 @@ class CreateAppointment extends CreateRecord
         $data['user_id'] = auth()->id();
         $data['booked_via'] = 'admin';
 
+        // Ensure datetime fields are properly formatted
+        if (isset($data['start_datetime']) && $data['start_datetime']) {
+            $data['start_datetime'] = \Carbon\Carbon::parse($data['start_datetime'])->format('Y-m-d H:i:s');
+        }
+
+        if (isset($data['end_datetime']) && $data['end_datetime']) {
+            $data['end_datetime'] = \Carbon\Carbon::parse($data['end_datetime'])->format('Y-m-d H:i:s');
+        }
+
+        // Ensure status has a default value
+        if (empty($data['status'])) {
+            $data['status'] = 'scheduled';
+        }
+
         return $data;
     }
 
