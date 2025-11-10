@@ -88,14 +88,27 @@ class InvoicePDFService
 </html>';
 
             // Generate PDF using Browsershot
-            $pdfContent = Browsershot::html($fullHtml)
+            $browsershot = Browsershot::html($fullHtml)
                 ->setOption('args', ['--no-sandbox', '--disable-setuid-sandbox'])
                 ->format('A4')
                 ->margins(10, 10, 10, 10)
                 ->showBackground()
                 ->waitUntilNetworkIdle()
-                ->timeout(120) // 2 minutes timeout for PDF generation
-                ->pdf();
+                ->timeout(120); // 2 minutes timeout for PDF generation
+
+            // Configure Node.js and npm paths if not in default PATH
+            $nodePath = $this->findNodePath();
+            $npmPath = $this->findNpmPath();
+
+            if ($nodePath) {
+                $browsershot->setNodeBinary($nodePath);
+            }
+
+            if ($npmPath) {
+                $browsershot->setNpmBinary($npmPath);
+            }
+
+            $pdfContent = $browsershot->pdf();
 
             // Save to storage if requested
             if ($save) {
@@ -104,10 +117,21 @@ class InvoicePDFService
 
             return $pdfContent;
         } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
+            $nodePath = $this->findNodePath();
+            $npmPath = $this->findNpmPath();
+
+            // Add helpful context for Node.js/npm not found errors
+            if (str_contains($errorMessage, 'node') || str_contains($errorMessage, 'npm') || str_contains($errorMessage, 'Command not found')) {
+                $errorMessage .= ' Node.js and npm are required for PDF generation. Please install Node.js on your server. See AWS_BROWSERSHOT_SETUP.md for instructions.';
+            }
+
             Log::error('Failed to generate invoice PDF', [
                 'invoice_id' => $invoice->id,
-                'error' => $e->getMessage(),
+                'error' => $errorMessage,
                 'trace' => $e->getTraceAsString(),
+                'node_path' => $nodePath ?? 'not found',
+                'npm_path' => $npmPath ?? 'not found',
             ]);
             throw $e;
         }
@@ -534,5 +558,93 @@ class InvoicePDFService
             'vibrant' => '#34d399',
             default => '#60a5fa',
         };
+    }
+
+    /**
+     * Find Node.js binary path
+     *
+     * @return string|null
+     */
+    protected function findNodePath(): ?string
+    {
+        // Check environment variable first
+        if ($path = env('NODE_PATH')) {
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+
+        // Check common installation paths
+        $commonPaths = [
+            '/usr/bin/node',
+            '/usr/local/bin/node',
+            '/opt/homebrew/bin/node',
+            '/usr/local/node/bin/node',
+        ];
+
+        foreach ($commonPaths as $path) {
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+
+        // Try to find in PATH
+        $output = @shell_exec('which node 2>/dev/null');
+        if ($output) {
+            $path = trim($output);
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Find npm binary path
+     *
+     * @return string|null
+     */
+    protected function findNpmPath(): ?string
+    {
+        // Check environment variable first
+        if ($path = env('NPM_PATH')) {
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+
+        // Check common installation paths (usually same directory as node)
+        $nodePath = $this->findNodePath();
+        if ($nodePath) {
+            $npmPath = dirname($nodePath) . '/npm';
+            if (file_exists($npmPath) && is_executable($npmPath)) {
+                return $npmPath;
+            }
+        }
+
+        $commonPaths = [
+            '/usr/bin/npm',
+            '/usr/local/bin/npm',
+            '/opt/homebrew/bin/npm',
+            '/usr/local/node/bin/npm',
+        ];
+
+        foreach ($commonPaths as $path) {
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+
+        // Try to find in PATH
+        $output = @shell_exec('which npm 2>/dev/null');
+        if ($output) {
+            $path = trim($output);
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+
+        return null;
     }
 }
