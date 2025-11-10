@@ -23,6 +23,15 @@ class Dashboard extends BaseDashboard
      */
 
     /**
+     * Get personalized dashboard title with user's name
+     */
+    public function getTitle(): string
+    {
+        $userName = auth()->user()->name ?? 'User';
+        return "{$userName}'s Dashboard";
+    }
+
+    /**
      * Override to prevent auto-discovered widgets from appearing
      * Only return widgets we explicitly want on the main dashboard
      */
