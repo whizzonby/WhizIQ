@@ -49,10 +49,19 @@ class DealImportService
             try {
                 $mappedData = $this->mapCsvToModel($dealData, $userId);
 
+                // Check if contact_id is required but missing
+                if (empty($mappedData['contact_id'])) {
+                    $results['failed']++;
+                    $results['errors'][] = "Row " . ($index + 2) . ": Contact not found. Please ensure the contact exists or create it first. Contact name/email from CSV: " .
+                        ($csvData['contact_name'] ?? $csvData['Contact Name'] ?? $csvData['contact'] ?? '') . ' / ' .
+                        ($csvData['contact_email'] ?? $csvData['Contact Email'] ?? '');
+                    continue;
+                }
+
                 // Validate
                 $validator = Validator::make($mappedData, [
                     'user_id' => 'required|exists:users,id',
-                    'contact_id' => 'nullable|exists:contacts,id',
+                    'contact_id' => 'required|exists:contacts,id',
                     'title' => 'required|string|max:255',
                     'value' => 'required|numeric|min:0',
                     'stage' => 'required|in:lead,qualified,proposal,negotiation,won,lost',

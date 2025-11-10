@@ -22,86 +22,93 @@ class ListDeals extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('download_template')
-                ->label('Download CSV Template')
-                ->icon('heroicon-o-document-arrow-down')
-                ->color('gray')
-                ->action(function () {
-                    $service = app(DealImportService::class);
-                    $template = $service->getCsvTemplate();
-
-                    return Response::streamDownload(function () use ($template) {
-                        echo $template;
-                    }, 'deal_import_template.csv', [
-                        'Content-Type' => 'text/csv',
-                    ]);
-                }),
-
-            Action::make('import')
-                ->label('Import Deals')
-                ->icon('heroicon-o-arrow-up-tray')
-                ->color('success')
-                ->form([
-                    Forms\Components\FileUpload::make('file')
-                        ->label('CSV File')
-                        ->acceptedFileTypes(['text/csv', 'application/csv', 'text/plain'])
-                        ->required()
-                        ->helperText('Upload a CSV file with deal data')
-                        ->maxSize(5120), // 5MB
-
-                ])
-                ->action(function (array $data) {
-                    try {
-                        $service = app(DealImportService::class);
-
-                        // Get file content
-                        $filePath = storage_path('app/public/' . $data['file']);
-                        $csvContent = file_get_contents($filePath);
-
-                        // Validate structure
-                        $validation = $service->validateCsvStructure($csvContent);
-                        if (!$validation['valid']) {
-                            Notification::make()
-                                ->title('Invalid CSV')
-                                ->danger()
-                                ->body($validation['message'])
-                                ->send();
-                            return;
-                        }
-
-                        // Import
-                        $results = $service->importFromCsv($csvContent, auth()->id());
-
-                        // Show results
-                        $message = "Successfully imported {$results['success']} deals.";
-                        if ($results['failed'] > 0) {
-                            $message .= " {$results['failed']} failed.";
-                        }
-
-                        Notification::make()
-                            ->title('Import Complete')
-                            ->success()
-                            ->body($message)
-                            ->send();
-
-                        if (!empty($results['errors'])) {
-                            foreach (array_slice($results['errors'], 0, 5) as $error) {
-                                Notification::make()
-                                    ->title('Import Error')
-                                    ->warning()
-                                    ->body($error)
-                                    ->send();
-                            }
-                        }
-
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->title('Import Failed')
-                            ->danger()
-                            ->body($e->getMessage())
-                            ->send();
-                    }
-                }),
+            // Import and Template Download features commented out - Export only
+            // Action::make('download_template')
+            //     ->label('Download CSV Template')
+            //     ->icon('heroicon-o-document-arrow-down')
+            //     ->color('gray')
+            //     ->action(function () {
+            //         $service = app(DealImportService::class);
+            //         $template = $service->getCsvTemplate();
+            //
+            //         return Response::streamDownload(function () use ($template) {
+            //             echo $template;
+            //         }, 'deal_import_template.csv', [
+            //             'Content-Type' => 'text/csv',
+            //         ]);
+            //     }),
+            //
+            // Action::make('import')
+            //     ->label('Import Deals')
+            //     ->icon('heroicon-o-arrow-up-tray')
+            //     ->color('success')
+            //     ->form([
+            //         Forms\Components\FileUpload::make('file')
+            //             ->label('CSV File')
+            //             ->acceptedFileTypes([
+            //                 'text/csv',
+            //                 'application/csv',
+            //                 'text/plain',
+            //                 'application/vnd.ms-excel',
+            //                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            //             ])
+            //             ->required()
+            //             ->helperText('Upload a CSV or Excel file with deal data')
+            //             ->maxSize(5120), // 5MB
+            //
+            //     ])
+            //     ->action(function (array $data) {
+            //         try {
+            //             $service = app(DealImportService::class);
+            //
+            //             // Get file content
+            //             $filePath = storage_path('app/public/' . $data['file']);
+            //             $csvContent = file_get_contents($filePath);
+            //
+            //             // Validate structure
+            //             $validation = $service->validateCsvStructure($csvContent);
+            //             if (!$validation['valid']) {
+            //                 Notification::make()
+            //                     ->title('Invalid CSV')
+            //                     ->danger()
+            //                     ->body($validation['message'])
+            //                     ->send();
+            //                 return;
+            //             }
+            //
+            //             // Import
+            //             $results = $service->importFromCsv($csvContent, auth()->id());
+            //
+            //             // Show results
+            //             $message = "Successfully imported {$results['success']} deals.";
+            //             if ($results['failed'] > 0) {
+            //                 $message .= " {$results['failed']} failed.";
+            //             }
+            //
+            //             Notification::make()
+            //                 ->title('Import Complete')
+            //                 ->success()
+            //                 ->body($message)
+            //                 ->send();
+            //
+            //             if (!empty($results['errors'])) {
+            //                 foreach (array_slice($results['errors'], 0, 5) as $error) {
+            //                     Notification::make()
+            //                         ->title('Import Error')
+            //                         ->warning()
+            //                         ->body($error)
+            //                         ->send();
+            //                 }
+            //             }
+            //
+            //         } catch (\Exception $e) {
+            //             Notification::make()
+            //                 ->title('Import Failed')
+            //                 ->danger()
+            //                 ->body($e->getMessage())
+            //                 ->send();
+            //         }
+            //     }),
 
             Action::make('export')
                 ->label('Export Deals')
