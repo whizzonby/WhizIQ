@@ -17,6 +17,26 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Check disk space before proceeding
+echo "Checking disk space..."
+AVAILABLE_SPACE=$(df -m / | tail -1 | awk '{print $4}')
+echo "Available disk space: ${AVAILABLE_SPACE}MB"
+echo ""
+
+if [ $AVAILABLE_SPACE -lt 500 ]; then
+    echo "⚠️  WARNING: Low disk space (${AVAILABLE_SPACE}MB available)"
+    echo "Node.js installation requires at least 200MB free space."
+    echo ""
+    echo "Please run the cleanup script first:"
+    echo "  sudo ./scripts/cleanup-disk-space.sh"
+    echo ""
+    echo "Or manually free up space, then run this script again."
+    exit 1
+fi
+
+echo "✓ Sufficient disk space available"
+echo ""
+
 # Update package list
 echo "Updating package list..."
 apt-get update
@@ -81,30 +101,54 @@ apt-get install -y \
 
 echo ""
 echo "=========================================="
-echo "Installing Puppeteer (for Browsershot)..."
+echo "Installing Puppeteer and Chrome..."
 echo "=========================================="
 echo ""
 
-# Create a temporary directory for npm packages
-TEMP_DIR="/tmp/puppeteer-install"
-mkdir -p $TEMP_DIR
-cd $TEMP_DIR
+# Navigate to project directory
+PROJECT_DIR="/var/www/WhizIQ"
+if [ ! -d "$PROJECT_DIR" ]; then
+    echo "⚠️  Project directory not found at $PROJECT_DIR"
+    echo "Please install Puppeteer manually in your project directory"
+    exit 1
+fi
 
-# Install Puppeteer globally
-npm install -g puppeteer
+cd $PROJECT_DIR
 
-# Change ownership to www-data for the npm global directory
+# Install Puppeteer locally in the project (this downloads Chrome)
+echo "Installing Puppeteer in project (this will download Chrome)..."
+npm install puppeteer --save-dev --legacy-peer-deps 2>/dev/null || npm install puppeteer --save-dev
+
+# Install Chrome using Puppeteer's browser installer
+echo "Installing Chrome via Puppeteer..."
+npx puppeteer browsers install chrome 2>/dev/null || npx --yes puppeteer browsers install chrome
+
+# Set permissions for www-data user
 echo "Setting permissions for www-data user..."
-chown -R www-data:www-data /usr/lib/node_modules 2>/dev/null || true
+chown -R www-data:www-data node_modules 2>/dev/null || true
+chown -R www-data:www-data .cache 2>/dev/null || true
 
-# Verify Puppeteer installation
-echo ""
-echo "Puppeteer installed at:"
-npm list -g puppeteer 2>/dev/null || echo "Puppeteer installed globally"
+# Find Chrome path
+CHROME_PATH=$(find node_modules -name "chrome" -type f -path "*/chrome-linux*/chrome" 2>/dev/null | head -1)
+if [ -z "$CHROME_PATH" ]; then
+    CHROME_PATH=$(find ~/.cache -name "chrome" -type f -path "*/chrome-linux*/chrome" 2>/dev/null | head -1)
+fi
+if [ -z "$CHROME_PATH" ]; then
+    CHROME_PATH=$(find /var/www/.cache -name "chrome" -type f -path "*/chrome-linux*/chrome" 2>/dev/null | head -1)
+fi
 
-# Clean up
-cd /
-rm -rf $TEMP_DIR
+if [ ! -z "$CHROME_PATH" ]; then
+    CHROME_PATH=$(readlink -f "$CHROME_PATH" 2>/dev/null || echo "$CHROME_PATH")
+    echo ""
+    echo "✓ Chrome found at: $CHROME_PATH"
+    echo ""
+    echo "Add this to your .env file:"
+    echo "CHROME_PATH=$CHROME_PATH"
+else
+    echo ""
+    echo "⚠️  Chrome path not automatically detected"
+    echo "You may need to set CHROME_PATH in your .env file manually"
+fi
 
 echo ""
 echo "=========================================="

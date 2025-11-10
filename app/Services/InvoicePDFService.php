@@ -108,6 +108,12 @@ class InvoicePDFService
                 $browsershot->setNpmBinary($npmPath);
             }
 
+            // Configure Chrome/Chromium path if specified or auto-detect
+            $chromePath = $this->findChromePath();
+            if ($chromePath) {
+                $browsershot->setChromePath($chromePath);
+            }
+
             $pdfContent = $browsershot->pdf();
 
             // Save to storage if requested
@@ -121,10 +127,16 @@ class InvoicePDFService
             $nodePath = $this->findNodePath();
             $npmPath = $this->findNpmPath();
 
-            // Add helpful context for Node.js/npm not found errors
+            // Add helpful context for common errors
             if (str_contains($errorMessage, 'node') || str_contains($errorMessage, 'npm') || str_contains($errorMessage, 'Command not found')) {
                 $errorMessage .= ' Node.js and npm are required for PDF generation. Please install Node.js on your server. See AWS_BROWSERSHOT_SETUP.md for instructions.';
             }
+            
+            if (str_contains($errorMessage, 'Chrome') || str_contains($errorMessage, 'Could not find')) {
+                $errorMessage .= ' Chrome/Chromium is required for PDF generation. Please run: cd /var/www/WhizIQ && npx puppeteer browsers install chrome';
+            }
+
+            $chromePath = $this->findChromePath();
 
             Log::error('Failed to generate invoice PDF', [
                 'invoice_id' => $invoice->id,
@@ -132,6 +144,7 @@ class InvoicePDFService
                 'trace' => $e->getTraceAsString(),
                 'node_path' => $nodePath ?? 'not found',
                 'npm_path' => $npmPath ?? 'not found',
+                'chrome_path' => $chromePath ?? 'not found',
             ]);
             throw $e;
         }
@@ -642,6 +655,70 @@ class InvoicePDFService
             $path = trim($output);
             if (file_exists($path) && is_executable($path)) {
                 return $path;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Find Chrome/Chromium executable path
+     *
+     * @return string|null
+     */
+    protected function findChromePath(): ?string
+    {
+        // Check environment variable first
+        if ($path = env('CHROME_PATH')) {
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+
+        $projectPath = base_path();
+        
+        // Check system Chromium first (if installed via apt)
+        $systemPaths = [
+            '/usr/bin/chromium',
+            '/usr/bin/chromium-browser',
+            '/usr/bin/google-chrome',
+            '/usr/bin/google-chrome-stable',
+        ];
+
+        foreach ($systemPaths as $path) {
+            if (file_exists($path) && is_executable($path)) {
+                return $path;
+            }
+        }
+
+        // Try to find using find command (most reliable for Puppeteer Chrome)
+        $homeDir = getenv('HOME') ?: '/root';
+        $searchPaths = [
+            $projectPath . '/node_modules',
+            '/var/www/.cache',
+            $homeDir . '/.cache',
+            '/root/.cache',
+        ];
+
+        foreach ($searchPaths as $searchPath) {
+            if (!is_dir($searchPath)) {
+                continue;
+            }
+
+            // Try different find patterns
+            $commands = [
+                "find " . escapeshellarg($searchPath) . " -name 'chrome' -type f -path '*/chrome-linux*/chrome' 2>/dev/null | head -1",
+                "find " . escapeshellarg($searchPath) . " -name 'chrome' -type f 2>/dev/null | grep -E 'chrome-linux.*chrome$' | head -1",
+            ];
+
+            foreach ($commands as $command) {
+                $output = @shell_exec($command);
+                if ($output) {
+                    $path = trim($output);
+                    if (file_exists($path) && is_executable($path)) {
+                        return $path;
+                    }
+                }
             }
         }
 
