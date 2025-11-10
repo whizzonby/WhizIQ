@@ -51,7 +51,7 @@ class TaxDocumentResource extends Resource
                             ->maxSize(10240) // 10MB
                             ->required()
                             ->live()
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                            ->afterStateUpdated(function ($state, callable $set) {
                                 if ($state) {
                                     $set('file_type', $state->getClientOriginalExtension());
                                     $set('file_size', $state->getSize());
