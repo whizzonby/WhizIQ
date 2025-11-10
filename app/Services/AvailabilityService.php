@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Appointment;
 use App\Models\AvailabilitySchedule;
+use App\Models\AvailabilityException;
 use App\Models\AppointmentType;
 use App\Models\User;
 use App\Models\Venue;
@@ -23,6 +24,15 @@ class AvailabilityService
      */
     public function getAvailableSlots(int $userId, Carbon $date, int $durationMinutes = 30, int $minNoticeHours = 0, ?int $venueId = null): array
     {
+        // Check if there are any availability exceptions for this date
+        $hasException = AvailabilityException::forUser($userId)
+            ->onDate($date)
+            ->exists();
+
+        if ($hasException) {
+            return []; // User is not available on this date due to exception
+        }
+
         // Get user's availability for this day of week
         $dayOfWeek = $date->dayOfWeek;
 
