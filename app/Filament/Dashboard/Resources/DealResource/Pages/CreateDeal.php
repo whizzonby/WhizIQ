@@ -29,6 +29,14 @@ class CreateDeal extends CreateRecord
     {
         $data['user_id'] = auth()->id();
 
+        // Ensure required fields have default values
+        $data['stage'] = $data['stage'] ?? 'lead';
+        $data['value'] = $data['value'] ?? 0;
+        $data['priority'] = $data['priority'] ?? 'medium';
+        $data['currency'] = $data['currency'] ?? 'USD';
+        $data['probability'] = $data['probability'] ?? 50;
+        $data['expected_close_date'] = $data['expected_close_date'] ?? now()->addDays(30)->format('Y-m-d');
+
         return $data;
     }
 

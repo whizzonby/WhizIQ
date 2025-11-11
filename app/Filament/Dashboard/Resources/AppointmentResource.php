@@ -95,22 +95,22 @@ class AppointmentResource extends Resource
                         Forms\Components\DateTimePicker::make('start_datetime')
                             ->label('Start Date & Time')
                             ->required()
-                            ->native(false)
-                            ->reactive()
+                            ->live()
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 $typeId = $get('appointment_type_id');
                                 if ($typeId && $state) {
                                     $type = AppointmentType::find($typeId);
-                                    $start = \Carbon\Carbon::parse($state);
-                                    $end = $start->copy()->addMinutes($type->duration_minutes);
-                                    $set('end_datetime', $end);
+                                    if ($type) {
+                                        $start = \Carbon\Carbon::parse($state);
+                                        $end = $start->copy()->addMinutes($type->duration_minutes);
+                                        $set('end_datetime', $end);
+                                    }
                                 }
                             }),
 
                         Forms\Components\DateTimePicker::make('end_datetime')
                             ->label('End Date & Time')
-                            ->required()
-                            ->native(false),
+                            ->required(),
 
                         Forms\Components\Select::make('appointment_format')
                             ->label('Format')
@@ -140,8 +140,7 @@ class AppointmentResource extends Resource
                                 'no_show' => 'No Show',
                             ])
                             ->default('scheduled')
-                            ->required()
-                            ->native(false),
+                            ->required(),
                     ])
                     ->columns(2),
 

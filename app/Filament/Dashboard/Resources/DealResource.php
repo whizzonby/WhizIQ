@@ -45,7 +45,19 @@ class DealResource extends Resource
                             ->relationship('contact', 'name', fn (Builder $query) => $query->where('user_id', auth()->id()))
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('email')
+                                    ->email()
+                                    ->maxLength(255),
+                            ])
+                            ->createOptionUsing(function (array $data) {
+                                $data['user_id'] = auth()->id();
+                                return \App\Models\Contact::create($data)->id;
+                            }),
 
                         Forms\Components\TextInput::make('title')
                             ->required()
@@ -72,15 +84,14 @@ class DealResource extends Resource
                                         'lost' => 'Lost',
                                     ])
                                     ->default('lead')
-                                    ->native(false)
                                     ->required(),
 
                                 Forms\Components\TextInput::make('value')
                                     ->label('Deal Value')
                                     ->numeric()
                                     ->prefix('$')
-                                    ->required()
-                                    ->default(0),
+                                    ->default(0)
+                                    ->required(),
 
                                 Forms\Components\TextInput::make('probability')
                                     ->label('Win Probability (%)')
@@ -101,7 +112,6 @@ class DealResource extends Resource
                                         'high' => 'High',
                                     ])
                                     ->default('medium')
-                                    ->native(false)
                                     ->required(),
 
                                 Forms\Components\DatePicker::make('expected_close_date')
