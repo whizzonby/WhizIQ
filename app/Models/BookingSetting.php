@@ -24,6 +24,8 @@ class BookingSetting extends Model
         'notify_sms',
         'send_reminder_hours_before',
         'meeting_platform',
+        'meeting_link',
+        'meeting_instructions',
         'zoom_client_id',
         'zoom_client_secret',
         'zoom_access_token',

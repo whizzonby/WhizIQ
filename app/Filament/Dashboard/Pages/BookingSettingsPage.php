@@ -65,6 +65,8 @@ class BookingSettingsPage extends Page implements HasForms
             'max_booking_days_ahead' => $this->settings->max_booking_days_ahead,
             'require_approval' => $this->settings->require_approval,
             'meeting_platform' => $this->settings->meeting_platform ?? 'none',
+            'meeting_link' => $this->settings->meeting_link,
+            'meeting_instructions' => $this->settings->meeting_instructions,
             'google_meet_enabled' => $this->settings->google_meet_enabled ?? false,
         ]);
     }
@@ -155,37 +157,38 @@ class BookingSettingsPage extends Page implements HasForms
                     ->columns(2),
 
                 Section::make('Meeting Platform')
-                    ->description('Automatically generate meeting links for all appointments')
+                    ->description('Configure online meeting settings for appointments')
                     ->schema([
                         Forms\Components\Select::make('meeting_platform')
-                            ->label('Select Platform')
+                            ->label('Meeting Platform')
                             ->options([
                                 'none' => 'No online meeting',
-                                'zoom' => 'Zoom',
-                                'google_meet' => 'Google Meet',
+                                'custom' => 'Custom Meeting Link (Zoom, Google Meet, Teams, etc.)',
                             ])
                             ->default('none')
                             ->live()
-                            ->helperText('Choose which platform to use for generating meeting links'),
+                            ->helperText('Choose how to handle meeting links for appointments'),
 
-                        Forms\Components\Toggle::make('google_meet_enabled')
-                            ->label('Enable Google Meet')
-                            ->helperText('Generate Google Meet links for appointments')
-                            ->visible(fn ($get) => $get('meeting_platform') === 'google_meet')
-                            ->default(true),
+                        Forms\Components\TextInput::make('meeting_link')
+                            ->label('Meeting Link')
+                            ->url()
+                            ->placeholder('https://zoom.us/j/123456789 or https://meet.google.com/abc-defg-hij')
+                            ->helperText('Enter your personal meeting room link (Zoom, Google Meet, Teams, etc.)')
+                            ->visible(fn ($get) => $get('meeting_platform') === 'custom')
+                            ->columnSpanFull(),
+
+                        Forms\Components\Textarea::make('meeting_instructions')
+                            ->label('Meeting Instructions (Optional)')
+                            ->rows(3)
+                            ->placeholder('e.g., Please join 5 minutes early. Meeting password: 12345')
+                            ->helperText('Additional instructions for joining the meeting (password, dial-in number, etc.)')
+                            ->visible(fn ($get) => $get('meeting_platform') === 'custom')
+                            ->columnSpanFull(),
 
                         Forms\Components\Placeholder::make('meeting_info')
                             ->label('')
-                            ->content(function ($get) {
-                                $platform = $get('meeting_platform');
-                                if ($platform === 'zoom') {
-                                    return 'Meeting links will be automatically generated for Zoom.';
-                                } elseif ($platform === 'google_meet') {
-                                    return 'Meeting links will be automatically generated for Google Meet.';
-                                }
-                                return 'No meeting platform selected.';
-                            })
-                            ->visible(fn ($get) => $get('meeting_platform') !== 'none'),
+                            ->content('This meeting link will be included in all appointment confirmation emails and reminders.')
+                            ->visible(fn ($get) => $get('meeting_platform') === 'custom'),
                     ])
                     ->columns(1),
 
