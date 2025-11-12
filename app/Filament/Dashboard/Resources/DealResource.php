@@ -42,22 +42,13 @@ class DealResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('contact_id')
                             ->label('Contact')
-                            ->relationship('contact', 'name', fn (Builder $query) => $query->where('user_id', auth()->id()))
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')
-                                    ->required()
-                                    ->maxLength(255),
-                                Forms\Components\TextInput::make('email')
-                                    ->email()
-                                    ->maxLength(255),
-                            ])
-                            ->createOptionUsing(function (array $data) {
-                                $data['user_id'] = auth()->id();
-                                return \App\Models\Contact::create($data)->id;
-                            }),
+                            ->options(function () {
+                                return \App\Models\Contact::where('user_id', auth()->id())
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id');
+                            })
+                            ->live()
+                            ->required(),
 
                         Forms\Components\TextInput::make('title')
                             ->required()
