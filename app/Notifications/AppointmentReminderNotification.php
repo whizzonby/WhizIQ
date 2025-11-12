@@ -36,7 +36,10 @@ class AppointmentReminderNotification extends Notification implements ShouldQueu
             ? $timeUntil . ' hours'
             : ceil($timeUntil / 24) . ' days';
 
-        return (new MailMessage)
+        // Get booking settings
+        $bookingSetting = $this->appointment->user->bookingSetting ?? null;
+
+        $mail = (new MailMessage)
             ->subject('Appointment Reminder: ' . $this->appointment->title)
             ->greeting('Hello ' . $this->appointment->attendee_name . '!')
             ->line('This is a friendly reminder about your upcoming appointment.')
@@ -85,11 +88,24 @@ class AppointmentReminderNotification extends Notification implements ShouldQueu
         }
 
         // Add meeting link if available (for online or hybrid)
-        if ($this->appointment->meeting_url) {
+        $meetingUrl = $this->appointment->meeting_url;
+        $meetingInstructions = null;
+
+        // If no meeting URL on appointment, check booking settings for custom link
+        if (!$meetingUrl && $bookingSetting && $bookingSetting->meeting_platform === 'custom') {
+            $meetingUrl = $bookingSetting->meeting_link;
+            $meetingInstructions = $bookingSetting->meeting_instructions;
+        }
+
+        if ($meetingUrl) {
             $mail->line('')
-                ->line('**Join Meeting:**')
-                ->line('Platform: ' . ucfirst(str_replace('_', ' ', $this->appointment->meeting_platform)))
-                ->action('Join Meeting', $this->appointment->meeting_url);
+                ->line('**Join Meeting:**');
+
+            if ($this->appointment->meeting_platform) {
+                $mail->line('Platform: ' . ucfirst(str_replace('_', ' ', $this->appointment->meeting_platform)));
+            }
+
+            $mail->action('Join Meeting', $meetingUrl);
 
             if ($this->appointment->meeting_id) {
                 $mail->line('Meeting ID: ' . $this->appointment->meeting_id);
@@ -98,6 +114,13 @@ class AppointmentReminderNotification extends Notification implements ShouldQueu
             if ($this->appointment->meeting_password) {
                 $mail->line('Password: ' . $this->appointment->meeting_password);
             }
+
+            // Add custom meeting instructions if available
+            if ($meetingInstructions) {
+                $mail->line('')
+                    ->line('**Meeting Instructions:**')
+                    ->line($meetingInstructions);
+            }
         }
 
         $mail->line('')
@@ -105,6 +128,8 @@ class AppointmentReminderNotification extends Notification implements ShouldQueu
             ->line('We look forward to seeing you!')
             ->line('')
             ->line('If you need to make any changes, please contact us as soon as possible.');
+
+        return $mail;
     }
 
     /**

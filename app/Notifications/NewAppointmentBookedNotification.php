@@ -54,11 +54,25 @@ class NewAppointmentBookedNotification extends Notification implements ShouldQue
             );
 
         // Add meeting link if available
-        if ($this->appointment->meeting_url) {
+        $meetingUrl = $this->appointment->meeting_url;
+        $meetingInstructions = null;
+
+        // If no meeting URL on appointment, check booking settings for custom link
+        $bookingSetting = $this->appointment->user->bookingSetting ?? null;
+        if (!$meetingUrl && $bookingSetting && $bookingSetting->meeting_platform === 'custom') {
+            $meetingUrl = $bookingSetting->meeting_link;
+            $meetingInstructions = $bookingSetting->meeting_instructions;
+        }
+
+        if ($meetingUrl) {
             $mail->line('')
-                ->line('**Meeting Link:**')
-                ->line('Platform: ' . ucfirst(str_replace('_', ' ', $this->appointment->meeting_platform)))
-                ->action('Join Meeting', $this->appointment->meeting_url);
+                ->line('**Meeting Link:**');
+
+            if ($this->appointment->meeting_platform) {
+                $mail->line('Platform: ' . ucfirst(str_replace('_', ' ', $this->appointment->meeting_platform)));
+            }
+
+            $mail->action('Join Meeting', $meetingUrl);
 
             if ($this->appointment->meeting_id) {
                 $mail->line('Meeting ID: ' . $this->appointment->meeting_id);
@@ -66,6 +80,13 @@ class NewAppointmentBookedNotification extends Notification implements ShouldQue
 
             if ($this->appointment->meeting_password) {
                 $mail->line('Password: ' . $this->appointment->meeting_password);
+            }
+
+            // Add custom meeting instructions if available
+            if ($meetingInstructions) {
+                $mail->line('')
+                    ->line('**Meeting Instructions:**')
+                    ->line($meetingInstructions);
             }
         }
 
