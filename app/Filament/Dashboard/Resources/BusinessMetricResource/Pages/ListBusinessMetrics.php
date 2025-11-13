@@ -3,6 +3,7 @@
 namespace App\Filament\Dashboard\Resources\BusinessMetricResource\Pages;
 
 use App\Filament\Dashboard\Resources\BusinessMetricResource;
+use App\Services\BusinessMetricAggregationService;
 use App\Services\BusinessMetricExportService;
 use App\Services\BusinessMetricImportService;
 use Filament\Actions\Action;
@@ -10,104 +11,22 @@ use Filament\Actions\CreateAction;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Response;
 
 class ListBusinessMetrics extends ListRecords
 {
     protected static string $resource = BusinessMetricResource::class;
 
+    public function getSubheading(): ?string
+    {
+        return 'This data is automatically calculated from your revenue sources, client payments, and expenses. Metrics are updated daily at 12:05 AM, or you can refresh them manually using the button above.';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('import')
-                ->label('Import Metrics')
-                ->icon('heroicon-o-arrow-up-tray')
-                ->color('success')
-                ->form([
-                    Forms\Components\FileUpload::make('file')
-                        ->label('CSV/Excel File')
-                        ->acceptedFileTypes(['text/csv', 'application/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
-                        ->required()
-                        ->helperText('Upload a CSV or Excel file with business metrics data')
-                        ->maxSize(5120), // 5MB
-                ])
-                ->action(function (array $data) {
-                    try {
-                        $service = app(BusinessMetricImportService::class);
-
-                        // Get file content
-                        $filePath = storage_path('app/public/' . $data['file']);
-                        
-                        if (!file_exists($filePath)) {
-                            Notification::make()
-                                ->title('File Not Found')
-                                ->danger()
-                                ->body('The uploaded file could not be found.')
-                                ->send();
-                            return;
-                        }
-
-                        $csvContent = file_get_contents($filePath);
-
-                        // Validate structure
-                        $validation = $service->validateCsvStructure($csvContent);
-                        if (!$validation['valid']) {
-                            Notification::make()
-                                ->title('Invalid CSV')
-                                ->danger()
-                                ->body($validation['message'])
-                                ->send();
-                            return;
-                        }
-
-                        // Import
-                        $results = $service->importFromCsv($csvContent, auth()->id());
-
-                        // Show results
-                        $message = "Successfully imported {$results['success']} business metrics.";
-                        if ($results['failed'] > 0) {
-                            $message .= " {$results['failed']} failed.";
-                        }
-
-                        Notification::make()
-                            ->title('Import Complete')
-                            ->success()
-                            ->body($message)
-                            ->send();
-
-                        if (!empty($results['errors'])) {
-                            foreach (array_slice($results['errors'], 0, 5) as $error) {
-                                Notification::make()
-                                    ->title('Import Error')
-                                    ->warning()
-                                    ->body($error)
-                                    ->send();
-                            }
-                        }
-
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->title('Import Failed')
-                            ->danger()
-                            ->body($e->getMessage())
-                            ->send();
-                    }
-                }),
-
-            Action::make('download_template')
-                ->label('Download CSV Template')
-                ->icon('heroicon-o-document-arrow-down')
-                ->color('gray')
-                ->action(function () {
-                    $service = app(BusinessMetricImportService::class);
-                    $template = $service->getCsvTemplate();
-
-                    return Response::streamDownload(function () use ($template) {
-                        echo $template;
-                    }, 'business_metrics_import_template.csv', [
-                        'Content-Type' => 'text/csv',
-                    ]);
-                }),
+            // Removed import and template actions - metrics are auto-calculated, not manually imported
 
             Action::make('export')
                 ->label('Export Metrics')
@@ -134,7 +53,7 @@ class ListBusinessMetrics extends ListRecords
                 ->action(function (array $data) {
                     $service = app(BusinessMetricExportService::class);
                     $format = $data['format'] ?? 'csv';
-                    
+
                     $filters = [];
                     if (isset($data['from_date'])) {
                         $filters['from_date'] = $data['from_date'];
@@ -160,7 +79,39 @@ class ListBusinessMetrics extends ListRecords
                     ]);
                 }),
 
-            CreateAction::make(),
+            Action::make('refresh')
+                ->label('Refresh Metrics')
+                ->icon('heroicon-o-arrow-path')
+                ->color('success')
+                ->requiresConfirmation()
+                ->modalHeading('Refresh Business Metrics')
+                ->modalDescription('This will recalculate all your business metrics from your revenue and expense data. This may take a few moments.')
+                ->modalSubmitActionLabel('Yes, Refresh Now')
+                ->action(function () {
+                    try {
+                        $service = app(BusinessMetricAggregationService::class);
+
+                        // Recalculate metrics for the last 90 days
+                        $service->aggregateForDateRange(
+                            auth()->id(),
+                            now()->subDays(90),
+                            now()
+                        );
+
+                        Notification::make()
+                            ->title('Metrics Refreshed')
+                            ->success()
+                            ->body('Your business metrics have been successfully recalculated from your revenue and expense data.')
+                            ->send();
+
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Refresh Failed')
+                            ->danger()
+                            ->body('Failed to refresh metrics: ' . $e->getMessage())
+                            ->send();
+                    }
+                }),
         ];
     }
 }

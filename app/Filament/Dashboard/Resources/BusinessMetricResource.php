@@ -122,13 +122,10 @@ class BusinessMetricResource extends Resource
                     }),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                // Removed edit and delete actions - this is read-only, auto-calculated data
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                // Removed bulk actions - this is read-only, auto-calculated data
             ])
             ->defaultSort('date', 'desc');
     }
@@ -137,8 +134,7 @@ class BusinessMetricResource extends Resource
     {
         return [
             'index' => Pages\ListBusinessMetrics::route('/'),
-            'create' => Pages\CreateBusinessMetric::route('/create'),
-            'edit' => Pages\EditBusinessMetric::route('/{record}/edit'),
+            // Removed create and edit pages - this is read-only, auto-calculated data
         ];
     }
 
