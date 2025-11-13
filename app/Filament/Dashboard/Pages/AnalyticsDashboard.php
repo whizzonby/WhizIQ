@@ -10,7 +10,6 @@ use App\Filament\Dashboard\Widgets\CashFlowChartWidget;
 use App\Filament\Dashboard\Widgets\ExpenseBreakdownWidget;
 use App\Filament\Dashboard\Widgets\ExpenseInsightsWidget;
 use App\Filament\Dashboard\Widgets\ProfitabilityRatiosWidget;
-use App\Filament\Dashboard\Widgets\RevenueInsightsWidget;
 use App\Filament\Dashboard\Widgets\RevenueSourcesWidget;
 use App\Filament\Dashboard\Widgets\RevenueVsExpenseChartWidget;
 use App\Filament\Dashboard\Widgets\RiskAssessmentWidget;
@@ -47,7 +46,6 @@ class AnalyticsDashboard extends Page
             // Core Financial Analytics
             RevenueVsExpenseChartWidget::class,
             RevenueSourcesWidget::class,
-            RevenueInsightsWidget::class,
             ExpenseBreakdownWidget::class,
             ExpenseInsightsWidget::class,
             ProfitabilityRatiosWidget::class,

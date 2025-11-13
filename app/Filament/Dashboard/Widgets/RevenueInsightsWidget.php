@@ -2,11 +2,13 @@
 
 namespace App\Filament\Dashboard\Widgets;
 
+use App\Models\ClientPayment;
 use App\Models\RevenueSource;
 use App\Services\FinancialMetricsCalculator;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\DB;
 
 class RevenueInsightsWidget extends BaseWidget
 {
@@ -36,13 +38,8 @@ class RevenueInsightsWidget extends BaseWidget
         // Calculate change
         $revenueChange = $calculator->calculatePercentageChange($currentMonthRevenue, $lastMonthRevenue);
 
-        // Top revenue source
-        $topSource = RevenueSource::where('user_id', $user->id)
-            ->where('date', '>=', $startOfMonth)
-            ->selectRaw('source, SUM(amount) as total')
-            ->groupBy('source')
-            ->orderByDesc('total')
-            ->first();
+        // Get top revenue source (including both RevenueSource and ClientPayment)
+        $topSource = $this->getTopRevenueSource($user, $startOfMonth);
 
         // Revenue diversification (count of unique sources)
         $uniqueSources = RevenueSource::where('user_id', $user->id)
@@ -111,5 +108,53 @@ class RevenueInsightsWidget extends BaseWidget
 
         // For revenue, increase is good (green), decrease is bad (red)
         return $percentage > 0 ? 'success' : 'danger';
+    }
+
+    /**
+     * Get top revenue source combining both RevenueSource and ClientPayment
+     */
+    protected function getTopRevenueSource($user, Carbon $startOfMonth): ?object
+    {
+        // Get revenue sources grouped by source
+        $revenueSources = RevenueSource::where('user_id', $user->id)
+            ->where('date', '>=', $startOfMonth)
+            ->selectRaw('source as name, SUM(amount) as total')
+            ->groupBy('source')
+            ->get();
+
+        // Get invoice payment revenue (excluding tax portion)
+        $invoiceRevenue = ClientPayment::where('client_payments.user_id', $user->id)
+            ->whereBetween('client_payments.payment_date', [$startOfMonth, Carbon::now()])
+            ->join('client_invoices', 'client_payments.client_invoice_id', '=', 'client_invoices.id')
+            ->selectRaw('SUM(
+                CASE
+                    WHEN client_invoices.total_amount > 0
+                    THEN client_payments.amount * (client_invoices.subtotal / client_invoices.total_amount)
+                    ELSE client_payments.amount
+                END
+            ) as total')
+            ->value('total') ?? 0;
+
+        // Combine all sources into a collection
+        $allSources = collect();
+
+        // Add revenue sources
+        foreach ($revenueSources as $source) {
+            $allSources->push((object)[
+                'source' => $source->name,
+                'total' => (float) $source->total,
+            ]);
+        }
+
+        // Add invoice payments as a source
+        if ($invoiceRevenue > 0) {
+            $allSources->push((object)[
+                'source' => 'client_invoices',
+                'total' => (float) $invoiceRevenue,
+            ]);
+        }
+
+        // Return the top source by total amount
+        return $allSources->sortByDesc('total')->first();
     }
 }
