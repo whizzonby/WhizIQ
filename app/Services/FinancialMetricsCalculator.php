@@ -211,13 +211,23 @@ class FinancialMetricsCalculator
     }
 
     /**
-     * Get outstanding revenue (unpaid invoices)
+     * Get outstanding invoice amount (unpaid invoices)
+     * Formula: Unpaid revenue (subtotal) + unpaid tax from invoices
+     * Rationale: Customer owes both the revenue portion and tax portion of unpaid invoices
      */
-    public function getOutstandingRevenue(User $user): float
+    public function getOutstandingInvoiceAmount(User $user): float
     {
         return (float) ClientInvoice::where('user_id', $user->id)
             ->whereIn('status', ['sent', 'partial'])
             ->sum(DB::raw('total_amount - COALESCE((SELECT SUM(amount) FROM client_payments WHERE client_invoice_id = client_invoices.id), 0)'));
+    }
+
+    /**
+     * @deprecated Use getOutstandingInvoiceAmount() instead
+     */
+    public function getOutstandingRevenue(User $user): float
+    {
+        return $this->getOutstandingInvoiceAmount($user);
     }
 
     /**

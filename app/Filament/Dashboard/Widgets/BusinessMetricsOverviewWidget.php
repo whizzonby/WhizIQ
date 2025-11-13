@@ -64,8 +64,8 @@ class BusinessMetricsOverviewWidget extends BaseWidget
         // Format the month name for display
         $currentMonthName = $currentCompleteMonthStart->format('F');
 
-        // Get outstanding revenue
-        $outstandingRevenue = $calculator->getOutstandingRevenue($user);
+        // Get outstanding invoice amount (unpaid revenue + unpaid tax)
+        $outstandingInvoiceAmount = $calculator->getOutstandingInvoiceAmount($user);
 
         return [
             Stat::make('Monthly Revenue', '$' . number_format($current['revenue'], 0))
@@ -104,8 +104,8 @@ class BusinessMetricsOverviewWidget extends BaseWidget
                     'class' => 'cursor-pointer hover:shadow-lg transition-shadow',
                 ]),
 
-            Stat::make('Outstanding Revenue', '$' . number_format($outstandingRevenue, 0))
-                ->description('Pending invoices')
+            Stat::make('Outstanding Invoice Amount', '$' . number_format($outstandingInvoiceAmount, 0))
+                ->description('Unpaid invoices (revenue + tax)')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('warning')
                 ->extraAttributes([
