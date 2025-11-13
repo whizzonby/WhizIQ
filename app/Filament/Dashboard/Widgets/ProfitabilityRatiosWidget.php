@@ -32,14 +32,10 @@ class ProfitabilityRatiosWidget extends Widget
         $expenses = $currentMetrics['expenses'];
         $netProfit = $currentMetrics['profit'];
 
-        // Get operating expenses (non-COGS expenses)
-        $operatingExpenses = Expense::where('user_id', $user->id)
-            ->where('date', '>=', $currentMonth)
-            ->whereNotIn('category', ['cost_of_goods_sold', 'cogs'])
-            ->sum('amount');
-
-        // Calculate operating profit
-        $operatingProfit = $revenue - $operatingExpenses;
+        // Since all expenses are operating expenses, Operating Profit = Net Profit
+        // Operating Profit = Revenue - Operating Expenses
+        // Operating Expenses = Total Expenses (all business expenses are operating expenses)
+        $operatingProfit = $netProfit;
 
         // Calculate ratios
         $netMargin = $revenue > 0 ? round(($netProfit / $revenue) * 100, 2) : 0;
