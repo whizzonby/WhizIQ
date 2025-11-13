@@ -112,3 +112,9 @@ Schedule::command('app:refresh-business-metrics')
     ->dailyAt('00:05')
     ->name('refresh-business-metrics')
     ->withoutOverlapping();
+
+// Sync marketing data from connected platforms daily at 2 AM
+Schedule::command('marketing:sync')
+    ->dailyAt('02:00')
+    ->name('sync-marketing-data')
+    ->withoutOverlapping();

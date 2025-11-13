@@ -138,4 +138,25 @@ return [
         'redirect_uri' => env('XERO_REDIRECT_URI', env('APP_URL') . '/finance/oauth/xero/callback'),
     ],
 
+    // Marketing Platform Integrations
+    'google_ads' => [
+        'developer_token' => env('GOOGLE_ADS_DEVELOPER_TOKEN'),
+        'manager_account_id' => env('GOOGLE_ADS_MANAGER_ACCOUNT_ID'),
+    ],
+
+    'tiktok' => [
+        'client_id' => env('TIKTOK_CLIENT_ID'),
+        'client_secret' => env('TIKTOK_CLIENT_SECRET'),
+    ],
+
+    'twitter' => [
+        'client_id' => env('TWITTER_CLIENT_ID'),
+        'client_secret' => env('TWITTER_CLIENT_SECRET'),
+    ],
+
+    'pinterest' => [
+        'client_id' => env('PINTEREST_CLIENT_ID'),
+        'client_secret' => env('PINTEREST_CLIENT_SECRET'),
+    ],
+
 ];

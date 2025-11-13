@@ -128,8 +128,11 @@ class LinkedInAdsApiService
         $reach = $metrics['reach'] ?? 0;
         $engagement = $metrics['engagement'] ?? 0;
 
-        // Estimate CLV (would need additional tracking for accurate value)
-        $estimatedCLV = $conversions > 0 ? 850 : 0; // Placeholder - should be configured per business
+        // Get CLV from business profile if available, otherwise use a default estimate
+        $businessProfile = auth()->user()->businessProfile ?? null;
+        $estimatedCLV = $businessProfile && $businessProfile->fin_avg_transaction_value
+            ? $businessProfile->fin_avg_transaction_value
+            : 0;
 
         return [
             'platform' => 'linkedin',

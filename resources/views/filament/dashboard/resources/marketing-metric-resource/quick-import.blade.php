@@ -19,24 +19,25 @@
                 'icon' => 'heroicon-o-briefcase',
                 'color' => 'primary',
             ],
-            'tiktok' => [
-                'name' => 'TikTok Ads',
-                'description' => 'Short-Form Video Advertising',
-                'icon' => 'heroicon-o-play-circle',
-                'color' => 'danger',
-            ],
-            'twitter' => [
-                'name' => 'X (Twitter) Ads',
-                'description' => 'Social Media Advertising',
-                'icon' => 'heroicon-o-hashtag',
-                'color' => 'gray',
-            ],
-            'pinterest' => [
-                'name' => 'Pinterest Ads',
-                'description' => 'Visual Discovery Platform',
-                'icon' => 'heroicon-o-photo',
-                'color' => 'warning',
-            ],
+            // Commented out platforms - not yet implemented
+            // 'tiktok' => [
+            //     'name' => 'TikTok Ads',
+            //     'description' => 'Short-Form Video Advertising',
+            //     'icon' => 'heroicon-o-play-circle',
+            //     'color' => 'danger',
+            // ],
+            // 'twitter' => [
+            //     'name' => 'X (Twitter) Ads',
+            //     'description' => 'Social Media Advertising',
+            //     'icon' => 'heroicon-o-hashtag',
+            //     'color' => 'gray',
+            // ],
+            // 'pinterest' => [
+            //     'name' => 'Pinterest Ads',
+            //     'description' => 'Visual Discovery Platform',
+            //     'icon' => 'heroicon-o-photo',
+            //     'color' => 'warning',
+            // ],
         ];
     @endphp
 
