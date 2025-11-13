@@ -3,6 +3,7 @@
 namespace App\Filament\Dashboard\Widgets;
 
 use App\Models\Expense;
+use App\Services\FinancialMetricsCalculator;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -20,24 +21,18 @@ class ExpenseInsightsWidget extends BaseWidget
     protected function getStats(): array
     {
         $user = auth()->user();
+        $calculator = app(FinancialMetricsCalculator::class);
         $startOfMonth = Carbon::now()->startOfMonth();
-        $startOfLastMonth = Carbon::now()->subMonth()->startOfMonth();
-        $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth();
 
-        // Current month expenses
-        $currentMonthExpenses = Expense::where('user_id', $user->id)
-            ->where('date', '>=', $startOfMonth)
-            ->sum('amount');
+        // Get current and last month metrics using FinancialMetricsCalculator (correct formula)
+        $currentMetrics = $calculator->getCurrentMonthMetrics($user);
+        $lastMetrics = $calculator->getLastMonthMetrics($user);
 
-        // Last month expenses
-        $lastMonthExpenses = Expense::where('user_id', $user->id)
-            ->whereBetween('date', [$startOfLastMonth, $endOfLastMonth])
-            ->sum('amount');
+        $currentMonthExpenses = $currentMetrics['expenses'];
+        $lastMonthExpenses = $lastMetrics['expenses'];
 
         // Calculate change
-        $expenseChange = $lastMonthExpenses > 0
-            ? (($currentMonthExpenses - $lastMonthExpenses) / $lastMonthExpenses) * 100
-            : 0;
+        $expenseChange = $calculator->calculatePercentageChange($currentMonthExpenses, $lastMonthExpenses);
 
         // Top category this month
         $topCategory = Expense::where('user_id', $user->id)
@@ -70,7 +65,7 @@ class ExpenseInsightsWidget extends BaseWidget
                 ->chart($expenseTrend)
                 ->color($this->getExpenseColor($expenseChange)),
 
-            Stat::make('Top Category', $topCategory ? ucwords(str_replace('_', ' ', $topCategory->category)) : 'N/A')
+            Stat::make('Top Expense Category', $topCategory ? ucwords(str_replace('_', ' ', $topCategory->category)) : 'N/A')
                 ->description($topCategory ? '$' . number_format($topCategory->total, 0) : 'No expenses yet')
                 ->descriptionIcon('heroicon-o-chart-pie')
                 ->color('warning'),
