@@ -3,6 +3,7 @@
 namespace App\Filament\Dashboard\Widgets;
 
 use App\Models\RevenueSource;
+use App\Services\FinancialMetricsCalculator;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -20,24 +21,20 @@ class RevenueInsightsWidget extends BaseWidget
     protected function getStats(): array
     {
         $user = auth()->user();
+        $calculator = app(FinancialMetricsCalculator::class);
         $startOfMonth = Carbon::now()->startOfMonth();
         $startOfLastMonth = Carbon::now()->subMonth()->startOfMonth();
         $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth();
 
-        // Current month revenue
-        $currentMonthRevenue = RevenueSource::where('user_id', $user->id)
-            ->where('date', '>=', $startOfMonth)
-            ->sum('amount');
+        // Get current and last month metrics using FinancialMetricsCalculator (correct formula)
+        $currentMetrics = $calculator->getCurrentMonthMetrics($user);
+        $lastMetrics = $calculator->getLastMonthMetrics($user);
 
-        // Last month revenue
-        $lastMonthRevenue = RevenueSource::where('user_id', $user->id)
-            ->whereBetween('date', [$startOfLastMonth, $endOfLastMonth])
-            ->sum('amount');
+        $currentMonthRevenue = $currentMetrics['revenue'];
+        $lastMonthRevenue = $lastMetrics['revenue'];
 
         // Calculate change
-        $revenueChange = $lastMonthRevenue > 0
-            ? (($currentMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100
-            : 0;
+        $revenueChange = $calculator->calculatePercentageChange($currentMonthRevenue, $lastMonthRevenue);
 
         // Top revenue source
         $topSource = RevenueSource::where('user_id', $user->id)
