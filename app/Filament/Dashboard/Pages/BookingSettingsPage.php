@@ -192,93 +192,96 @@ class BookingSettingsPage extends Page implements HasForms
                     ])
                     ->columns(1),
 
-                Section::make('Calendar Sync')
-                    ->description('Connect your calendar to automatically block busy times')
-                    ->schema([
-                        Forms\Components\Placeholder::make('calendar_status')
-                            ->label('Google Calendar Status')
-                            ->content(function () {
-                                $connection = CalendarConnection::where('user_id', auth()->id())
-                                    ->where('provider', 'google_calendar')
-                                    ->where('is_primary', true)
-                                    ->first();
+                // Calendar Sync and Zoom Connection sections commented out
+                // Users now enter meeting links manually in the Meeting Platform section above
 
-                                if ($connection) {
-                                    $statusText = '✅ Connected';
-                                    if ($connection->provider_email) {
-                                        $statusText .= ' (' . $connection->provider_email . ')';
-                                    }
-                                    if ($connection->last_synced_at) {
-                                        $statusText .= ' • Last synced: ' . $connection->last_synced_at->diffForHumans();
-                                    }
-                                    return $statusText;
-                                }
-
-                                return '❌ Not connected';
-                            }),
-
-                        Forms\Components\Placeholder::make('calendar_info')
-                            ->label('')
-                            ->content('Connect your Google Calendar to automatically block time slots when you have other events scheduled. This prevents double-bookings.')
-                            ->visible(fn () => !CalendarConnection::where('user_id', auth()->id())
-                                ->where('provider', 'google_calendar')
-                                ->exists()),
-
-                        Forms\Components\ViewField::make('calendar_actions')
-                            ->view('filament.dashboard.components.calendar-actions')
-                            ->viewData([
-                                'provider' => 'google_calendar',
-                                'hasConnection' => CalendarConnection::where('user_id', auth()->id())
-                                    ->where('provider', 'google_calendar')
-                                    ->exists(),
-                                'connectUrl' => route('calendar.google.connect'),
-                                'testUrl' => route('calendar.google.test'),
-                                'disconnectUrl' => route('calendar.google.disconnect'),
-                            ]),
-                    ])
-                    ->columns(1),
-
-                Section::make('Zoom Connection')
-                    ->description('Connect your Zoom account to automatically create meeting links')
-                    ->schema([
-                        Forms\Components\Placeholder::make('zoom_status')
-                            ->label('Zoom Status')
-                            ->content(function () {
-                                $connection = CalendarConnection::where('user_id', auth()->id())
-                                    ->where('provider', 'zoom')
-                                    ->first();
-
-                                if ($connection) {
-                                    $statusText = '✅ Connected';
-                                    if ($connection->provider_email) {
-                                        $statusText .= ' (' . $connection->provider_email . ')';
-                                    }
-                                    return $statusText;
-                                }
-
-                                return '❌ Not connected';
-                            }),
-
-                        Forms\Components\Placeholder::make('zoom_info')
-                            ->label('')
-                            ->content('Connect your Zoom account to automatically generate Zoom meeting links for all appointments. Each user needs to connect their own Zoom account.')
-                            ->visible(fn () => !CalendarConnection::where('user_id', auth()->id())
-                                ->where('provider', 'zoom')
-                                ->exists()),
-
-                        Forms\Components\ViewField::make('zoom_actions')
-                            ->view('filament.dashboard.components.calendar-actions')
-                            ->viewData([
-                                'provider' => 'zoom',
-                                'hasConnection' => CalendarConnection::where('user_id', auth()->id())
-                                    ->where('provider', 'zoom')
-                                    ->exists(),
-                                'connectUrl' => route('zoom.connect'),
-                                'testUrl' => route('zoom.test'),
-                                'disconnectUrl' => route('zoom.disconnect'),
-                            ]),
-                    ])
-                    ->columns(1),
+                // Section::make('Calendar Sync')
+                //     ->description('Connect your calendar to automatically block busy times')
+                //     ->schema([
+                //         Forms\Components\Placeholder::make('calendar_status')
+                //             ->label('Google Calendar Status')
+                //             ->content(function () {
+                //                 $connection = CalendarConnection::where('user_id', auth()->id())
+                //                     ->where('provider', 'google_calendar')
+                //                     ->where('is_primary', true)
+                //                     ->first();
+                //
+                //                 if ($connection) {
+                //                     $statusText = '✅ Connected';
+                //                     if ($connection->provider_email) {
+                //                         $statusText .= ' (' . $connection->provider_email . ')';
+                //                     }
+                //                     if ($connection->last_synced_at) {
+                //                         $statusText .= ' • Last synced: ' . $connection->last_synced_at->diffForHumans();
+                //                     }
+                //                     return $statusText;
+                //                 }
+                //
+                //                 return '❌ Not connected';
+                //             }),
+                //
+                //         Forms\Components\Placeholder::make('calendar_info')
+                //             ->label('')
+                //             ->content('Connect your Google Calendar to automatically block time slots when you have other events scheduled. This prevents double-bookings.')
+                //             ->visible(fn () => !CalendarConnection::where('user_id', auth()->id())
+                //                 ->where('provider', 'google_calendar')
+                //                 ->exists()),
+                //
+                //         Forms\Components\ViewField::make('calendar_actions')
+                //             ->view('filament.dashboard.components.calendar-actions')
+                //             ->viewData([
+                //                 'provider' => 'google_calendar',
+                //                 'hasConnection' => CalendarConnection::where('user_id', auth()->id())
+                //                     ->where('provider', 'google_calendar')
+                //                     ->exists(),
+                //                 'connectUrl' => route('calendar.google.connect'),
+                //                 'testUrl' => route('calendar.google.test'),
+                //                 'disconnectUrl' => route('calendar.google.disconnect'),
+                //             ]),
+                //     ])
+                //     ->columns(1),
+                //
+                // Section::make('Zoom Connection')
+                //     ->description('Connect your Zoom account to automatically create meeting links')
+                //     ->schema([
+                //         Forms\Components\Placeholder::make('zoom_status')
+                //             ->label('Zoom Status')
+                //             ->content(function () {
+                //                 $connection = CalendarConnection::where('user_id', auth()->id())
+                //                     ->where('provider', 'zoom')
+                //                     ->first();
+                //
+                //                 if ($connection) {
+                //                     $statusText = '✅ Connected';
+                //                     if ($connection->provider_email) {
+                //                         $statusText .= ' (' . $connection->provider_email . ')';
+                //                     }
+                //                     return $statusText;
+                //                 }
+                //
+                //                 return '❌ Not connected';
+                //             }),
+                //
+                //         Forms\Components\Placeholder::make('zoom_info')
+                //             ->label('')
+                //             ->content('Connect your Zoom account to automatically generate Zoom meeting links for all appointments. Each user needs to connect their own Zoom account.')
+                //             ->visible(fn () => !CalendarConnection::where('user_id', auth()->id())
+                //                 ->where('provider', 'zoom')
+                //                 ->exists()),
+                //
+                //         Forms\Components\ViewField::make('zoom_actions')
+                //             ->view('filament.dashboard.components.calendar-actions')
+                //             ->viewData([
+                //                 'provider' => 'zoom',
+                //                 'hasConnection' => CalendarConnection::where('user_id', auth()->id())
+                //                     ->where('provider', 'zoom')
+                //                     ->exists(),
+                //                 'connectUrl' => route('zoom.connect'),
+                //                 'testUrl' => route('zoom.test'),
+                //                 'disconnectUrl' => route('zoom.disconnect'),
+                //             ]),
+                //     ])
+                //     ->columns(1),
             ])
             ->statePath('data');
     }
