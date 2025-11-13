@@ -140,7 +140,14 @@ class BusinessMetricResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->where('user_id', auth()->id());
+        return parent::getEloquentQuery()
+            ->where('user_id', auth()->id())
+            ->where(function ($query) {
+                // Only show records with actual financial activity
+                $query->where('revenue', '>', 0)
+                    ->orWhere('expenses', '>', 0)
+                    ->orWhere('cash_flow', '!=', 0);
+            });
     }
 
 }
