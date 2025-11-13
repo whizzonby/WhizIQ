@@ -5,6 +5,7 @@ namespace App\Filament\Dashboard\Pages;
 use App\Filament\Dashboard\Widgets\AIUsageWidget;
 use App\Filament\Dashboard\Widgets\BusinessMetricsOverviewWidget;
 use App\Filament\Dashboard\Widgets\FinancialKpiWidget;
+use App\Filament\Dashboard\Widgets\MonthlyExpensesAndProfitWidget;
 use App\Filament\Dashboard\Widgets\NaturalLanguageQueryWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
 
@@ -53,6 +54,7 @@ class Dashboard extends BaseDashboard
     {
         return [
             BusinessMetricsOverviewWidget::class,
+            MonthlyExpensesAndProfitWidget::class,
         ];
     }
 
