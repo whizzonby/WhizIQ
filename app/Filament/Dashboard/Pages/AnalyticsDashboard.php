@@ -7,7 +7,6 @@ use App\Filament\Dashboard\Widgets\AIFinancialForecastWidget;
 use App\Filament\Dashboard\Widgets\AnomalyDetectionWidget;
 use App\Filament\Dashboard\Widgets\BusinessPerformanceTrendWidget;
 use App\Filament\Dashboard\Widgets\CashFlowChartWidget;
-use App\Filament\Dashboard\Widgets\CashFlowSummaryWidget;
 use App\Filament\Dashboard\Widgets\ExpenseBreakdownWidget;
 use App\Filament\Dashboard\Widgets\ExpenseInsightsWidget;
 use App\Filament\Dashboard\Widgets\ProfitabilityRatiosWidget;
@@ -39,8 +38,6 @@ class AnalyticsDashboard extends Page
         return [
             // Comprehensive AI-Powered Business Insights (Top Priority)
             AIBusinessInsightsWidget::class,
-            // Financial KPI Summary
-            CashFlowSummaryWidget::class,
         ];
     }
 
