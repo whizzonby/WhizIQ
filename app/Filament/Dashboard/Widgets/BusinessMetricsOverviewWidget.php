@@ -15,7 +15,7 @@ class BusinessMetricsOverviewWidget extends BaseWidget
 
     public function getHeading(): string
     {
-        return '📊 Business Metrics Overview';
+        return '📊 Monthly Business Metrics Overview';
     }
 
     protected function getStats(): array
