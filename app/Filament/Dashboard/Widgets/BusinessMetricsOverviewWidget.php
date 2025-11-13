@@ -40,22 +40,29 @@ class BusinessMetricsOverviewWidget extends BaseWidget
         $changes = $metricsData['changes'];
         $trends = $metricsData['trends'];
 
-        // Calculate customer growth
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $startOfLastMonth = Carbon::now()->subMonth()->startOfMonth();
-        $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth();
+        // Calculate customer growth (compare complete months only)
+        // Current complete month = last month (e.g., October if today is in November)
+        $currentCompleteMonthStart = Carbon::now()->subMonth()->startOfMonth();
+        $currentCompleteMonthEnd = Carbon::now()->subMonth()->endOfMonth();
+
+        // Previous complete month = month before last (e.g., September if today is in November)
+        $previousCompleteMonthStart = Carbon::now()->subMonths(2)->startOfMonth();
+        $previousCompleteMonthEnd = Carbon::now()->subMonths(2)->endOfMonth();
 
         $currentMonthCustomers = Contact::where('user_id', $user->id)
-            ->where('created_at', '>=', $startOfMonth)
+            ->whereBetween('created_at', [$currentCompleteMonthStart, $currentCompleteMonthEnd])
             ->count();
 
         $lastMonthCustomers = Contact::where('user_id', $user->id)
-            ->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])
+            ->whereBetween('created_at', [$previousCompleteMonthStart, $previousCompleteMonthEnd])
             ->count();
 
         $customerGrowthPercentage = $lastMonthCustomers > 0
             ? (($currentMonthCustomers - $lastMonthCustomers) / $lastMonthCustomers) * 100
             : ($currentMonthCustomers > 0 ? 100 : 0);
+
+        // Format the month name for display
+        $currentMonthName = $currentCompleteMonthStart->format('F');
 
         // Get outstanding revenue
         $outstandingRevenue = $calculator->getOutstandingRevenue($user);
@@ -88,8 +95,8 @@ class BusinessMetricsOverviewWidget extends BaseWidget
                     'class' => 'cursor-pointer hover:shadow-lg transition-shadow',
                 ]),
 
-            Stat::make('Customer Growth', $currentMonthCustomers . ' new')
-                ->description($this->getCustomerGrowthDescription($customerGrowthPercentage))
+            Stat::make('Customer Growth', $currentMonthCustomers . ' in ' . $currentMonthName)
+                ->description($this->getCustomerGrowthDescription($customerGrowthPercentage) . ' from previous month')
                 ->descriptionIcon($this->getChangeIcon($customerGrowthPercentage))
                 ->chart($this->getCustomerGrowthTrend($user))
                 ->color($this->getChangeColor($customerGrowthPercentage))
