@@ -104,21 +104,30 @@ class FinancialMetricsCalculator
 
     /**
      * Calculate cash flow (actual money in - money out)
-     * Optimized: ClientPayment already has user_id, no need for whereHas
+     * Cash In = Revenue sources collected + Invoice payments received (full amount including tax)
+     * Cash Out = Expenses paid
+     * Rationale: Cash flow reflects actual cash movement, not earned revenue
      */
     protected function calculateCashFlow(User $user, Carbon $startDate, Carbon $endDate): float
     {
-        // Cash in: Client payments received - optimized: use user_id directly instead of whereHas
-        $cashIn = ClientPayment::where('user_id', $user->id)
+        // Cash in from revenue sources (already collected cash)
+        $cashFromRevenueSources = RevenueSource::where('user_id', $user->id)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->sum('amount');
+
+        // Cash in from client invoice payments (full payment amount including tax)
+        $cashFromInvoicePayments = ClientPayment::where('user_id', $user->id)
             ->whereBetween('payment_date', [$startDate, $endDate])
             ->sum('amount');
+
+        $totalCashIn = $cashFromRevenueSources + $cashFromInvoicePayments;
 
         // Cash out: Expenses
         $cashOut = Expense::where('user_id', $user->id)
             ->whereBetween('date', [$startDate, $endDate])
             ->sum('amount');
 
-        return (float) ($cashIn - $cashOut);
+        return (float) ($totalCashIn - $cashOut);
     }
 
     /**
