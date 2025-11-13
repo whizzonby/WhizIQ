@@ -46,10 +46,8 @@ class AIUsageWidget extends BaseWidget
         };
 
         // Calculate remaining requests safely
-        $remaining = $usageCheck['remaining'] ?? max(0, $dailyLimit - $todayUsage);
-        $remainingText = $usageCheck['allowed'] ?? true
-            ? $remaining . ' requests remaining today'
-            : ($usageCheck['message'] ?? 'Limit reached');
+        $remaining = max(0, $dailyLimit - $todayUsage);
+        $remainingText = $remaining . ' requests remaining today';
 
         return [
             Stat::make('Today\'s AI Requests', $todayUsage . ' / ' . $dailyLimit)
