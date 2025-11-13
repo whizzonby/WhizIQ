@@ -30,12 +30,6 @@ class BusinessMetricsOverviewWidget extends BaseWidget
                 ->warning()
                 ->title('Tax Settings Incomplete')
                 ->body('Please configure your tax rate in Tax Settings for accurate financial calculations.')
-                ->actions([
-                    \Filament\Notifications\Actions\Action::make('configure')
-                        ->label('Configure Tax Settings')
-                        ->url(route('filament.dashboard.pages.tax-settings-page'))
-                        ->markAsRead(),
-                ])
                 ->persistent()
                 ->send();
         }
