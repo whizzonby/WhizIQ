@@ -139,10 +139,10 @@ class BusinessMetricAggregationService
     }
 
     /**
-     * Get total revenue for a specific date
-     * Revenue = Revenue already earned + subtotal of new invoices (tax excluded)
-     * Rationale: Revenue is based on what was earned, not what was collected.
-     * Tax is excluded because the business does not earn tax.
+     * Get total revenue for a specific date (CASH BASIS with tax exclusion)
+     * Revenue = Revenue sources + payments received (minus tax portion)
+     * Rationale: Revenue is recognized when cash is collected, and tax is excluded
+     * because the business does not earn tax - it's collected for the government.
      */
     protected function getDailyRevenue(int $userId, Carbon $date): float
     {
@@ -151,14 +151,21 @@ class BusinessMetricAggregationService
             ->whereDate('date', $date)
             ->sum('amount');
 
-        // Revenue from new invoices created on this date (subtotal only, tax excluded)
-        // Using subtotal instead of total_amount to exclude tax
-        $revenueFromInvoices = ClientInvoice::where('user_id', $userId)
-            ->whereDate('invoice_date', $date)
-            ->whereNotIn('status', ['draft', 'cancelled']) // Only count sent/paid invoices
-            ->sum('subtotal');
+        // Revenue from payments received (excluding tax portion)
+        // For each payment, calculate: payment_amount * (invoice_subtotal / invoice_total)
+        $revenueFromPayments = ClientPayment::where('client_payments.user_id', $userId)
+            ->whereDate('client_payments.payment_date', $date)
+            ->join('client_invoices', 'client_payments.client_invoice_id', '=', 'client_invoices.id')
+            ->selectRaw('SUM(
+                CASE
+                    WHEN client_invoices.total_amount > 0
+                    THEN client_payments.amount * (client_invoices.subtotal / client_invoices.total_amount)
+                    ELSE client_payments.amount
+                END
+            ) as revenue_portion')
+            ->value('revenue_portion') ?? 0;
 
-        return $revenueFromSources + $revenueFromInvoices;
+        return $revenueFromSources + $revenueFromPayments;
     }
 
     /**

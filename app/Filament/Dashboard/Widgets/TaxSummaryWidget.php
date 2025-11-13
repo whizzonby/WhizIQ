@@ -2,7 +2,9 @@
 
 namespace App\Filament\Dashboard\Widgets;
 
+use App\Services\FinancialMetricsCalculator;
 use App\Services\TaxCalculationService;
+use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -20,9 +22,14 @@ class TaxSummaryWidget extends BaseWidget
     {
         $user = auth()->user();
         $taxService = app(TaxCalculationService::class);
+        $metricsCalculator = app(FinancialMetricsCalculator::class);
 
         // Get year-to-date summary
         $summary = $taxService->getYearToDateSummary($user);
+
+        // Calculate sales tax collected from invoice payments (YTD)
+        $yearStart = Carbon::now()->startOfYear();
+        $salesTaxCollected = $metricsCalculator->calculateCollectedSalesTax($user, $yearStart, Carbon::now());
 
         return [
             Stat::make('Total Revenue (YTD)', '$' . number_format($summary['total_revenue'], 2))
@@ -30,9 +37,9 @@ class TaxSummaryWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->color('success'),
 
-            Stat::make('Total Deductions (YTD)', '$' . number_format($summary['total_deductions'], 2))
-                ->description('Tax deductible expenses')
-                ->descriptionIcon('heroicon-m-receipt-percent')
+            Stat::make('Sales Tax Collected', '$' . number_format($salesTaxCollected, 2))
+                ->description('Tax collected from invoice payments')
+                ->descriptionIcon('heroicon-m-receipt-tax')
                 ->color('info'),
 
             Stat::make('Taxable Income (YTD)', '$' . number_format($summary['taxable_income'], 2))

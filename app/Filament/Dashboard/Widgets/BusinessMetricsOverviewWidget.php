@@ -23,6 +23,23 @@ class BusinessMetricsOverviewWidget extends BaseWidget
         $user = auth()->user();
         $calculator = app(FinancialMetricsCalculator::class);
 
+        // Check if tax settings are configured
+        $taxSetting = $user->taxSetting;
+        if (!$taxSetting || !$taxSetting->tax_rate) {
+            \Filament\Notifications\Notification::make()
+                ->warning()
+                ->title('Tax Settings Incomplete')
+                ->body('Please configure your tax rate in Tax Settings for accurate financial calculations.')
+                ->actions([
+                    \Filament\Notifications\Actions\Action::make('configure')
+                        ->label('Configure Tax Settings')
+                        ->url(route('filament.dashboard.pages.tax-settings-page'))
+                        ->markAsRead(),
+                ])
+                ->persistent()
+                ->send();
+        }
+
         // Get comprehensive metrics with comparisons
         $metricsData = $calculator->getMetricsWithComparisons($user);
         $current = $metricsData['current'];

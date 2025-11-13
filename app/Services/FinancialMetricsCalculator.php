@@ -63,10 +63,10 @@ class FinancialMetricsCalculator
     }
 
     /**
-     * Calculate total revenue for period
-     * Revenue = Revenue already earned + subtotal of new invoices (tax excluded)
-     * Rationale: Revenue is based on what was earned, not what was collected.
-     * Tax is excluded because the business does not earn tax.
+     * Calculate total revenue for period (CASH BASIS with tax exclusion)
+     * Revenue = Revenue sources + payments received (minus tax portion)
+     * Rationale: Revenue is recognized when cash is collected, and tax is excluded
+     * because the business does not earn tax - it's collected for the government.
      */
     protected function calculateRevenue(User $user, Carbon $startDate, Carbon $endDate): float
     {
@@ -75,14 +75,21 @@ class FinancialMetricsCalculator
             ->whereBetween('date', [$startDate, $endDate])
             ->sum('amount');
 
-        // Revenue from new invoices created in this period (subtotal only, tax excluded)
-        // Using subtotal instead of total_amount to exclude tax
-        $revenueFromInvoices = ClientInvoice::where('user_id', $user->id)
-            ->whereBetween('invoice_date', [$startDate, $endDate])
-            ->whereNotIn('status', ['draft', 'cancelled']) // Only count sent/paid invoices
-            ->sum('subtotal');
+        // Revenue from payments received (excluding tax portion)
+        // For each payment, calculate: payment_amount * (invoice_subtotal / invoice_total)
+        $revenueFromPayments = ClientPayment::where('client_payments.user_id', $user->id)
+            ->whereBetween('client_payments.payment_date', [$startDate, $endDate])
+            ->join('client_invoices', 'client_payments.client_invoice_id', '=', 'client_invoices.id')
+            ->selectRaw('SUM(
+                CASE
+                    WHEN client_invoices.total_amount > 0
+                    THEN client_payments.amount * (client_invoices.subtotal / client_invoices.total_amount)
+                    ELSE client_payments.amount
+                END
+            ) as revenue_portion')
+            ->value('revenue_portion') ?? 0;
 
-        return (float) ($revenueFromSources + $revenueFromInvoices);
+        return (float) ($revenueFromSources + $revenueFromPayments);
     }
 
     /**
@@ -228,5 +235,26 @@ class FinancialMetricsCalculator
                 'cash_flow' => $this->getMonthlyTrend($user, 'cash_flow'),
             ],
         ];
+    }
+
+    /**
+     * Calculate sales tax collected from invoice payments for a period
+     * Tax Collected = payment_amount * (invoice_tax_amount / invoice_total_amount)
+     */
+    public function calculateCollectedSalesTax(User $user, Carbon $startDate, Carbon $endDate): float
+    {
+        $taxCollected = ClientPayment::where('client_payments.user_id', $user->id)
+            ->whereBetween('client_payments.payment_date', [$startDate, $endDate])
+            ->join('client_invoices', 'client_payments.client_invoice_id', '=', 'client_invoices.id')
+            ->selectRaw('SUM(
+                CASE
+                    WHEN client_invoices.total_amount > 0
+                    THEN client_payments.amount * (client_invoices.tax_amount / client_invoices.total_amount)
+                    ELSE 0
+                END
+            ) as tax_portion')
+            ->value('tax_portion') ?? 0;
+
+        return (float) $taxCollected;
     }
 }
