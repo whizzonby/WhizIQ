@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\BusinessMetric;
 use App\Models\CashFlowHistory;
+use App\Models\ClientInvoice;
 use App\Models\ClientPayment;
 use App\Models\Expense;
 use App\Models\RevenueSource;
@@ -139,17 +140,23 @@ class BusinessMetricAggregationService
 
     /**
      * Get total revenue for a specific date
-     * Includes both revenue sources and invoice payments
+     * Revenue = Revenue already earned + subtotal of new invoices (tax excluded)
+     * Rationale: Revenue is based on what was earned, not what was collected.
+     * Tax is excluded because the business does not earn tax.
      */
     protected function getDailyRevenue(int $userId, Carbon $date): float
     {
+        // Revenue from RevenueSource (already earned revenue)
         $revenueFromSources = RevenueSource::where('user_id', $userId)
             ->whereDate('date', $date)
             ->sum('amount');
 
-        $revenueFromInvoices = ClientPayment::where('user_id', $userId)
-            ->whereDate('payment_date', $date)
-            ->sum('amount');
+        // Revenue from new invoices created on this date (subtotal only, tax excluded)
+        // Using subtotal instead of total_amount to exclude tax
+        $revenueFromInvoices = ClientInvoice::where('user_id', $userId)
+            ->whereDate('invoice_date', $date)
+            ->whereNotIn('status', ['draft', 'cancelled']) // Only count sent/paid invoices
+            ->sum('subtotal');
 
         return $revenueFromSources + $revenueFromInvoices;
     }

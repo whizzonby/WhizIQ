@@ -64,21 +64,25 @@ class FinancialMetricsCalculator
 
     /**
      * Calculate total revenue for period
-     * Optimized: ClientPayment already has user_id, no need for whereHas
+     * Revenue = Revenue already earned + subtotal of new invoices (tax excluded)
+     * Rationale: Revenue is based on what was earned, not what was collected.
+     * Tax is excluded because the business does not earn tax.
      */
     protected function calculateRevenue(User $user, Carbon $startDate, Carbon $endDate): float
     {
-        // Revenue from RevenueSource
+        // Revenue from RevenueSource (already earned revenue)
         $revenueFromSources = RevenueSource::where('user_id', $user->id)
             ->whereBetween('date', [$startDate, $endDate])
             ->sum('amount');
 
-        // Revenue from Client Payments - optimized: use user_id directly instead of whereHas
-        $revenueFromPayments = ClientPayment::where('user_id', $user->id)
-            ->whereBetween('payment_date', [$startDate, $endDate])
-            ->sum('amount');
+        // Revenue from new invoices created in this period (subtotal only, tax excluded)
+        // Using subtotal instead of total_amount to exclude tax
+        $revenueFromInvoices = ClientInvoice::where('user_id', $user->id)
+            ->whereBetween('invoice_date', [$startDate, $endDate])
+            ->whereNotIn('status', ['draft', 'cancelled']) // Only count sent/paid invoices
+            ->sum('subtotal');
 
-        return (float) ($revenueFromSources + $revenueFromPayments);
+        return (float) ($revenueFromSources + $revenueFromInvoices);
     }
 
     /**
