@@ -3,7 +3,7 @@
 namespace App\Filament\Dashboard\Widgets;
 
 use App\Models\Expense;
-use App\Models\RevenueSource;
+use App\Services\FinancialMetricsCalculator;
 use Carbon\Carbon;
 use Filament\Widgets\Widget;
 
@@ -21,16 +21,16 @@ class ProfitabilityRatiosWidget extends Widget
     public function getRatios(): array
     {
         $user = auth()->user();
+        $calculator = app(FinancialMetricsCalculator::class);
         $currentMonth = Carbon::today()->startOfMonth();
 
-        // Get current month data
-        $revenue = RevenueSource::where('user_id', $user->id)
-            ->where('date', '>=', $currentMonth)
-            ->sum('amount');
+        // Get current month metrics using FinancialMetricsCalculator (correct formula)
+        // Revenue = RevenueSource + ClientPayment (invoice revenue, excluding tax)
+        $currentMetrics = $calculator->getCurrentMonthMetrics($user);
 
-        $expenses = Expense::where('user_id', $user->id)
-            ->where('date', '>=', $currentMonth)
-            ->sum('amount');
+        $revenue = $currentMetrics['revenue'];
+        $expenses = $currentMetrics['expenses'];
+        $netProfit = $currentMetrics['profit'];
 
         // Get operating expenses (non-COGS expenses)
         $operatingExpenses = Expense::where('user_id', $user->id)
@@ -38,8 +38,7 @@ class ProfitabilityRatiosWidget extends Widget
             ->whereNotIn('category', ['cost_of_goods_sold', 'cogs'])
             ->sum('amount');
 
-        // Calculate metrics
-        $netProfit = $revenue - $expenses;
+        // Calculate operating profit
         $operatingProfit = $revenue - $operatingExpenses;
 
         // Calculate ratios
