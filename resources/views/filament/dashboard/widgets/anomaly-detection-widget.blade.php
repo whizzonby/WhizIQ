@@ -34,13 +34,39 @@
                     <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">Scanning for anomalies...</p>
                 </div>
             @elseif($anomalies && count($anomalies) > 0)
-                <div class="mb-4 p-3 rounded-lg bg-warning-50 dark:bg-warning-950 border border-warning-200 dark:border-warning-800">
-                    <p class="text-sm text-warning-800 dark:text-warning-200">
-                        <strong>{{ count($anomalies) }} anomal{{ count($anomalies) === 1 ? 'y' : 'ies' }} detected</strong> in your business metrics. Review the details below and take action as needed.
-                    </p>
-                </div>
+                {{-- Check if this is a learning state message --}}
+                @if(isset($anomalies[0]['is_learning']) && $anomalies[0]['is_learning'])
+                    <div class="text-center py-8">
+                        <x-filament::icon
+                            icon="heroicon-o-academic-cap"
+                            class="h-12 w-12 mx-auto text-info-500"
+                        />
+                        <p class="mt-3 text-sm font-medium text-info-700 dark:text-info-300">
+                            {{ $anomalies[0]['metric'] }}
+                        </p>
+                        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+                            {{ $anomalies[0]['description'] }}
+                        </p>
+                        @if(isset($anomalies[0]['recommendation']))
+                            <div class="mt-4 p-3 rounded-lg bg-info-50 dark:bg-info-950 border border-info-200 dark:border-info-800 max-w-md mx-auto">
+                                <p class="text-xs text-info-800 dark:text-info-200">
+                                    <x-filament::icon
+                                        icon="heroicon-m-light-bulb"
+                                        class="h-3 w-3 inline mr-1"
+                                    />
+                                    {{ $anomalies[0]['recommendation'] }}
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                @else
+                    <div class="mb-4 p-3 rounded-lg bg-warning-50 dark:bg-warning-950 border border-warning-200 dark:border-warning-800">
+                        <p class="text-sm text-warning-800 dark:text-warning-200">
+                            <strong>{{ count($anomalies) }} anomal{{ count($anomalies) === 1 ? 'y' : 'ies' }} detected</strong> in your business metrics. Review the details below and take action as needed.
+                        </p>
+                    </div>
 
-                @foreach($anomalies as $anomaly)
+                    @foreach($anomalies as $anomaly)
                     <div class="border rounded-lg p-4
                         @if($anomaly['severity'] === 'high')
                             bg-danger-50 dark:bg-danger-950 border-danger-200 dark:border-danger-800
@@ -129,7 +155,8 @@
                             </div>
                         </div>
                     </div>
-                @endforeach
+                    @endforeach
+                @endif
             @else
                 <div class="text-center py-8">
                     <x-filament::icon

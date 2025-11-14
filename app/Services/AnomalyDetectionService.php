@@ -45,7 +45,7 @@ class AnomalyDetectionService
             for ($i = 29; $i >= 0; $i--) {
                 $date = Carbon::today()->subDays($i);
                 $existingMetric = $businessMetrics->firstWhere('date', $date->toDateString());
-                
+
                 if ($existingMetric) {
                     $metrics[] = (object) [
                         'date' => $date,
@@ -84,16 +84,43 @@ class AnomalyDetectionService
             return []; // Not enough data
         }
 
-        // Get latest metric
-        $latest = $metricsCollection->last();
+        // Check if we have enough non-zero data for meaningful anomaly detection
+        // Require at least 14 days of non-zero revenue data
+        $nonZeroDays = $metricsCollection->filter(function ($metric) {
+            return $metric->revenue > 0 || $metric->expenses > 0;
+        })->count();
+
+        if ($nonZeroDays < 14) {
+            return [[
+                'metric' => 'System Status',
+                'severity' => 'info',
+                'description' => "We're still learning your business patterns. Anomaly alerts will start once we have at least 14 days of activity. Currently tracking: {$nonZeroDays} days with data.",
+                'recommendation' => 'Keep recording your revenue and expenses. The more data we have, the better we can detect unusual patterns.',
+                'type' => 'learning',
+                'is_learning' => true,
+            ]];
+        }
+
+        // Get current values: Use today's actual metrics (Revenue: 100,000, Profit: 88,000, Expenses: 12,000)
+        $today = Carbon::today();
+        $currentMetrics = $this->calculator->getCurrentMonthMetrics($user);
+
+        // Create current metric object with today's actual values
+        $current = (object) [
+            'date' => $today,
+            'revenue' => $currentMetrics['revenue'],
+            'profit' => $currentMetrics['profit'],
+            'expenses' => $currentMetrics['expenses'],
+            'cash_flow' => $currentMetrics['cash_flow'],
+        ];
 
         // Statistical anomaly detection
-        $anomalies = array_merge($anomalies, $this->detectStatisticalAnomalies($metricsCollection, $latest));
+        $anomalies = array_merge($anomalies, $this->detectStatisticalAnomalies($metricsCollection, $current));
 
         // AI-powered anomaly detection (if API key is configured)
         if (!empty(config('services.openai.key'))) {
             try {
-                $aiAnomalies = $this->detectAIAnomalies($metricsCollection, $latest);
+                $aiAnomalies = $this->detectAIAnomalies($metricsCollection, $current);
                 if ($aiAnomalies) {
                     $anomalies = array_merge($anomalies, $aiAnomalies);
                 }
