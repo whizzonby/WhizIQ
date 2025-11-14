@@ -127,13 +127,12 @@ class TaxForecastingService
         $lastYearStart = Carbon::create(now()->year - 1, 1, 1);
         $lastYearEnd = Carbon::create(now()->year - 1, 12, 31);
 
-        $thisYearRevenue = RevenueSource::where('user_id', $user->id)
-            ->where('date', '>=', $thisYearStart)
-            ->sum('amount');
+        // Use TaxCalculationService for consistent revenue calculation (excludes tax)
+        $thisYearSummary = $this->taxCalculationService->calculateTaxSummary($user, $thisYearStart, now());
+        $lastYearSummary = $this->taxCalculationService->calculateTaxSummary($user, $lastYearStart, $lastYearEnd);
 
-        $lastYearRevenue = RevenueSource::where('user_id', $user->id)
-            ->whereBetween('date', [$lastYearStart, $lastYearEnd])
-            ->sum('amount');
+        $thisYearRevenue = $thisYearSummary['total_revenue'];
+        $lastYearRevenue = $lastYearSummary['total_revenue'];
 
         if ($lastYearRevenue == 0) {
             return 1.0; // No historical data, assume no growth
@@ -292,19 +291,15 @@ class TaxForecastingService
                 break;
             }
 
-            $revenue = RevenueSource::where('user_id', $user->id)
-                ->whereBetween('date', [$startDate, $endDate])
-                ->sum('amount');
-
-            $expenses = Expense::where('user_id', $user->id)
-                ->whereBetween('date', [$startDate, $endDate])
-                ->sum('amount');
+            // Use TaxCalculationService for consistent revenue calculation
+            // This ensures we exclude tax from invoice payments
+            $summary = $this->taxCalculationService->calculateTaxSummary($user, $startDate, $endDate);
 
             $months[] = [
                 'month' => $month,
                 'month_name' => $startDate->format('F'),
-                'revenue' => round($revenue, 2),
-                'expenses' => round($expenses, 2),
+                'revenue' => $summary['total_revenue'],
+                'expenses' => $summary['total_expenses'],
             ];
         }
 

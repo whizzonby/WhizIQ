@@ -54,6 +54,8 @@ class TaxCalculationService
 
     /**
      * Calculate total revenue for period
+     * Revenue = RevenueSource + ClientPayment (excluding tax portion)
+     * Uses same formula as FinancialMetricsCalculator for consistency
      */
     public function calculateTotalRevenue(User $user, Carbon $startDate, Carbon $endDate): float
     {
@@ -63,13 +65,20 @@ class TaxCalculationService
             ->where('amount', '>=', 0) // Only positive amounts
             ->sum('amount');
 
-        // Revenue from Client Payments (validate non-negative)
-        $revenueFromPayments = ClientPayment::whereHas('client', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })
-            ->whereBetween('payment_date', [$startDate, $endDate])
-            ->where('amount', '>=', 0) // Only positive amounts
-            ->sum('amount');
+        // Revenue from Client Payments (excluding tax portion)
+        // Formula: payment_amount * (invoice_subtotal / invoice_total_amount)
+        $revenueFromPayments = ClientPayment::where('client_payments.user_id', $user->id)
+            ->whereBetween('client_payments.payment_date', [$startDate, $endDate])
+            ->where('client_payments.amount', '>=', 0) // Only positive amounts
+            ->join('client_invoices', 'client_payments.client_invoice_id', '=', 'client_invoices.id')
+            ->selectRaw('SUM(
+                CASE
+                    WHEN client_invoices.total_amount > 0
+                    THEN client_payments.amount * (client_invoices.subtotal / client_invoices.total_amount)
+                    ELSE client_payments.amount
+                END
+            ) as revenue_portion')
+            ->value('revenue_portion') ?? 0;
 
         return max(0, (float) ($revenueFromSources + $revenueFromPayments));
     }
