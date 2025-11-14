@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ClientPayment;
 use App\Models\Expense;
 use App\Models\RevenueSource;
 use App\Models\SwotAnalysis;
@@ -76,20 +77,42 @@ class SwotGeneratorService
             ->where('date', '>=', $startDate)
             ->get();
 
-        // Get revenue
-        $revenue = RevenueSource::where('user_id', $userId)
+        // Get revenue from RevenueSource
+        $revenueSources = RevenueSource::where('user_id', $userId)
             ->where('date', '>=', $startDate)
+            ->where('amount', '>=', 0)
+            ->get();
+
+        // Get revenue from ClientPayments (excluding tax portion)
+        $clientPayments = ClientPayment::where('client_payments.user_id', $userId)
+            ->whereBetween('client_payments.payment_date', [$startDate, Carbon::now()])
+            ->where('client_payments.amount', '>=', 0)
+            ->join('client_invoices', 'client_payments.client_invoice_id', '=', 'client_invoices.id')
+            ->selectRaw('
+                client_payments.payment_date as date,
+                CASE
+                    WHEN client_invoices.total_amount > 0
+                    THEN client_payments.amount * (client_invoices.subtotal / client_invoices.total_amount)
+                    ELSE client_payments.amount
+                END as amount
+            ')
             ->get();
 
         // Get current and previous month metrics using calculator
         $currentMetrics = $this->calculator->getCurrentMonthMetrics($user);
         $previousMetrics = $this->calculator->getLastMonthMetrics($user);
 
-        // Calculate revenue growth
-        $revenueGrowth = $this->calculator->calculatePercentageChange(
-            $currentMetrics['revenue'],
-            $previousMetrics['revenue']
-        );
+        // Check if we have historical data for valid comparison
+        $hasHistoricalData = $previousMetrics['revenue'] > 0 || $previousMetrics['expenses'] > 0;
+
+        // Calculate revenue growth only if we have valid historical data
+        $revenueGrowth = null;
+        if ($hasHistoricalData && $previousMetrics['revenue'] > 0) {
+            $revenueGrowth = $this->calculator->calculatePercentageChange(
+                $currentMetrics['revenue'],
+                $previousMetrics['revenue']
+            );
+        }
 
         // Get revenue trend
         $revenueTrend = $this->calculator->getMonthlyTrend($user, 'revenue');
@@ -100,25 +123,35 @@ class SwotGeneratorService
             ->sortDesc()
             ->take(3);
 
-        // Revenue sources
-        $revenueSources = $revenue->groupBy('source')
-            ->map(fn ($items) => $items->sum('amount'))
-            ->sortDesc();
+        // Revenue sources - combine all sources
+        $allRevenueSources = collect();
 
-        $hasData = $expenses->isNotEmpty() || $revenue->isNotEmpty() || array_sum($revenueTrend) > 0;
+        // Add RevenueSource data
+        foreach ($revenueSources->groupBy('source') as $source => $items) {
+            $allRevenueSources->put($source, $items->sum('amount'));
+        }
+
+        // Add ClientPayment data
+        if ($clientPayments->sum('amount') > 0) {
+            $allRevenueSources->put('client_invoices', $clientPayments->sum('amount'));
+        }
+
+        $hasData = $expenses->isNotEmpty() || $revenueSources->isNotEmpty() || $clientPayments->isNotEmpty() || array_sum($revenueTrend) > 0;
 
         return [
             'has_data' => $hasData,
+            'has_historical_data' => $hasHistoricalData,
             'period_days' => $days,
             'total_revenue' => $currentMetrics['revenue'],
             'total_expenses' => $currentMetrics['expenses'],
             'avg_revenue' => count($revenueTrend) > 0 ? array_sum($revenueTrend) / count($revenueTrend) : 0,
             'avg_profit' => $currentMetrics['profit'],
             'latest_cash_flow' => $currentMetrics['cash_flow'],
-            'revenue_growth' => $revenueGrowth,
+            'revenue_growth' => $revenueGrowth, // null if no historical data
             'profit_margin' => $currentMetrics['profit_margin'],
             'top_expenses' => $topExpenses->toArray(),
-            'revenue_sources' => $revenueSources->toArray(),
+            'revenue_sources' => $allRevenueSources->toArray(),
+            'revenue_sources_count' => $allRevenueSources->count(),
             'metrics_count' => count(array_filter($revenueTrend)),
         ];
     }
@@ -175,7 +208,14 @@ class SwotGeneratorService
         $prompt .= "- Total Revenue: $" . number_format($data['total_revenue'], 2) . "\n";
         $prompt .= "- Total Expenses: $" . number_format($data['total_expenses'], 2) . "\n";
         $prompt .= "- Profit Margin: " . number_format($data['profit_margin'], 1) . "%\n";
-        $prompt .= "- Revenue Growth: " . number_format($data['revenue_growth'], 1) . "%\n";
+
+        // Only include growth if we have historical data
+        if ($data['revenue_growth'] !== null && $data['has_historical_data']) {
+            $prompt .= "- Revenue Growth: " . number_format($data['revenue_growth'], 1) . "%\n";
+        } else {
+            $prompt .= "- Revenue Growth: Insufficient historical data to calculate trend\n";
+        }
+
         $prompt .= "- Current Cash Flow: $" . number_format($data['latest_cash_flow'], 2) . "\n\n";
 
         if (!empty($data['top_expenses'])) {
@@ -194,7 +234,14 @@ class SwotGeneratorService
             $prompt .= "\n";
         }
 
-        $prompt .= "Generate a SWOT analysis with 3-5 items per category. Focus on actionable insights.";
+        $prompt .= "**IMPORTANT CONSTRAINTS:**\n";
+        $prompt .= "- Only use the data provided above. Do NOT make assumptions or add fictional details.\n";
+        $prompt .= "- If historical data is insufficient, note 'Trend unavailable - insufficient history' instead of calculating growth.\n";
+        $prompt .= "- Cash flow shown is NET cash flow (positive = surplus, negative = deficit).\n";
+        if ($data['latest_cash_flow'] > 0) {
+            $prompt .= "- Do NOT list positive cash flow as a weakness. It is a strength.\n";
+        }
+        $prompt .= "\nGenerate a SWOT analysis with 3-5 items per category based ONLY on the real data provided. Focus on actionable insights.";
 
         return $prompt;
     }
@@ -212,7 +259,7 @@ class SwotGeneratorService
         ];
 
         // Strengths
-        if ($data['revenue_growth'] > 10) {
+        if ($data['revenue_growth'] !== null && $data['revenue_growth'] > 10 && $data['has_historical_data']) {
             $swot['strengths'][] = [
                 'description' => "Strong revenue growth of " . number_format($data['revenue_growth'], 1) . "% indicates market demand and effective sales strategy.",
                 'priority' => 9,
@@ -233,37 +280,36 @@ class SwotGeneratorService
             ];
         }
 
-        if (count($data['revenue_sources']) > 2) {
+        if ($data['revenue_sources_count'] > 2) {
             $swot['strengths'][] = [
-                'description' => "Diversified revenue streams across " . count($data['revenue_sources']) . " sources reduce dependency risk.",
+                'description' => "Diversified revenue streams across " . $data['revenue_sources_count'] . " sources reduce dependency risk.",
                 'priority' => 7,
             ];
         }
 
         // Weaknesses
-        if ($data['revenue_growth'] < 0) {
+        if ($data['revenue_growth'] !== null && $data['revenue_growth'] < 0 && $data['has_historical_data']) {
             $swot['weaknesses'][] = [
                 'description' => "Revenue declining by " . number_format(abs($data['revenue_growth']), 1) . "% requires immediate attention to sales and marketing strategies.",
                 'priority' => 9,
             ];
+        } elseif ($data['revenue_growth'] === null || !$data['has_historical_data']) {
+            // Note insufficient data instead of false weakness
+            $swot['weaknesses'][] = [
+                'description' => "Insufficient historical data to calculate revenue trends - need at least 2 months of data for meaningful analysis.",
+                'priority' => 5,
+            ];
         }
 
-        if ($data['profit_margin'] < 10) {
+        if ($data['profit_margin'] < 10 && $data['total_revenue'] > 0) {
             $swot['weaknesses'][] = [
                 'description' => "Low profit margin of " . number_format($data['profit_margin'], 1) . "% suggests high costs or pricing issues.",
                 'priority' => 8,
             ];
         }
 
-        if ($data['latest_cash_flow'] < 0) {
-            $swot['weaknesses'][] = [
-                'description' => "Negative cash flow of $" . number_format(abs($data['latest_cash_flow']), 2) . " threatens business sustainability.",
-                'priority' => 10,
-            ];
-        }
-
         // Opportunities
-        if ($data['revenue_growth'] > 0 && $data['revenue_growth'] < 20) {
+        if ($data['revenue_growth'] !== null && $data['revenue_growth'] > 0 && $data['revenue_growth'] < 20 && $data['has_historical_data']) {
             $swot['opportunities'][] = [
                 'description' => "Moderate growth of " . number_format($data['revenue_growth'], 1) . "% can be accelerated with increased marketing investment.",
                 'priority' => 7,
@@ -284,14 +330,14 @@ class SwotGeneratorService
         ];
 
         // Threats
-        if (count($data['revenue_sources']) <= 1) {
+        if ($data['revenue_sources_count'] <= 1) {
             $swot['threats'][] = [
                 'description' => "Heavy reliance on single revenue source creates vulnerability to market changes.",
                 'priority' => 8,
             ];
         }
 
-        if ($data['profit_margin'] < 15 && $data['revenue_growth'] < 5) {
+        if ($data['profit_margin'] < 15 && $data['revenue_growth'] !== null && $data['revenue_growth'] < 5 && $data['has_historical_data']) {
             $swot['threats'][] = [
                 'description' => "Combination of low margins and slow growth makes business vulnerable to economic downturns.",
                 'priority' => 8,
@@ -337,9 +383,13 @@ class SwotGeneratorService
 
     /**
      * Create SWOT records in database
+     * IMPORTANT: Replaces all existing records (does not append)
      */
     protected function createSwotRecords(int $userId, array $swot): array
     {
+        // Delete all existing SWOT records for this user to avoid duplicates
+        SwotAnalysis::where('user_id', $userId)->delete();
+
         $created = [];
 
         foreach (['strengths' => 'strength', 'weaknesses' => 'weakness', 'opportunities' => 'opportunity', 'threats' => 'threat'] as $category => $type) {
