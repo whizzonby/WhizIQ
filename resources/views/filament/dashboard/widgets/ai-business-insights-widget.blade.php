@@ -50,7 +50,7 @@
                         <div class="space-y-2">
                             @foreach($anomalies as $anomaly)
                                 <div class="flex items-start gap-2 text-sm">
-                                    <x-filament::badge :color="getSeverityColor($anomaly['severity'])">
+                                    <x-filament::badge :color="$this->getSeverityColor($anomaly['severity'])">
                                         {{ ucfirst($anomaly['severity']) }}
                                     </x-filament::badge>
                                     <p class="text-danger-800 dark:text-danger-200 flex-1">
