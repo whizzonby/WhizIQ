@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\Expense;
 use App\Models\RevenueSource;
+use App\Models\ClientPayment;
 use App\Models\RiskAssessment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -70,8 +71,27 @@ class RiskAssessmentGeneratorService
             ->where('date', '>=', $startDate)
             ->get();
 
-        $revenue = RevenueSource::where('user_id', $userId)
+        // Get revenue from RevenueSource
+        $revenueSources = RevenueSource::where('user_id', $userId)
             ->where('date', '>=', $startDate)
+            ->where('amount', '>=', 0)
+            ->get();
+
+        // Get revenue from ClientPayments (excluding tax portion)
+        // Formula: payment_amount * (invoice_subtotal / invoice_total_amount)
+        $clientPayments = ClientPayment::where('client_payments.user_id', $userId)
+            ->whereBetween('client_payments.payment_date', [$startDate, Carbon::now()])
+            ->where('client_payments.amount', '>=', 0)
+            ->join('client_invoices', 'client_payments.client_invoice_id', '=', 'client_invoices.id')
+            ->selectRaw('
+                client_payments.payment_date as date,
+                client_invoices.client_id as source_id,
+                CASE
+                    WHEN client_invoices.total_amount > 0
+                    THEN client_payments.amount * (client_invoices.subtotal / client_invoices.total_amount)
+                    ELSE client_payments.amount
+                END as amount
+            ')
             ->get();
 
         // Get current and previous metrics using calculator
@@ -84,7 +104,7 @@ class RiskAssessmentGeneratorService
             $previousMetrics['cash_flow']
         );
 
-        // Get revenue trend for volatility calculation
+        // Get revenue trend for volatility calculation (uses correct formula with tax exclusion)
         $revenueTrend = $this->calculator->getMonthlyTrend($user, 'revenue');
         $expenseTrend = $this->calculator->getMonthlyTrend($user, 'expenses');
 
@@ -92,13 +112,30 @@ class RiskAssessmentGeneratorService
         $revenueVolatility = count($revenueTrend) > 0 ? $this->calculateVolatility($revenueTrend) : 0;
         $expenseVolatility = count($expenseTrend) > 0 ? $this->calculateVolatility($expenseTrend) : 0;
 
-        // Revenue concentration
-        $revenueSources = $revenue->groupBy('source')->map(fn($items) => $items->sum('amount'));
-        $totalRevenue = $revenue->sum('amount');
-        $revenueConcentration = $revenueSources->isNotEmpty() ? ($revenueSources->max() / max($totalRevenue, 1)) * 100 : 0;
+        // Revenue concentration - combine all revenue sources
+        $allRevenueSources = collect();
+
+        // Add RevenueSource data
+        foreach ($revenueSources->groupBy('source') as $source => $items) {
+            $allRevenueSources->put($source, $items->sum('amount'));
+        }
+
+        // Add ClientPayment data (group by client)
+        foreach ($clientPayments->groupBy('source_id') as $clientId => $items) {
+            $sourceName = 'client_invoices';
+            if ($allRevenueSources->has($sourceName)) {
+                $allRevenueSources->put($sourceName, $allRevenueSources->get($sourceName) + $items->sum('amount'));
+            } else {
+                $allRevenueSources->put($sourceName, $items->sum('amount'));
+            }
+        }
+
+        $totalRevenue = $allRevenueSources->sum();
+        $revenueConcentration = $allRevenueSources->isNotEmpty() ? ($allRevenueSources->max() / max($totalRevenue, 1)) * 100 : 0;
+        $revenueSourcesCount = $allRevenueSources->count();
 
         return [
-            'has_data' => $expenses->isNotEmpty() || $revenue->isNotEmpty() || $currentMetrics['revenue'] > 0,
+            'has_data' => $expenses->isNotEmpty() || $revenueSources->isNotEmpty() || $clientPayments->isNotEmpty() || $currentMetrics['revenue'] > 0,
             'period_days' => $days,
             'total_revenue' => $currentMetrics['revenue'],
             'total_expenses' => $currentMetrics['expenses'],
@@ -109,7 +146,7 @@ class RiskAssessmentGeneratorService
             'revenue_concentration' => $revenueConcentration,
             'profit_margin' => $currentMetrics['profit_margin'],
             'expense_categories' => $expenses->groupBy('category')->count(),
-            'revenue_sources_count' => $revenueSources->count(),
+            'revenue_sources_count' => $revenueSourcesCount,
         ];
     }
 
