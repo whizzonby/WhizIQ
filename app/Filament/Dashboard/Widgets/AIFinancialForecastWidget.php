@@ -2,10 +2,13 @@
 
 namespace App\Filament\Dashboard\Widgets;
 
+use App\Models\ClientPayment;
 use App\Models\Expense;
 use App\Models\RevenueSource;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class AIFinancialForecastWidget extends ChartWidget
 {
@@ -34,6 +37,11 @@ class AIFinancialForecastWidget extends ChartWidget
             $forecast = $this->generateForecast($historicalData, $forecastDays);
             $lineColor = 'rgb(34, 197, 94)';
             $forecastColor = 'rgb(134, 239, 172)';
+        } elseif ($this->filter === 'profit') {
+            $historicalData = $this->getHistoricalProfit($user, $startDate, $historicalDays);
+            $forecast = $this->generateForecast($historicalData, $forecastDays);
+            $lineColor = 'rgb(59, 130, 246)';
+            $forecastColor = 'rgb(147, 197, 253)';
         } else {
             $historicalData = $this->getHistoricalExpenses($user, $startDate, $historicalDays);
             $forecast = $this->generateForecast($historicalData, $forecastDays);
@@ -84,28 +92,90 @@ class AIFinancialForecastWidget extends ChartWidget
 
     protected function getHistoricalRevenue($user, $startDate, $days): array
     {
-        $data = [];
-        for ($i = 0; $i < $days; $i++) {
-            $date = Carbon::parse($startDate)->addDays($i);
-            $amount = RevenueSource::where('user_id', $user->id)
-                ->whereDate('date', $date)
-                ->sum('amount');
-            $data[] = $amount;
-        }
-        return $data;
+        $cacheKey = "ai_forecast_revenue_{$user->id}_" . $startDate->format('Y-m-d') . "_{$days}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($user, $startDate, $days) {
+            $endDate = Carbon::parse($startDate)->addDays($days - 1);
+
+            // Get revenue from RevenueSource aggregated by date
+            $revenueSources = RevenueSource::where('user_id', $user->id)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->where('amount', '>=', 0)
+                ->selectRaw('DATE(date) as date, SUM(amount) as total')
+                ->groupBy('date')
+                ->pluck('total', 'date');
+
+            // Get invoice payment revenue (excluding tax portion) aggregated by date
+            // Formula: payment_amount * (invoice_subtotal / invoice_total_amount)
+            $invoicePayments = ClientPayment::where('client_payments.user_id', $user->id)
+                ->whereBetween('client_payments.payment_date', [$startDate, $endDate])
+                ->where('client_payments.amount', '>=', 0)
+                ->join('client_invoices', 'client_payments.client_invoice_id', '=', 'client_invoices.id')
+                ->selectRaw('DATE(client_payments.payment_date) as date, SUM(
+                    CASE
+                        WHEN client_invoices.total_amount > 0
+                        THEN client_payments.amount * (client_invoices.subtotal / client_invoices.total_amount)
+                        ELSE client_payments.amount
+                    END
+                ) as total')
+                ->groupBy('date')
+                ->pluck('total', 'date');
+
+            // Combine daily revenue into array
+            $data = [];
+            for ($i = 0; $i < $days; $i++) {
+                $date = Carbon::parse($startDate)->addDays($i)->format('Y-m-d');
+                $revenueSourceAmount = (float) ($revenueSources[$date] ?? 0);
+                $invoicePaymentAmount = (float) ($invoicePayments[$date] ?? 0);
+                $data[] = $revenueSourceAmount + $invoicePaymentAmount;
+            }
+
+            return $data;
+        });
     }
 
     protected function getHistoricalExpenses($user, $startDate, $days): array
     {
-        $data = [];
-        for ($i = 0; $i < $days; $i++) {
-            $date = Carbon::parse($startDate)->addDays($i);
-            $amount = Expense::where('user_id', $user->id)
-                ->whereDate('date', $date)
-                ->sum('amount');
-            $data[] = $amount;
-        }
-        return $data;
+        $cacheKey = "ai_forecast_expenses_{$user->id}_" . $startDate->format('Y-m-d') . "_{$days}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($user, $startDate, $days) {
+            $endDate = Carbon::parse($startDate)->addDays($days - 1);
+
+            // Get expenses aggregated by date
+            $expenses = Expense::where('user_id', $user->id)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->where('amount', '>=', 0)
+                ->selectRaw('DATE(date) as date, SUM(amount) as total')
+                ->groupBy('date')
+                ->pluck('total', 'date');
+
+            // Build array with daily expenses
+            $data = [];
+            for ($i = 0; $i < $days; $i++) {
+                $date = Carbon::parse($startDate)->addDays($i)->format('Y-m-d');
+                $data[] = (float) ($expenses[$date] ?? 0);
+            }
+
+            return $data;
+        });
+    }
+
+    protected function getHistoricalProfit($user, $startDate, $days): array
+    {
+        $cacheKey = "ai_forecast_profit_{$user->id}_" . $startDate->format('Y-m-d') . "_{$days}";
+
+        return Cache::remember($cacheKey, 3600, function () use ($user, $startDate, $days) {
+            // Get revenue and expenses, then calculate profit for each day
+            $revenue = $this->getHistoricalRevenue($user, $startDate, $days);
+            $expenses = $this->getHistoricalExpenses($user, $startDate, $days);
+
+            $data = [];
+            for ($i = 0; $i < $days; $i++) {
+                $data[] = $revenue[$i] - $expenses[$i];
+            }
+
+            return $data;
+        });
     }
 
     protected function generateForecast(array $historicalData, int $days): array
