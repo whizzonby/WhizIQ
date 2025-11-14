@@ -39,7 +39,7 @@ class TaxSummaryWidget extends BaseWidget
 
             Stat::make('Sales Tax Collected', '$' . number_format($salesTaxCollected, 2))
                 ->description('Tax collected from invoice payments')
-                ->descriptionIcon('heroicon-m-receipt-tax')
+                ->descriptionIcon('heroicon-m-receipt-percent')
                 ->color('info'),
 
             Stat::make('Taxable Income (YTD)', '$' . number_format($summary['taxable_income'], 2))
