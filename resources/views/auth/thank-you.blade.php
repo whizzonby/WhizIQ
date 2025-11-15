@@ -19,9 +19,18 @@
 
                     @php
                         $user = auth()->user();
-                        $onboardingUrl = $user && !$user->onboardingData 
-                            ? route('filament.dashboard.pages.onboarding') 
-                            : route('filament.dashboard.pages.dashboard');
+                        
+                        // Determine redirect URL based on onboarding and subscription status
+                        if ($user && !$user->onboardingData) {
+                            // User hasn't completed onboarding - go to onboarding
+                            $onboardingUrl = route('filament.dashboard.pages.onboarding');
+                        } elseif ($user && !$user->isSubscribed()) {
+                            // User completed onboarding but has no subscription - go to plans page
+                            $onboardingUrl = route('filament.dashboard.resources.subscriptions.index');
+                        } else {
+                            // User has completed onboarding and has subscription - go to dashboard
+                            $onboardingUrl = route('filament.dashboard.pages.dashboard');
+                        }
                     @endphp
 
                     <x-button-link.primary class="inline-block w-full! mt-6" href="{{ $onboardingUrl }}">

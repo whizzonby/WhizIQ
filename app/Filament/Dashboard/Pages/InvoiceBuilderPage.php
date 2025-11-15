@@ -450,6 +450,16 @@ class InvoiceBuilderPage extends Page implements HasForms
 
                     // Get limit from subscription metadata
                     $metadata = $user->subscriptionProductMetadata();
+                    
+                    // Safety check: ensure metadata is a flat array
+                    if (!empty($metadata) && !is_array($metadata)) {
+                        \Log::error('Unexpected metadata type in InvoiceBuilderPage', [
+                            'user_id' => $user->id,
+                            'metadata_type' => gettype($metadata),
+                        ]);
+                        $metadata = [];
+                    }
+                    
                     $limit = $metadata['finance_invoices_limit'] ?? 50;
 
                     if ($limit !== 'unlimited' && $limit !== 'true' && $currentMonthCount >= (int)$limit) {
@@ -578,6 +588,16 @@ class InvoiceBuilderPage extends Page implements HasForms
 
                     // Get limit from subscription metadata
                     $metadata = $user->subscriptionProductMetadata();
+                    
+                    // Safety check: ensure metadata is a flat array
+                    if (!empty($metadata) && !is_array($metadata)) {
+                        \Log::error('Unexpected metadata type in InvoiceBuilderPage', [
+                            'user_id' => $user->id,
+                            'metadata_type' => gettype($metadata),
+                        ]);
+                        $metadata = [];
+                    }
+                    
                     $limit = $metadata['finance_invoices_limit'] ?? 50;
 
                     if ($limit !== 'unlimited' && $limit !== 'true' && $currentMonthCount >= (int)$limit) {

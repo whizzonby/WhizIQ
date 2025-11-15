@@ -186,11 +186,34 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Two
         if (empty($metadata)) {
             return false;
         }
+
+        // Safety check: ensure metadata is a flat array (not nested)
+        // Check if any value is itself an array (indicating nested structure)
+        if (!is_array($metadata)) {
+            \Log::error('Metadata is not an array in canCreate', [
+                'user_id' => $this->id,
+                'metadata_key' => $metadataKey,
+                'metadata_type' => gettype($metadata),
+            ]);
+            return false;
+        }
+
+        // Check for nested array structure (e.g., ['product-slug' => [...metadata...]])
+        foreach ($metadata as $key => $value) {
+            if (is_array($value)) {
+                \Log::error('Nested metadata structure detected in canCreate - this should not happen', [
+                    'user_id' => $this->id,
+                    'metadata_key' => $metadataKey,
+                    'nested_key' => $key,
+                ]);
+                return false;
+            }
+        }
         
         $limit = $metadata[$metadataKey] ?? '0';
         
         // Unlimited = allow
-        if ($limit === 'unlimited') {
+        if (strtolower((string)$limit) === 'unlimited') {
             return true;
         }
         
@@ -216,9 +239,32 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Two
         if (empty($metadata)) {
             return false;
         }
+
+        // Safety check: ensure metadata is a flat array (not nested)
+        // Check if any value is itself an array (indicating nested structure)
+        if (!is_array($metadata)) {
+            \Log::error('Metadata is not an array in hasFeature', [
+                'user_id' => $this->id,
+                'metadata_key' => $metadataKey,
+                'metadata_type' => gettype($metadata),
+            ]);
+            return false;
+        }
+
+        // Check for nested array structure (e.g., ['product-slug' => [...metadata...]])
+        foreach ($metadata as $key => $value) {
+            if (is_array($value)) {
+                \Log::error('Nested metadata structure detected in hasFeature - this should not happen', [
+                    'user_id' => $this->id,
+                    'metadata_key' => $metadataKey,
+                    'nested_key' => $key,
+                ]);
+                return false;
+            }
+        }
         
         $value = $metadata[$metadataKey] ?? 'false';
-        return in_array(strtolower($value), ['true', '1', 'yes']);
+        return in_array(strtolower((string)$value), ['true', '1', 'yes'], true);
     }
 
     public function sendEmailVerificationNotification()

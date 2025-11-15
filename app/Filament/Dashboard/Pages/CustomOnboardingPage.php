@@ -17,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\RawJs;
+use Saasykit\FilamentOnboarding\FilamentOnboardingPlugin;
 use Saasykit\FilamentOnboarding\Pages\OnboardingPage;
 
 class CustomOnboardingPage extends OnboardingPage
@@ -362,5 +363,25 @@ class CustomOnboardingPage extends OnboardingPage
 
         $onboardingData->calculateMetrics();
         $this->onboarded();
+    }
+
+    /**
+     * Override onboarded() to check for subscription before redirecting
+     * If user has no subscription, redirect to plans page instead of dashboard
+     */
+    protected function onboarded()
+    {
+        // Mark user as onboarded (call parent logic)
+        $this->onboardingManager->onboarded();
+
+        // Check if user has active subscription
+        $user = auth()->user();
+        if ($user && !$user->is_admin && !$user->isSubscribed()) {
+            // Redirect to plans page if no subscription
+            return $this->redirect(route('filament.dashboard.resources.subscriptions.index'));
+        }
+
+        // Default redirect (to dashboard) if user has subscription or is admin
+        $this->redirect(FilamentOnboardingPlugin::get()->getAfterOnboardingRedirectTo());
     }
 }

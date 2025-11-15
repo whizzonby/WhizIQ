@@ -464,27 +464,128 @@ class SubscriptionService
             return [];
         }
 
-        // if there is 1 subscription, return metadata of its product
-        if ($subscriptions->count() === 1) {
-            $subscription = $subscriptions->first();
+        // Collect all metadata from valid subscriptions
+        $allMetadata = [];
+        $orphanedSubscriptions = [];
+
+        foreach ($subscriptions as $subscription) {
             if ($subscription->plan && $subscription->plan->product) {
-                return $subscription->plan->product->metadata ?? [];
+                $productMetadata = $subscription->plan->product->metadata ?? [];
+                if (!empty($productMetadata)) {
+                    $allMetadata[] = $productMetadata;
+                }
+            } else {
+                // Track orphaned subscriptions for logging
+                $orphanedSubscriptions[] = $subscription->id;
             }
-            // If subscription has no plan/product, fallback to default product
+        }
+
+        // Log orphaned subscriptions if any
+        if (!empty($orphanedSubscriptions)) {
+            \Log::warning('User has subscriptions with missing plan/product', [
+                'user_id' => $user->id,
+                'subscription_ids' => $orphanedSubscriptions,
+            ]);
+        }
+
+        // If no valid metadata found, try fallback to default product
+        if (empty($allMetadata)) {
             $defaultProduct = Product::where('is_default', true)->first();
             if ($defaultProduct) {
-                return $defaultProduct->metadata ?? [];
+                $defaultMetadata = $defaultProduct->metadata ?? [];
+                if (!empty($defaultMetadata)) {
+                    \Log::info('Using default product metadata for user', [
+                        'user_id' => $user->id,
+                        'default_product' => $defaultProduct->slug,
+                    ]);
+                    return $defaultMetadata;
+                }
             }
             return [];
         }
 
-        // if there are multiple subscriptions, return array of product-slug => metadata
-        return $subscriptions->mapWithKeys(function (Subscription $subscription) {
-            if ($subscription->plan && $subscription->plan->product) {
-                return [$subscription->plan->product->slug => $subscription->plan->product->metadata ?? []];
-            }
+        // If only one subscription, return its metadata directly (backward compatibility)
+        if (count($allMetadata) === 1) {
+            return $allMetadata[0];
+        }
+
+        // Multiple subscriptions: merge metadata using union strategy
+        return $this->mergeSubscriptionMetadata($allMetadata);
+    }
+
+    /**
+     * Merge metadata from multiple subscriptions using union strategy:
+     * - Boolean features: true if ANY subscription has it as true
+     * - Numeric limits: maximum value across all subscriptions
+     * - "unlimited": if ANY subscription has "unlimited", result is "unlimited"
+     */
+    private function mergeSubscriptionMetadata(array $metadataArray): array
+    {
+        if (empty($metadataArray)) {
             return [];
-        })->filter()->toArray();
+        }
+
+        $merged = [];
+
+        // Get all unique keys from all metadata arrays
+        $allKeys = [];
+        foreach ($metadataArray as $metadata) {
+            $allKeys = array_merge($allKeys, array_keys($metadata));
+        }
+        $allKeys = array_unique($allKeys);
+
+        foreach ($allKeys as $key) {
+            $values = [];
+            foreach ($metadataArray as $metadata) {
+                if (isset($metadata[$key])) {
+                    $values[] = $metadata[$key];
+                }
+            }
+
+            if (empty($values)) {
+                continue;
+            }
+
+            // Check if any value is "unlimited" (for limits)
+            $hasUnlimited = in_array('unlimited', array_map('strtolower', $values), true);
+            if ($hasUnlimited) {
+                $merged[$key] = 'unlimited';
+                continue;
+            }
+
+            // Check if values are numeric (limits)
+            $numericValues = array_filter($values, function ($v) {
+                return is_numeric($v) || (is_string($v) && is_numeric(trim($v)));
+            });
+
+            if (!empty($numericValues)) {
+                // Take maximum numeric value
+                $maxValue = max(array_map(function ($v) {
+                    return (int) $v;
+                }, $numericValues));
+                $merged[$key] = (string) $maxValue;
+                continue;
+            }
+
+            // For boolean/string values, check if any is "true"
+            $hasTrue = false;
+            foreach ($values as $value) {
+                $normalized = strtolower(trim((string) $value));
+                if (in_array($normalized, ['true', '1', 'yes'], true)) {
+                    $hasTrue = true;
+                    break;
+                }
+            }
+
+            if ($hasTrue) {
+                $merged[$key] = 'true';
+            } else {
+                // Take the first value (or could be 'false')
+                $merged[$key] = $values[0];
+            }
+        }
+
+        return $merged;
     }
 
     public function canEditSubscriptionPaymentDetails(Subscription $subscription)

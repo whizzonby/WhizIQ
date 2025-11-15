@@ -55,6 +55,15 @@ class AIUsageService
         // Get limits from subscription metadata (simple feature system)
         $metadata = $user->subscriptionProductMetadata();
         
+        // Safety check: ensure metadata is a flat array (not nested)
+        if (!empty($metadata) && !is_array($metadata)) {
+            \Log::error('Unexpected metadata type in AIUsageService::canMakeRequest', [
+                'user_id' => $user->id,
+                'metadata_type' => gettype($metadata),
+            ]);
+            $metadata = [];
+        }
+        
         // Default limits if no subscription (safety fallback)
         $dailyLimit = !empty($metadata) 
             ? (int)($metadata['ai_daily_limit'] ?? 20) 
