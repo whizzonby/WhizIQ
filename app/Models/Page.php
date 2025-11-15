@@ -20,6 +20,8 @@ class Page extends Model
         'title',
         'slug',
         'content',
+        'editor_mode',
+        'featured_image',
         'meta_description',
         'meta_keywords',
         'is_published',
@@ -38,6 +40,7 @@ class Page extends Model
         'is_published' => 'boolean',
         'published_at' => 'datetime',
         'sort_order' => 'integer',
+        'content' => 'array',
     ];
 
     /**
@@ -133,5 +136,147 @@ class Page extends Model
     public function isPolicyPage(): bool
     {
         return in_array($this->page_type, ['policy', 'legal']);
+    }
+
+    /**
+     * Get the content as HTML string for display.
+     */
+    public function getContentHtmlAttribute(): string
+    {
+        $content = $this->content;
+
+        // If content is a string (from old data or code editor), return as-is
+        if (is_string($content)) {
+            return $content;
+        }
+
+        // If content is an array (from rich editor mode), convert to HTML
+        if (is_array($content)) {
+            // Check if it's Tiptap format (has 'type' key)
+            if (isset($content['type'])) {
+                return $this->convertTiptapToHtml($content);
+            }
+            // Otherwise, it might be JSON-encoded HTML string
+            return implode('', $content);
+        }
+
+        return '';
+    }
+
+    /**
+     * Convert Tiptap JSON to HTML.
+     */
+    private function convertTiptapToHtml(array $content): string
+    {
+        if (! isset($content['type'])) {
+            return '';
+        }
+
+        $html = '';
+
+        if ($content['type'] === 'doc' && isset($content['content'])) {
+            foreach ($content['content'] as $node) {
+                $html .= $this->renderNode($node);
+            }
+        }
+
+        return $html;
+    }
+
+    /**
+     * Render a Tiptap node to HTML.
+     */
+    private function renderNode(array $node): string
+    {
+        $type = $node['type'] ?? '';
+        $content = $node['content'] ?? [];
+        $attrs = $node['attrs'] ?? [];
+        $marks = $node['marks'] ?? [];
+
+        switch ($type) {
+            case 'paragraph':
+                $inner = $this->renderChildren($content, $marks);
+
+                return "<p>{$inner}</p>";
+            case 'heading':
+                $level = $attrs['level'] ?? 2;
+                $inner = $this->renderChildren($content, $marks);
+
+                return "<h{$level}>{$inner}</h{$level}>";
+            case 'bulletList':
+                $inner = $this->renderChildren($content, $marks);
+
+                return "<ul>{$inner}</ul>";
+            case 'orderedList':
+                $inner = $this->renderChildren($content, $marks);
+
+                return "<ol>{$inner}</ol>";
+            case 'listItem':
+                $inner = $this->renderChildren($content, $marks);
+
+                return "<li>{$inner}</li>";
+            case 'blockquote':
+                $inner = $this->renderChildren($content, $marks);
+
+                return "<blockquote>{$inner}</blockquote>";
+            case 'codeBlock':
+                $inner = $this->renderChildren($content, $marks);
+
+                return "<pre><code>{$inner}</code></pre>";
+            case 'text':
+                $text = $node['text'] ?? '';
+
+                return $this->applyMarks($text, $marks);
+            case 'hardBreak':
+                return '<br>';
+            default:
+                return '';
+        }
+    }
+
+    /**
+     * Render child nodes.
+     */
+    private function renderChildren(array $children, array $parentMarks = []): string
+    {
+        $html = '';
+        foreach ($children as $child) {
+            $html .= $this->renderNode($child);
+        }
+
+        return $html;
+    }
+
+    /**
+     * Apply text marks (bold, italic, etc).
+     */
+    private function applyMarks(string $text, array $marks): string
+    {
+        foreach ($marks as $mark) {
+            $type = $mark['type'] ?? '';
+            switch ($type) {
+                case 'bold':
+                    $text = "<strong>{$text}</strong>";
+                    break;
+                case 'italic':
+                    $text = "<em>{$text}</em>";
+                    break;
+                case 'underline':
+                    $text = "<u>{$text}</u>";
+                    break;
+                case 'strike':
+                    $text = "<s>{$text}</s>";
+                    break;
+                case 'link':
+                    $href = $mark['attrs']['href'] ?? '#';
+                    $text = "<a href=\"{$href}\">{$text}</a>";
+                    break;
+                case 'code':
+                    $text = "<code>{$text}</code>";
+                    break;
+            }
+        }
+
+        return $text;
     }
 }

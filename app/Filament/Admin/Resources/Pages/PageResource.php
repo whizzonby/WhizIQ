@@ -12,6 +12,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -68,25 +70,61 @@ class PageResource extends Resource
                                 $set('slug', Str::slug($state));
                             }
                         }),
+                    Radio::make('editor_mode')
+                        ->label(__('Editor Mode'))
+                        ->options([
+                            'rich' => __('Rich Text Editor (WYSIWYG)'),
+                            'code' => __('Code Editor (HTML/CSS)'),
+                        ])
+                        ->default('rich')
+                        ->inline()
+                        ->live()
+                        ->columnSpanFull(),
                     RichEditor::make('content')
                         ->required()
                         ->label(__('Content'))
-                        ->floatingToolbars([
-                            'paragraph' => [
-                                'bold', 'italic', 'underline', 'strike', 'subscript', 'superscript',
-                            ],
-                            'heading' => [
-                                'h1', 'h2', 'h3',
-                            ],
-                            'table' => [
-                                'tableAddColumnBefore', 'tableAddColumnAfter', 'tableDeleteColumn',
-                                'tableAddRowBefore', 'tableAddRowAfter', 'tableDeleteRow',
-                                'tableMergeCells', 'tableSplitCell',
-                                'tableToggleHeaderRow',
-                                'tableDelete',
-                            ],
+                        ->toolbarButtons([
+                            'bold',
+                            'italic',
+                            'underline',
+                            'strike',
+                            'link',
+                            'h2',
+                            'h3',
+                            'bulletList',
+                            'orderedList',
+                            'blockquote',
+                            'codeBlock',
+                            'undo',
+                            'redo',
                         ])
-                        ->fileAttachmentsDirectory('page-images')
+                        ->disableToolbarButtons([
+                            'attachFiles',
+                        ])
+                        ->columnSpanFull()
+                        ->visible(fn (Get $get): bool => $get('editor_mode') === 'rich'),
+                    Textarea::make('content')
+                        ->required()
+                        ->label(__('Content (HTML/CSS)'))
+                        ->rows(20)
+                        ->helperText(__('You can use HTML and CSS. The content will be rendered as-is on the page.'))
+                        ->columnSpanFull()
+                        ->visible(fn (Get $get): bool => $get('editor_mode') === 'code'),
+                    FileUpload::make('featured_image')
+                        ->label(__('Featured Image'))
+                        ->image()
+                        ->disk('public')
+                        ->directory('pages/images')
+                        ->visibility('public')
+                        ->maxSize(5120) // 5MB
+                        ->helperText(__('Optional featured image for the page. Maximum size: 5MB'))
+                        ->imageEditor()
+                        ->imageEditorAspectRatios([
+                            null,
+                            '16:9',
+                            '4:3',
+                            '1:1',
+                        ])
                         ->columnSpanFull(),
                     Textarea::make('meta_description')
                         ->label(__('Meta Description'))

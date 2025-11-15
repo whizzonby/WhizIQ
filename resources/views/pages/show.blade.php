@@ -15,8 +15,16 @@
             {{ $page->title }}
         </x-heading.h1>
 
+        @if($page->featured_image)
+            <div class="mb-8">
+                <img src="{{ Storage::url($page->featured_image) }}"
+                     alt="{{ $page->title }}"
+                     class="w-full h-auto rounded-lg shadow-lg">
+            </div>
+        @endif
+
         <div class="prose prose-lg max-w-none">
-            {!! $page->content !!}
+            {!! $page->content_html !!}
         </div>
 
         @if($page->published_at)
