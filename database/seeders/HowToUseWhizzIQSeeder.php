@@ -26,7 +26,7 @@ class HowToUseWhizzIQSeeder extends Seeder
             ['slug' => 'how-to-use-whizziq'],
             [
                 'title' => 'How to Use WhizzIQ',
-                'slug' => 'how-to-use-WhizzIQ',
+                'slug' => 'how-to-use-whizziq',
                 'content' => $this->getHowToUseWhizzIQContent(),
                 'meta_description' => 'Complete guide on how to use WhizzIQ - your all-in-one business management platform. Learn about features, getting started, and best practices.',
                 'meta_keywords' => 'WhizzIQ guide, how to use WhizzIQ, WhizzIQ tutorial, business management, user guide',
