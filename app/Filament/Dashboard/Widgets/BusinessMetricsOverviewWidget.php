@@ -23,15 +23,28 @@ class BusinessMetricsOverviewWidget extends BaseWidget
         $user = auth()->user();
         $calculator = app(FinancialMetricsCalculator::class);
 
-        // Check if tax settings are configured
+        // Check if tax settings are configured (show notification only once per session if incomplete)
         $taxSetting = $user->taxSetting;
-        if (!$taxSetting || !$taxSetting->tax_rate) {
+        $sessionKey = 'tax_settings_notification_shown_' . $user->id;
+
+        // Only show notification if:
+        // 1. Tax settings are incomplete AND
+        // 2. Notification hasn't been shown this session
+        if ((!$taxSetting || !$taxSetting->tax_rate) && !session()->has($sessionKey)) {
             \Filament\Notifications\Notification::make()
                 ->warning()
                 ->title('Tax Settings Incomplete')
                 ->body('Please configure your tax rate in Tax Settings for accurate financial calculations.')
                 ->persistent()
                 ->send();
+
+            // Mark as shown for this session
+            session()->put($sessionKey, true);
+        }
+
+        // If tax settings are completed, clear the session flag
+        if ($taxSetting && $taxSetting->tax_rate) {
+            session()->forget($sessionKey);
         }
 
         // Get comprehensive metrics with comparisons
