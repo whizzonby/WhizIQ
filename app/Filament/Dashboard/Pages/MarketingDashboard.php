@@ -25,6 +25,9 @@ class MarketingDashboard extends Page
 
     protected static ?int $navigationSort = 0;
 
+    // Hide from navigation - will bring back later
+    protected static bool $shouldRegisterNavigation = false;
+
     protected string $view = 'filament.dashboard.pages.marketing-dashboard';
 
     protected function getHeaderWidgets(): array

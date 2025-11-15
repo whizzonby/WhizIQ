@@ -29,6 +29,9 @@ class MarketingMetricResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    // Hide from navigation - will bring back later
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Schema $schema): Schema
     {
         return $schema
