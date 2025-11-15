@@ -148,11 +148,6 @@ Route::get('/privacy-policy', [PageController::class, 'show'])
     ->name('privacy-policy')
     ->middleware('sitemapped');
 
-// Dynamic catch-all route for other pages (cookie-policy, etc.)
-Route::get('/page/{slug}', [PageController::class, 'show'])
-    ->name('page.show')
-    ->middleware('sitemapped');
-
 // Product checkout routes
 
 Route::get('/buy/product/{productSlug}/{quantity?}', [
@@ -222,3 +217,8 @@ Route::get('/revenue-sources/export', [
     App\Http\Controllers\RevenueSourceExportController::class,
     'download',
 ])->name('revenue-sources.export')->middleware('auth');
+
+// Dynamic catch-all route for pages (must be last to avoid conflicts)
+Route::get('/{slug}', [PageController::class, 'show'])
+    ->name('page.show')
+    ->middleware('sitemapped');
