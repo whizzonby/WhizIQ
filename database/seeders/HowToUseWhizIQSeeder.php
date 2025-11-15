@@ -6,7 +6,7 @@ use App\Models\Page;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
-class HowToUseWhizIQSeeder extends Seeder
+class HowToUseWhizzIQSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -21,15 +21,15 @@ class HowToUseWhizIQSeeder extends Seeder
             return;
         }
 
-        // How to use WhizIQ
+        // How to use WhizzIQ
         Page::updateOrCreate(
-            ['slug' => 'how-to-use-whiziq'],
+            ['slug' => 'how-to-use-whizziq'],
             [
-                'title' => 'How to Use WhizIQ',
-                'slug' => 'how-to-use-whiziq',
-                'content' => $this->getHowToUseWhizIQContent(),
-                'meta_description' => 'Complete guide on how to use WhizIQ - your all-in-one business management platform. Learn about features, getting started, and best practices.',
-                'meta_keywords' => 'WhizIQ guide, how to use WhizIQ, WhizIQ tutorial, business management, user guide',
+                'title' => 'How to Use WhizzIQ',
+                'slug' => 'how-to-use-WhizzIQ',
+                'content' => $this->getHowToUseWhizzIQContent(),
+                'meta_description' => 'Complete guide on how to use WhizzIQ - your all-in-one business management platform. Learn about features, getting started, and best practices.',
+                'meta_keywords' => 'WhizzIQ guide, how to use WhizzIQ, WhizzIQ tutorial, business management, user guide',
                 'is_published' => true,
                 'published_at' => now(),
                 'author_id' => $admin->id,
@@ -38,14 +38,14 @@ class HowToUseWhizIQSeeder extends Seeder
             ]
         );
 
-        $this->command->info('How to Use WhizIQ page created/updated successfully!');
+        $this->command->info('How to Use WhizzIQ page created/updated successfully!');
     }
 
-    private function getHowToUseWhizIQContent(): string
+    private function getHowToUseWhizzIQContent(): string
     {
-        $appName = config('app.name', 'WhizIQ');
+        $appName = config('app.name', 'WhizzIQ');
         $appUrl = config('app.url', '');
-        $supportEmail = config('app.support_email', 'support@whiziq.com');
+        $supportEmail = config('app.support_email', 'support@WhizzIQ.com');
 
         return <<<HTML
 <div class="prose prose-lg max-w-none">
@@ -271,14 +271,14 @@ class HowToUseWhizIQSeeder extends Seeder
         For a comprehensive, detailed guide covering all features, advanced tips, and troubleshooting, download our complete PDF guide:
     </p>
     <div class="mt-6 mb-8 not-prose">
-        <a href="/download/whiziq-complete-guide.pdf" 
+        <a href="/download/WhizzIQ-complete-guide.pdf" 
            class="!inline-flex !items-center !px-6 !py-3 !bg-primary-600 !text-white !font-semibold !rounded-lg hover:!bg-primary-700 !transition-colors !duration-200 !shadow-md hover:!shadow-lg !no-underline">
             <span class="!mr-2" style="display: inline-block; width: 14px; height: 14px; line-height: 1;">
                 <svg style="width: 14px; height: 14px; display: block;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
             </span>
-            Download Complete WhizIQ Guide (PDF)
+            Download Complete WhizzIQ Guide (PDF)
         </a>
     </div>
 
