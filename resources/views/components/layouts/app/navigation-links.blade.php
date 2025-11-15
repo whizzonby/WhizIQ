@@ -5,7 +5,7 @@
     <x-nav.item route="roadmap">{{ __('Roadmap') }}</x-nav.item>
 @endif
 <x-nav.item route="blog">{{ __('Blog') }}</x-nav.item>
-<x-nav.item href="/how-to-use-whiziq">{{ __('How to Use WhizzIQ') }}</x-nav.item>
+<li><a href="/how-to-use-whiziq" class="text-sm block py-2 px-3 md:p-0 rounded hover:bg-primary-600 md:hover:bg-transparent md:hover:text-white text-primary-50">{{ __('How to Use WhizzIQ') }}</a></li>
 @guest
     <x-nav.item route="login" class="md:hidden">{{ __('Login') }}</x-nav.item>
 @endguest
