@@ -228,7 +228,50 @@ class SubscriptionService
 
     public function isIncompleteSubscription(Subscription $subscription): bool
     {
+        // Subscription is incomplete if it's LOCAL and has no payment provider
+        // Once converted to PAYMENT_PROVIDER_MANAGED, it's no longer incomplete
         return $this->isLocalSubscription($subscription) && $subscription->paymentProvider === null;
+    }
+
+    /**
+     * Convert a LOCAL subscription to PAYMENT_PROVIDER_MANAGED after checkout
+     * This is called when user completes checkout for a trial/local subscription
+     */
+    public function convertLocalSubscriptionToPaymentProvider(
+        Subscription $subscription,
+        PaymentProvider $paymentProvider
+    ): bool {
+        // Only convert LOCAL subscriptions
+        if (! $this->isLocalSubscription($subscription)) {
+            return false;
+        }
+
+        // Get the subscription's plan to ensure we have the right context
+        if (! $subscription->plan) {
+            \Log::error('Cannot convert subscription: missing plan', [
+                'subscription_id' => $subscription->id,
+            ]);
+            return false;
+        }
+
+        // Convert to PAYMENT_PROVIDER_MANAGED
+        // Status will be set to PENDING - webhook will update to ACTIVE when it arrives
+        // Payment provider subscription ID will be set by webhook
+        $this->updateSubscription($subscription, [
+            'type' => SubscriptionType::PAYMENT_PROVIDER_MANAGED,
+            'status' => SubscriptionStatus::PENDING->value,
+            'payment_provider_id' => $paymentProvider->id,
+            // payment_provider_subscription_id will be set by webhook
+            // payment_provider_status will be set by webhook
+        ]);
+
+        \Log::info('Converted LOCAL subscription to PAYMENT_PROVIDER_MANAGED', [
+            'subscription_id' => $subscription->id,
+            'user_id' => $subscription->user_id,
+            'payment_provider_id' => $paymentProvider->id,
+        ]);
+
+        return true;
     }
 
     public function shouldSkipTrial(Subscription $subscription)
@@ -413,18 +456,30 @@ class SubscriptionService
             return false;
         }
 
+        // Get ACTIVE subscriptions
         $subscriptions = $user->subscriptions()
             ->where('status', SubscriptionStatus::ACTIVE->value)
             ->where('ends_at', '>', Carbon::now())
             ->get();
 
+        // Also consider PENDING subscriptions for PAYMENT_PROVIDER_MANAGED subscriptions
+        // These are subscriptions waiting for webhook confirmation after checkout
+        $pendingSubscriptions = $user->subscriptions()
+            ->where('status', SubscriptionStatus::PENDING->value)
+            ->where('type', SubscriptionType::PAYMENT_PROVIDER_MANAGED)
+            ->where('ends_at', '>', Carbon::now())
+            ->get();
+
+        // Merge both collections
+        $allSubscriptions = $subscriptions->merge($pendingSubscriptions);
+
         if ($productSlug) {
-            $subscriptions = $subscriptions->filter(function (Subscription $subscription) use ($productSlug) {
+            $allSubscriptions = $allSubscriptions->filter(function (Subscription $subscription) use ($productSlug) {
                 return $subscription->plan && $subscription->plan->product && $subscription->plan->product->slug === $productSlug;
             });
         }
 
-        return $subscriptions->count() > 0;
+        return $allSubscriptions->count() > 0;
     }
 
     public function isUserTrialing(?User $user, ?string $productSlug = null): bool
@@ -453,10 +508,22 @@ class SubscriptionService
             return [];
         }
 
+        // Get ACTIVE subscriptions
         $subscriptions = $user->subscriptions()
             ->where('status', SubscriptionStatus::ACTIVE->value)
             ->where('ends_at', '>', Carbon::now())
             ->get();
+
+        // Also consider PENDING subscriptions for PAYMENT_PROVIDER_MANAGED subscriptions
+        // These are subscriptions waiting for webhook confirmation after checkout
+        $pendingSubscriptions = $user->subscriptions()
+            ->where('status', SubscriptionStatus::PENDING->value)
+            ->where('type', SubscriptionType::PAYMENT_PROVIDER_MANAGED)
+            ->where('ends_at', '>', Carbon::now())
+            ->get();
+
+        // Merge both collections
+        $subscriptions = $subscriptions->merge($pendingSubscriptions);
 
         if ($subscriptions->count() === 0) {
             // Users without subscription get NO access - they must subscribe first

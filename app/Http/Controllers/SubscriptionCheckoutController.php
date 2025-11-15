@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Constants\SubscriptionType;
 use App\Exceptions\SubscriptionCreationNotAllowedException;
+use App\Models\PaymentProvider;
 use App\Models\Plan;
 use App\Services\CalculationService;
 use App\Services\DiscountService;
+use App\Services\PaymentProviders\PaymentService;
 use App\Services\SessionService;
 use App\Services\SubscriptionService;
 
@@ -17,6 +19,7 @@ class SubscriptionCheckoutController extends Controller
         private CalculationService $calculationService,
         private SubscriptionService $subscriptionService,
         private SessionService $sessionService,
+        private PaymentService $paymentService,
     ) {}
 
     public function subscriptionCheckout(string $planSlug)
@@ -124,7 +127,59 @@ class SubscriptionCheckoutController extends Controller
             return false;
         }
 
-        $this->subscriptionService->setAsPending($checkoutDto->subscriptionId);
+        $subscription = $this->subscriptionService->findById($checkoutDto->subscriptionId);
+
+        if (! $subscription) {
+            \Log::error('Subscription not found in handleSubscriptionSuccess', [
+                'subscription_id' => $checkoutDto->subscriptionId,
+            ]);
+            return false;
+        }
+
+        // Handle LOCAL subscription conversion (trial subscriptions)
+        if ($this->subscriptionService->isLocalSubscription($subscription)) {
+            // Get payment provider from plan's available providers
+            if (! $subscription->plan) {
+                \Log::error('Cannot convert subscription: missing plan', [
+                    'subscription_id' => $subscription->id,
+                ]);
+                return false;
+            }
+
+            $paymentProviders = $this->paymentService->getActivePaymentProvidersForPlan(
+                $subscription->plan,
+                true, // shouldSupportSkippingTrial
+                true  // isNewPayment
+            );
+
+            if (empty($paymentProviders)) {
+                \Log::error('No payment providers available for subscription conversion', [
+                    'subscription_id' => $subscription->id,
+                    'plan_id' => $subscription->plan->id,
+                ]);
+                return false;
+            }
+
+            // Get the payment provider model (first available)
+            $paymentProviderInterface = $paymentProviders[0];
+            $paymentProvider = PaymentProvider::where('slug', $paymentProviderInterface->getSlug())
+                ->where('is_active', true)
+                ->first();
+
+            if (! $paymentProvider) {
+                \Log::error('Payment provider not found in database', [
+                    'slug' => $paymentProviderInterface->getSlug(),
+                ]);
+                return false;
+            }
+
+            // Convert LOCAL subscription to PAYMENT_PROVIDER_MANAGED
+            $this->subscriptionService->convertLocalSubscriptionToPaymentProvider($subscription, $paymentProvider);
+        } else {
+            // For NEW subscriptions that are already PAYMENT_PROVIDER_MANAGED, set as PENDING
+            $this->subscriptionService->setAsPending($checkoutDto->subscriptionId);
+        }
+
         $this->subscriptionService->updateUserSubscriptionTrials($checkoutDto->subscriptionId);
 
         if ($checkoutDto->discountCode !== null) {
