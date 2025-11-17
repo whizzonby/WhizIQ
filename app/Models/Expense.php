@@ -67,7 +67,7 @@ class Expense extends Model
         return (float) $this->amount;
     }
 
-    // Auto-categorize expense on creation
+    // Auto-categorize expense on creation and validate tax deduction behavior
     protected static function booted(): void
     {
         static::created(function (Expense $expense) {
@@ -75,6 +75,26 @@ class Expense extends Model
             if (!$expense->tax_category_id) {
                 $autoCategorizationService = app(\App\Services\AutoCategorizationService::class);
                 $autoCategorizationService->autoCategorizeNewExpense($expense);
+            }
+        });
+
+        static::saving(function (Expense $expense) {
+            // Validate and auto-set is_tax_deductible based on tax category behavior
+            if ($expense->tax_category_id && $expense->taxCategory) {
+                $taxCategory = $expense->taxCategory;
+
+                // For 'always' and 'never' behaviors, enforce the correct status
+                if ($taxCategory->isAlwaysDeductible()) {
+                    $expense->is_tax_deductible = true;
+                } elseif ($taxCategory->isNeverDeductible()) {
+                    $expense->is_tax_deductible = false;
+                }
+                // For 'requires_confirmation', keep the user's choice
+
+                // Auto-populate category field if empty
+                if (empty($expense->category)) {
+                    $expense->category = $taxCategory->name;
+                }
             }
         });
     }

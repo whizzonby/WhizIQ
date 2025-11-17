@@ -12,6 +12,8 @@ class TaxCategory extends Model
         'slug',
         'description',
         'deduction_percentage',
+        'deduction_behavior',
+        'confirmation_prompt',
         'is_active',
         'sort_order',
     ];
@@ -57,5 +59,42 @@ class TaxCategory extends Model
     public function isFullyDeductible(): bool
     {
         return ($this->deduction_percentage ?? 100) == 100;
+    }
+
+    /**
+     * Check if this category is always deductible
+     */
+    public function isAlwaysDeductible(): bool
+    {
+        return $this->deduction_behavior === 'always';
+    }
+
+    /**
+     * Check if this category requires user confirmation
+     */
+    public function requiresConfirmation(): bool
+    {
+        return $this->deduction_behavior === 'requires_confirmation';
+    }
+
+    /**
+     * Check if this category is never deductible
+     */
+    public function isNeverDeductible(): bool
+    {
+        return $this->deduction_behavior === 'never';
+    }
+
+    /**
+     * Get the default tax deductible status based on behavior
+     */
+    public function getDefaultTaxDeductibleStatus(): bool
+    {
+        return match ($this->deduction_behavior) {
+            'always' => true,
+            'never' => false,
+            'requires_confirmation' => false, // Default to false, user must confirm
+            default => false,
+        };
     }
 }
