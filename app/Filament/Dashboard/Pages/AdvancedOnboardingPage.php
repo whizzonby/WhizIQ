@@ -3,6 +3,7 @@
 namespace App\Filament\Dashboard\Pages;
 
 use App\Models\BusinessProfile;
+use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Tabs;
@@ -186,8 +187,18 @@ class AdvancedOnboardingPage extends OnboardingPage
                                 ]),
                         ]),
                 ])
-                ->columnSpanFull()
-                ->submitAction(view('filament.pages.actions.onboarding-submit')),
+                ->columnSpanFull(),
+        ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            Forms\Components\Actions\Action::make('submit')
+                ->label('Complete Setup')
+                ->action('submit')
+                ->size('lg')
+                ->extraAttributes(['class' => 'w-full']),
         ];
     }
 
