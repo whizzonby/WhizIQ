@@ -177,9 +177,8 @@ class SubscriptionService
     {
         return $this->findActiveUserSubscriptions($user)
             ->map(function (Subscription $subscription) {
-                return $subscription->plan?->product;
-            })
-            ->filter();
+                return $subscription->plan->product;
+            });
     }
 
     public function findActiveUserSubscriptionWithPlanType(int $userId, PlanType $planType): ?Subscription
@@ -228,55 +227,12 @@ class SubscriptionService
 
     public function isIncompleteSubscription(Subscription $subscription): bool
     {
-        // Subscription is incomplete if it's LOCAL and has no payment provider
-        // Once converted to PAYMENT_PROVIDER_MANAGED, it's no longer incomplete
         return $this->isLocalSubscription($subscription) && $subscription->paymentProvider === null;
-    }
-
-    /**
-     * Convert a LOCAL subscription to PAYMENT_PROVIDER_MANAGED after checkout
-     * This is called when user completes checkout for a trial/local subscription
-     */
-    public function convertLocalSubscriptionToPaymentProvider(
-        Subscription $subscription,
-        PaymentProvider $paymentProvider
-    ): bool {
-        // Only convert LOCAL subscriptions
-        if (! $this->isLocalSubscription($subscription)) {
-            return false;
-        }
-
-        // Get the subscription's plan to ensure we have the right context
-        if (! $subscription->plan) {
-            \Log::error('Cannot convert subscription: missing plan', [
-                'subscription_id' => $subscription->id,
-            ]);
-            return false;
-        }
-
-        // Convert to PAYMENT_PROVIDER_MANAGED
-        // Status will be set to PENDING - webhook will update to ACTIVE when it arrives
-        // Payment provider subscription ID will be set by webhook
-        $this->updateSubscription($subscription, [
-            'type' => SubscriptionType::PAYMENT_PROVIDER_MANAGED,
-            'status' => SubscriptionStatus::PENDING->value,
-            'payment_provider_id' => $paymentProvider->id,
-            // payment_provider_subscription_id will be set by webhook
-            // payment_provider_status will be set by webhook
-        ]);
-
-        \Log::info('Converted LOCAL subscription to PAYMENT_PROVIDER_MANAGED', [
-            'subscription_id' => $subscription->id,
-            'user_id' => $subscription->user_id,
-            'payment_provider_id' => $paymentProvider->id,
-        ]);
-
-        return true;
     }
 
     public function shouldSkipTrial(Subscription $subscription)
     {
-        if ($this->isLocalSubscription($subscription) && $subscription->plan && $subscription->plan->has_trial) {
+        if ($this->isLocalSubscription($subscription) && $subscription->plan->has_trial) {
             return true;
         }
 
@@ -380,7 +336,7 @@ class SubscriptionService
 
     public function changePlan(Subscription $subscription, PaymentProviderInterface $paymentProviderStrategy, string $newPlanSlug, bool $isProrated = false): bool
     {
-        if (!$subscription->plan || $subscription->plan->slug === $newPlanSlug) {
+        if ($subscription->plan->slug === $newPlanSlug) {
             return false;
         }
 
@@ -456,30 +412,18 @@ class SubscriptionService
             return false;
         }
 
-        // Get ACTIVE subscriptions
         $subscriptions = $user->subscriptions()
             ->where('status', SubscriptionStatus::ACTIVE->value)
             ->where('ends_at', '>', Carbon::now())
             ->get();
 
-        // Also consider PENDING subscriptions for PAYMENT_PROVIDER_MANAGED subscriptions
-        // These are subscriptions waiting for webhook confirmation after checkout
-        $pendingSubscriptions = $user->subscriptions()
-            ->where('status', SubscriptionStatus::PENDING->value)
-            ->where('type', SubscriptionType::PAYMENT_PROVIDER_MANAGED)
-            ->where('ends_at', '>', Carbon::now())
-            ->get();
-
-        // Merge both collections
-        $allSubscriptions = $subscriptions->merge($pendingSubscriptions);
-
         if ($productSlug) {
-            $allSubscriptions = $allSubscriptions->filter(function (Subscription $subscription) use ($productSlug) {
-                return $subscription->plan && $subscription->plan->product && $subscription->plan->product->slug === $productSlug;
+            $subscriptions = $subscriptions->filter(function (Subscription $subscription) use ($productSlug) {
+                return $subscription->plan->product->slug === $productSlug;
             });
         }
 
-        return $allSubscriptions->count() > 0;
+        return $subscriptions->count() > 0;
     }
 
     public function isUserTrialing(?User $user, ?string $productSlug = null): bool
@@ -495,7 +439,7 @@ class SubscriptionService
 
         if ($productSlug) {
             $subscriptions = $subscriptions->filter(function (Subscription $subscription) use ($productSlug) {
-                return $subscription->plan && $subscription->plan->product && $subscription->plan->product->slug === $productSlug;
+                return $subscription->plan->product->slug === $productSlug;
             });
         }
 
@@ -508,151 +452,31 @@ class SubscriptionService
             return [];
         }
 
-        // Get ACTIVE subscriptions
         $subscriptions = $user->subscriptions()
             ->where('status', SubscriptionStatus::ACTIVE->value)
             ->where('ends_at', '>', Carbon::now())
             ->get();
 
-        // Also consider PENDING subscriptions for PAYMENT_PROVIDER_MANAGED subscriptions
-        // These are subscriptions waiting for webhook confirmation after checkout
-        $pendingSubscriptions = $user->subscriptions()
-            ->where('status', SubscriptionStatus::PENDING->value)
-            ->where('type', SubscriptionType::PAYMENT_PROVIDER_MANAGED)
-            ->where('ends_at', '>', Carbon::now())
-            ->get();
-
-        // Merge both collections
-        $subscriptions = $subscriptions->merge($pendingSubscriptions);
-
         if ($subscriptions->count() === 0) {
-            // Users without subscription get NO access - they must subscribe first
-            // This prevents revenue leak where users can use features without paying
-            return [];
-        }
-
-        // Collect all metadata from valid subscriptions
-        $allMetadata = [];
-        $orphanedSubscriptions = [];
-
-        foreach ($subscriptions as $subscription) {
-            if ($subscription->plan && $subscription->plan->product) {
-                $productMetadata = $subscription->plan->product->metadata ?? [];
-                if (!empty($productMetadata)) {
-                    $allMetadata[] = $productMetadata;
-                }
-            } else {
-                // Track orphaned subscriptions for logging
-                $orphanedSubscriptions[] = $subscription->id;
-            }
-        }
-
-        // Log orphaned subscriptions if any
-        if (!empty($orphanedSubscriptions)) {
-            \Log::warning('User has subscriptions with missing plan/product', [
-                'user_id' => $user->id,
-                'subscription_ids' => $orphanedSubscriptions,
-            ]);
-        }
-
-        // If no valid metadata found, try fallback to default product
-        if (empty($allMetadata)) {
+            // if there is no active subscriptions, return metadata of default product
             $defaultProduct = Product::where('is_default', true)->first();
-            if ($defaultProduct) {
-                $defaultMetadata = $defaultProduct->metadata ?? [];
-                if (!empty($defaultMetadata)) {
-                    \Log::info('Using default product metadata for user', [
-                        'user_id' => $user->id,
-                        'default_product' => $defaultProduct->slug,
-                    ]);
-                    return $defaultMetadata;
-                }
+
+            if (! $defaultProduct) {
+                return [];
             }
-            return [];
+
+            return $defaultProduct->metadata ?? [];
         }
 
-        // If only one subscription, return its metadata directly (backward compatibility)
-        if (count($allMetadata) === 1) {
-            return $allMetadata[0];
+        // if there is 1 subscription, return metadata of its product
+        if ($subscriptions->count() === 1) {
+            return $subscriptions->first()->plan->product->metadata ?? [];
         }
 
-        // Multiple subscriptions: merge metadata using union strategy
-        return $this->mergeSubscriptionMetadata($allMetadata);
-    }
-
-    /**
-     * Merge metadata from multiple subscriptions using union strategy:
-     * - Boolean features: true if ANY subscription has it as true
-     * - Numeric limits: maximum value across all subscriptions
-     * - "unlimited": if ANY subscription has "unlimited", result is "unlimited"
-     */
-    private function mergeSubscriptionMetadata(array $metadataArray): array
-    {
-        if (empty($metadataArray)) {
-            return [];
-        }
-
-        $merged = [];
-
-        // Get all unique keys from all metadata arrays
-        $allKeys = [];
-        foreach ($metadataArray as $metadata) {
-            $allKeys = array_merge($allKeys, array_keys($metadata));
-        }
-        $allKeys = array_unique($allKeys);
-
-        foreach ($allKeys as $key) {
-            $values = [];
-            foreach ($metadataArray as $metadata) {
-                if (isset($metadata[$key])) {
-                    $values[] = $metadata[$key];
-                }
-            }
-
-            if (empty($values)) {
-                continue;
-            }
-
-            // Check if any value is "unlimited" (for limits)
-            $hasUnlimited = in_array('unlimited', array_map('strtolower', $values), true);
-            if ($hasUnlimited) {
-                $merged[$key] = 'unlimited';
-                continue;
-            }
-
-            // Check if values are numeric (limits)
-            $numericValues = array_filter($values, function ($v) {
-                return is_numeric($v) || (is_string($v) && is_numeric(trim($v)));
-            });
-
-            if (!empty($numericValues)) {
-                // Take maximum numeric value
-                $maxValue = max(array_map(function ($v) {
-                    return (int) $v;
-                }, $numericValues));
-                $merged[$key] = (string) $maxValue;
-                continue;
-            }
-
-            // For boolean/string values, check if any is "true"
-            $hasTrue = false;
-            foreach ($values as $value) {
-                $normalized = strtolower(trim((string) $value));
-                if (in_array($normalized, ['true', '1', 'yes'], true)) {
-                    $hasTrue = true;
-                    break;
-                }
-            }
-
-            if ($hasTrue) {
-                $merged[$key] = 'true';
-            } else {
-                // Take the first value (or could be 'false')
-                $merged[$key] = $values[0];
-            }
-        }
-
-        return $merged;
+        // if there are multiple subscriptions, return array of product-slug => metadata
+        return $subscriptions->mapWithKeys(function (Subscription $subscription) {
+            return [$subscription->plan->product->slug => $subscription->plan->product->metadata ?? []];
+        })->toArray();
     }
 
     public function canEditSubscriptionPaymentDetails(Subscription $subscription)
@@ -677,10 +501,6 @@ class SubscriptionService
 
     public function canChangeSubscriptionPlan(Subscription $subscription)
     {
-        if (!$subscription->plan) {
-            return false;
-        }
-
         return $subscription->type === SubscriptionType::PAYMENT_PROVIDER_MANAGED &&
             $this->planService->isPlanChangeable($subscription->plan) &&
             $subscription->status === SubscriptionStatus::ACTIVE->value;
