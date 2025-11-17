@@ -31,6 +31,8 @@ class AdvancedOnboardingPage extends OnboardingPage
     {
         return [
             Tabs::make('Quick Business Setup')
+                ->persistTabInQueryString()
+                ->contained(false)
                 ->tabs([
                     // Tab 1: Business Essentials
                     Tab::make('Business Essentials')
@@ -184,7 +186,8 @@ class AdvancedOnboardingPage extends OnboardingPage
                                 ]),
                         ]),
                 ])
-                ->columnSpanFull(),
+                ->columnSpanFull()
+                ->submitAction(view('filament.pages.actions.onboarding-submit')),
         ];
     }
 

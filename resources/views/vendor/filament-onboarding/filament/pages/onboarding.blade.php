@@ -11,13 +11,7 @@
     </div>
     <form wire:submit="submit">
         {{ $this->form }}
-        <div>
-            <div class="flex items-center justify-center flex-col gap-6">
 
-                <x-filament::button type="submit" size="xl" class="mt-4">
-                    {{ __('Submit') }}
-                </x-filament::button>
-            </div>
-        </div>
+        <x-filament-actions::modals />
     </form>
 </x-filament-panels::page>
