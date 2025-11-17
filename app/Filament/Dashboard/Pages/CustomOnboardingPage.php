@@ -3,7 +3,7 @@
 namespace App\Filament\Dashboard\Pages;
 
 use App\Models\BusinessProfile;
-use Filament\Forms;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Tabs;
@@ -206,7 +206,7 @@ class CustomOnboardingPage extends OnboardingPage
 
         // Show Previous button if not on first tab
         if ($this->activeTab !== 'business-essentials') {
-            $actions[] = Forms\Components\Actions\Action::make('previous')
+            $actions[] = Action::make('previous')
                 ->label('Previous')
                 ->icon('heroicon-o-arrow-left')
                 ->color('gray')
@@ -217,7 +217,7 @@ class CustomOnboardingPage extends OnboardingPage
 
         // Show Next button if not on last tab
         if ($this->activeTab !== 'quick-setup') {
-            $actions[] = Forms\Components\Actions\Action::make('next')
+            $actions[] = Action::make('next')
                 ->label('Next')
                 ->icon('heroicon-o-arrow-right')
                 ->action(function () {
@@ -229,7 +229,7 @@ class CustomOnboardingPage extends OnboardingPage
 
         // Show Submit button on last tab
         if ($this->activeTab === 'quick-setup') {
-            $actions[] = Forms\Components\Actions\Action::make('submit')
+            $actions[] = Action::make('submit')
                 ->label('Complete Setup')
                 ->icon('heroicon-o-check-circle')
                 ->action('submit')
