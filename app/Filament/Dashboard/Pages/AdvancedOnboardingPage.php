@@ -3,11 +3,10 @@
 namespace App\Filament\Dashboard\Pages;
 
 use App\Models\BusinessProfile;
-use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Forms\Components\Wizard;
+use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -15,11 +14,6 @@ use Saasykit\FilamentOnboarding\Pages\OnboardingPage;
 
 class AdvancedOnboardingPage extends OnboardingPage
 {
-    // Override the view to include form actions
-    protected string $view = 'filament.dashboard.pages.base-onboarding';
-
-    // Tab navigation
-    public string $activeTab = 'business-essentials';
 
     // Essential Business Information
     public string $biz_registered_name = '';
@@ -37,19 +31,14 @@ class AdvancedOnboardingPage extends OnboardingPage
     protected function getFormSchema(): array
     {
         return [
-            Tabs::make('Quick Business Setup')
-                ->persistTabInQueryString()
-                ->contained(false)
-                ->livewireProperty('activeTab')
-                ->tabs([
-                    // Tab 1: Business Essentials
-                    Tab::make('business-essentials')
-                        ->label('Business Essentials')
-                        ->icon('heroicon-o-building-storefront')
-                        ->schema([
-                            Section::make('Tell us about your business')
-                                ->description('Just the essentials - you can add more details later in Business Metrics')
-                                ->schema([
+            Wizard::make([
+                // Step 1: Business Essentials
+                Step::make('Business Essentials')
+                    ->icon('heroicon-o-building-storefront')
+                    ->schema([
+                        Section::make('Tell us about your business')
+                            ->description('Just the essentials - you can add more details later in Business Metrics')
+                            ->schema([
                                     TextInput::make('biz_registered_name')
                                         ->label('Business Name')
                                         ->required()
@@ -137,17 +126,16 @@ class AdvancedOnboardingPage extends OnboardingPage
                                             ->default('annually')
                                             ->helperText('How often do you file?'),
                                     ]),
-                                ]),
-                        ]),
+                            ]),
+                    ]),
 
-                    // Tab 2: Quick Setup
-                    Tab::make('quick-setup')
-                        ->label('Quick Setup')
-                        ->icon('heroicon-o-cog-6-tooth')
-                        ->schema([
-                            Section::make('Revenue & Preferences')
-                                ->description('Help us tailor WhizIQ to your needs')
-                                ->schema([
+                // Step 2: Quick Setup
+                Step::make('Quick Setup')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->schema([
+                        Section::make('Revenue & Preferences')
+                            ->description('Help us tailor WhizIQ to your needs')
+                            ->schema([
                                     TextInput::make('rev_monthly_avg')
                                         ->label('Average Monthly Revenue')
                                         ->numeric()
@@ -180,77 +168,25 @@ class AdvancedOnboardingPage extends OnboardingPage
                                             ->helperText('How detailed should reports be?'),
                                     ]),
 
-                                    Section::make('📊 What happens next?')
-                                        ->schema([])
-                                        ->description('
-                                            **You\'re all set!** After this, you can:
-                                            - Add detailed financial info in Business Metrics
-                                            - Set up your appointment types and availability
-                                            - Start managing contacts and deals
-                                            - Track revenue and expenses
+                                Section::make('📊 What happens next?')
+                                    ->schema([])
+                                    ->description('
+                                        **You\'re all set!** After this, you can:
+                                        - Add detailed financial info in Business Metrics
+                                        - Set up your appointment types and availability
+                                        - Start managing contacts and deals
+                                        - Track revenue and expenses
 
-                                            *You can always update these details later.*
-                                        ')
-                                        ->collapsible()
-                                        ->collapsed(false),
-                                ]),
-                        ]),
-                ])
+                                        *You can always update these details later.*
+                                    ')
+                                    ->collapsible()
+                                    ->collapsed(false),
+                            ]),
+                    ]),
+            ])
+                ->submitAction(view('filament.components.wizard-submit-action'))
                 ->columnSpanFull(),
         ];
-    }
-
-    protected function getFormActions(): array
-    {
-        $actions = [];
-
-        // Show Previous button if not on first tab
-        if ($this->activeTab !== 'business-essentials') {
-            $actions[] = Action::make('previous')
-                ->label('Previous')
-                ->icon('heroicon-o-arrow-left')
-                ->color('gray')
-                ->action(function () {
-                    $this->activeTab = 'business-essentials';
-                });
-        }
-
-        // Show Next button if not on last tab
-        if ($this->activeTab !== 'quick-setup') {
-            $actions[] = Action::make('next')
-                ->label('Next')
-                ->icon('heroicon-o-arrow-right')
-                ->action(function () {
-                    // Validate current tab before moving to next
-                    $this->validateCurrentTab();
-                    $this->activeTab = 'quick-setup';
-                });
-        }
-
-        // Show Submit button on last tab
-        if ($this->activeTab === 'quick-setup') {
-            $actions[] = Action::make('submit')
-                ->label('Complete Setup')
-                ->icon('heroicon-o-check-circle')
-                ->action('submit')
-                ->size('lg');
-        }
-
-        return $actions;
-    }
-
-    protected function validateCurrentTab(): void
-    {
-        if ($this->activeTab === 'business-essentials') {
-            $this->validate([
-                'biz_registered_name' => 'required|string|max:80',
-                'biz_country' => 'required|string',
-                'biz_incorporation_date' => 'required|date',
-                'biz_legal_type' => 'required|string',
-                'ops_employee_count' => 'required|integer|min:1',
-                'comp_tax_cycle' => 'required|string',
-            ]);
-        }
     }
 
     public function submit()
