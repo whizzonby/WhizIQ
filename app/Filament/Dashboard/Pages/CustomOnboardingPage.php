@@ -193,9 +193,10 @@ class CustomOnboardingPage extends OnboardingPage
     {
         $this->validate();
 
-        // Create business profile with smart defaults
-        $businessProfile = BusinessProfile::create([
-            'user_id' => auth()->id(),
+        // Create or update business profile with smart defaults
+        $businessProfile = BusinessProfile::updateOrCreate(
+            ['user_id' => auth()->id()],
+            [
 
             // Required fields from form
             'biz_registered_name' => $this->biz_registered_name,
@@ -261,7 +262,8 @@ class CustomOnboardingPage extends OnboardingPage
             // Preferences
             'prefs_report_format' => 'interactive',
             'prefs_ai_actions' => true,
-        ]);
+            ]
+        );
 
         // Calculate initial metrics
         $businessProfile->calculateMetrics();
