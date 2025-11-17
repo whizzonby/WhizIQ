@@ -35,13 +35,7 @@ class MonthlyExpensesAndProfitWidget extends BaseWidget
         $profitColor = $this->getProfitColor($current['profit'], $profitChangePercentage);
 
         return [
-            Stat::make('💸 Monthly Expenses', '$' . number_format($current['expenses'], 0))
-                ->description($expensesChangeDescription)
-                ->descriptionIcon($expensesChangeIcon)
-                ->chart($trends['expenses'])
-                ->color($expensesColor),
-
-            Stat::make('💰 Monthly Profit', '$' . number_format($current['profit'], 0))
+            Stat::make('Monthly Profit', '$' . number_format($current['profit'], 0))
                 ->description($profitChangeDescription . ' • ' . number_format($current['profit_margin'], 1) . '% margin')
                 ->descriptionIcon($profitChangeIcon)
                 ->chart($trends['profit'])
