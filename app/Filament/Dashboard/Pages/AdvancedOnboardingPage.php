@@ -5,11 +5,11 @@ namespace App\Filament\Dashboard\Pages;
 use App\Models\BusinessProfile;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Wizard;
-use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
 use Saasykit\FilamentOnboarding\Pages\OnboardingPage;
 
 class AdvancedOnboardingPage extends OnboardingPage
