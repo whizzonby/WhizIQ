@@ -15,6 +15,9 @@ use Saasykit\FilamentOnboarding\Pages\OnboardingPage;
 
 class AdvancedOnboardingPage extends OnboardingPage
 {
+    // Tab navigation
+    public string $activeTab = 'business-essentials';
+
     // Essential Business Information
     public string $biz_registered_name = '';
     public string $biz_country = '';
@@ -34,9 +37,11 @@ class AdvancedOnboardingPage extends OnboardingPage
             Tabs::make('Quick Business Setup')
                 ->persistTabInQueryString()
                 ->contained(false)
+                ->livewireProperty('activeTab')
                 ->tabs([
                     // Tab 1: Business Essentials
-                    Tab::make('Business Essentials')
+                    Tab::make('business-essentials')
+                        ->label('Business Essentials')
                         ->icon('heroicon-o-building-storefront')
                         ->schema([
                             Section::make('Tell us about your business')
@@ -133,7 +138,8 @@ class AdvancedOnboardingPage extends OnboardingPage
                         ]),
 
                     // Tab 2: Quick Setup
-                    Tab::make('Quick Setup')
+                    Tab::make('quick-setup')
+                        ->label('Quick Setup')
                         ->icon('heroicon-o-cog-6-tooth')
                         ->schema([
                             Section::make('Revenue & Preferences')
@@ -193,13 +199,55 @@ class AdvancedOnboardingPage extends OnboardingPage
 
     protected function getFormActions(): array
     {
-        return [
-            Forms\Components\Actions\Action::make('submit')
+        $actions = [];
+
+        // Show Previous button if not on first tab
+        if ($this->activeTab !== 'business-essentials') {
+            $actions[] = Forms\Components\Actions\Action::make('previous')
+                ->label('Previous')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->action(function () {
+                    $this->activeTab = 'business-essentials';
+                });
+        }
+
+        // Show Next button if not on last tab
+        if ($this->activeTab !== 'quick-setup') {
+            $actions[] = Forms\Components\Actions\Action::make('next')
+                ->label('Next')
+                ->icon('heroicon-o-arrow-right')
+                ->action(function () {
+                    // Validate current tab before moving to next
+                    $this->validateCurrentTab();
+                    $this->activeTab = 'quick-setup';
+                });
+        }
+
+        // Show Submit button on last tab
+        if ($this->activeTab === 'quick-setup') {
+            $actions[] = Forms\Components\Actions\Action::make('submit')
                 ->label('Complete Setup')
+                ->icon('heroicon-o-check-circle')
                 ->action('submit')
-                ->size('lg')
-                ->extraAttributes(['class' => 'w-full']),
-        ];
+                ->size('lg');
+        }
+
+        return $actions;
+    }
+
+    protected function validateCurrentTab(): void
+    {
+        if ($this->activeTab === 'business-essentials') {
+            $this->validate([
+                'biz_registered_name' => 'required|string|max:80',
+                'biz_country' => 'required|string',
+                'biz_incorporation_date' => 'required|date',
+                'biz_legal_type' => 'required|string',
+                'ops_employee_count' => 'required|integer|min:1',
+                'comp_tax_cycle' => 'required|string',
+            ]);
+        }
     }
 
     public function submit()
@@ -279,7 +327,23 @@ class AdvancedOnboardingPage extends OnboardingPage
         // Calculate initial metrics
         $businessProfile->calculateMetrics();
 
-        // Mark as onboarded
+        // Mark as onboarded and redirect based on subscription status
         $this->onboarded();
+    }
+
+    protected function onboarded()
+    {
+        $this->onboardingManager->onboarded();
+
+        // Redirect based on subscription status (similar to RedirectAwareTrait logic)
+        $user = auth()->user();
+        
+        if ($user && ! $user->isSubscribed()) {
+            // User doesn't have a subscription - redirect to plans/subscriptions page
+            $this->redirect(route('filament.dashboard.resources.subscriptions.index'));
+        } else {
+            // User has subscription or is admin - redirect to dashboard
+            $this->redirect(route('filament.dashboard.pages.dashboard'));
+        }
     }
 }
