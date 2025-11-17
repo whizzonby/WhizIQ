@@ -15,6 +15,9 @@ use Saasykit\FilamentOnboarding\Pages\OnboardingPage;
 
 class CustomOnboardingPage extends OnboardingPage
 {
+    // Override the view to include form actions
+    protected string $view = 'filament.dashboard.pages.base-onboarding';
+
     // Tab navigation
     public string $activeTab = 'business-essentials';
 
