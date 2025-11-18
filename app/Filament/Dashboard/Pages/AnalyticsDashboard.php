@@ -6,7 +6,6 @@ use App\Filament\Dashboard\Widgets\AIBusinessInsightsWidget;
 use App\Filament\Dashboard\Widgets\AIFinancialForecastWidget;
 use App\Filament\Dashboard\Widgets\AnomalyDetectionWidget;
 use App\Filament\Dashboard\Widgets\BusinessPerformanceTrendWidget;
-use App\Filament\Dashboard\Widgets\CashFlowChartWidget;
 use App\Filament\Dashboard\Widgets\ExpenseBreakdownWidget;
 use App\Filament\Dashboard\Widgets\ExpenseInsightsWidget;
 use App\Filament\Dashboard\Widgets\ProfitabilityRatiosWidget;
@@ -49,7 +48,6 @@ class AnalyticsDashboard extends Page
             ExpenseBreakdownWidget::class,
             ExpenseInsightsWidget::class,
             ProfitabilityRatiosWidget::class,
-            CashFlowChartWidget::class,
             BusinessPerformanceTrendWidget::class,
 
             // AI-Powered Predictive Analytics
