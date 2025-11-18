@@ -124,15 +124,6 @@ class BusinessMetricsOverviewWidget extends BaseWidget
                 ->extraAttributes([
                     'class' => 'cursor-pointer hover:shadow-lg transition-shadow',
                 ]),
-
-            Stat::make('Cash Flow', '$' . number_format($current['cash_flow'], 0))
-                ->description($this->getChangeDescription($changes['cash_flow_change']))
-                ->descriptionIcon($this->getChangeIcon($changes['cash_flow_change']))
-                ->chart($trends['cash_flow'])
-                ->color($this->getCashFlowColor($current['cash_flow']))
-                ->extraAttributes([
-                    'class' => 'cursor-pointer hover:shadow-lg transition-shadow',
-                ]),
         ];
     }
 
@@ -144,17 +135,6 @@ class BusinessMetricsOverviewWidget extends BaseWidget
             return 'warning';
         } else {
             return 'danger';
-        }
-    }
-
-    protected function getCashFlowColor($cashFlow): string
-    {
-        if ($cashFlow < 0) {
-            return 'danger';
-        } elseif ($cashFlow < 10000) {
-            return 'warning';
-        } else {
-            return 'success';
         }
     }
 
