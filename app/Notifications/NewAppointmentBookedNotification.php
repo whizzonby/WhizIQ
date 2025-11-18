@@ -31,7 +31,9 @@ class NewAppointmentBookedNotification extends Notification implements ShouldQue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $url = route('filament.dashboard.resources.appointments.edit', ['record' => $this->appointment]);
+        // Link to appointments list page instead of edit page
+        // This shows all appointments where the user can see the new booking
+        $url = route('filament.dashboard.resources.appointments.index');
 
         $requiresApproval = $this->appointment->status === 'scheduled';
 
@@ -116,7 +118,7 @@ class NewAppointmentBookedNotification extends Notification implements ShouldQue
             'attendee_email' => $this->appointment->attendee_email,
             'start_datetime' => $this->appointment->start_datetime->toDateTimeString(),
             'status' => $this->appointment->status,
-            'url' => route('filament.dashboard.resources.appointments.edit', ['record' => $this->appointment]),
+            'url' => route('filament.dashboard.resources.appointments.index'),
         ];
     }
 
@@ -132,8 +134,8 @@ class NewAppointmentBookedNotification extends Notification implements ShouldQue
             ->iconColor('success')
             ->actions([
                 \Filament\Notifications\Actions\Action::make('view')
-                    ->label('View Appointment')
-                    ->url(route('filament.dashboard.resources.appointments.edit', ['record' => $this->appointment]))
+                    ->label('View Appointments')
+                    ->url(route('filament.dashboard.resources.appointments.index'))
                     ->markAsRead(),
             ])
             ->getDatabaseMessage();
