@@ -93,12 +93,25 @@ class ExpenseImportService
         // Parse boolean values
         $isTaxDeductible = $this->parseBoolean($csvData['is tax deductible'] ?? $csvData['tax deductible'] ?? $csvData['tax_deductible'] ?? false);
 
+        // Try to find tax category by name (optional)
+        $taxCategoryId = null;
+        $taxCategoryName = $csvData['tax category'] ?? $csvData['tax_category'] ?? null;
+        if ($taxCategoryName) {
+            $taxCategory = \App\Models\TaxCategory::where('name', $taxCategoryName)
+                ->orWhere('slug', \Illuminate\Support\Str::slug($taxCategoryName))
+                ->first();
+            if ($taxCategory) {
+                $taxCategoryId = $taxCategory->id;
+            }
+        }
+
         $mapped = [
             'user_id' => $userId,
             'date' => $date,
             'category' => $csvData['category'] ?? $csvData['expense category'] ?? '',
             'amount' => $this->parseNumeric($csvData['amount'] ?? $csvData['cost'] ?? $csvData['expense amount'] ?? 0),
             'description' => $csvData['description'] ?? $csvData['notes'] ?? $csvData['details'] ?? null,
+            'tax_category_id' => $taxCategoryId,
             'is_tax_deductible' => $isTaxDeductible,
             'deductible_amount' => $isTaxDeductible ? $this->parseNumeric($csvData['deductible amount'] ?? $csvData['deductible_amount'] ?? null) : null,
             'tax_notes' => $csvData['tax notes'] ?? $csvData['tax_notes'] ?? $csvData['tax notes'] ?? null,
@@ -155,6 +168,7 @@ class ExpenseImportService
             'Category',
             'Amount',
             'Description',
+            'Tax Category',
             'Tax Deductible',
             'Deductible Amount',
             'Tax Notes',
@@ -165,9 +179,10 @@ class ExpenseImportService
             'Office Supplies',
             '125.50',
             'Printer paper and ink cartridges',
+            'Office Supplies',
             'Yes',
             '125.50',
-            'Office supplies are fully deductible',
+            'Fully deductible business expense',
         ];
 
         return implode(',', $headers) . "\n" . implode(',', array_map(function($field) {

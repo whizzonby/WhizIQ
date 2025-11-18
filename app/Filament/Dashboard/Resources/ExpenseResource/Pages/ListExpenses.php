@@ -21,97 +21,95 @@ class ListExpenses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            // TODO: Uncomment when ready to enable import functionality
-            // Action::make('import')
-            //     ->label('Import Expenses')
-            //     ->icon('heroicon-o-arrow-up-tray')
-            //     ->color('success')
-            //     ->form([
-            //         Forms\Components\FileUpload::make('file')
-            //             ->label('CSV/Excel File')
-            //             ->acceptedFileTypes(['text/csv', 'application/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
-            //             ->required()
-            //             ->helperText('Upload a CSV or Excel file with expense data')
-            //             ->maxSize(5120), // 5MB
-            //     ])
-            //     ->action(function (array $data) {
-            //         try {
-            //             $service = app(ExpenseImportService::class);
+            Action::make('import')
+                ->label('Import Expenses')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->color('success')
+                ->form([
+                    Forms\Components\FileUpload::make('file')
+                        ->label('CSV/Excel File')
+                        ->acceptedFileTypes(['text/csv', 'application/csv', 'text/plain', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                        ->required()
+                        ->helperText('Upload a CSV or Excel file with expense data')
+                        ->maxSize(5120), // 5MB
+                ])
+                ->action(function (array $data) {
+                    try {
+                        $service = app(ExpenseImportService::class);
 
-            //             // Get file content
-            //             $filePath = storage_path('app/public/' . $data['file']);
-            //
-            //             if (!file_exists($filePath)) {
-            //                 Notification::make()
-            //                     ->title('File Not Found')
-            //                     ->danger()
-            //                     ->body('The uploaded file could not be found.')
-            //                     ->send();
-            //                 return;
-            //             }
+                        // Get file content
+                        $filePath = storage_path('app/public/' . $data['file']);
 
-            //             $csvContent = file_get_contents($filePath);
+                        if (!file_exists($filePath)) {
+                            Notification::make()
+                                ->title('File Not Found')
+                                ->danger()
+                                ->body('The uploaded file could not be found.')
+                                ->send();
+                            return;
+                        }
 
-            //             // Validate structure
-            //             $validation = $service->validateCsvStructure($csvContent);
-            //             if (!$validation['valid']) {
-            //                 Notification::make()
-            //                     ->title('Invalid CSV')
-            //                     ->danger()
-            //                     ->body($validation['message'])
-            //                     ->send();
-            //                 return;
-            //             }
+                        $csvContent = file_get_contents($filePath);
 
-            //             // Import
-            //             $results = $service->importFromCsv($csvContent, auth()->id());
+                        // Validate structure
+                        $validation = $service->validateCsvStructure($csvContent);
+                        if (!$validation['valid']) {
+                            Notification::make()
+                                ->title('Invalid CSV')
+                                ->danger()
+                                ->body($validation['message'])
+                                ->send();
+                            return;
+                        }
 
-            //             // Show results
-            //             $message = "Successfully imported {$results['success']} expenses.";
-            //             if ($results['failed'] > 0) {
-            //                 $message .= " {$results['failed']} failed.";
-            //             }
+                        // Import
+                        $results = $service->importFromCsv($csvContent, auth()->id());
 
-            //             Notification::make()
-            //                 ->title('Import Complete')
-            //                 ->success()
-            //                 ->body($message)
-            //                 ->send();
+                        // Show results
+                        $message = "Successfully imported {$results['success']} expenses.";
+                        if ($results['failed'] > 0) {
+                            $message .= " {$results['failed']} failed.";
+                        }
 
-            //             if (!empty($results['errors'])) {
-            //                 foreach (array_slice($results['errors'], 0, 5) as $error) {
-            //                     Notification::make()
-            //                         ->title('Import Error')
-            //                         ->warning()
-            //                         ->body($error)
-            //                         ->send();
-            //                 }
-            //             }
+                        Notification::make()
+                            ->title('Import Complete')
+                            ->success()
+                            ->body($message)
+                            ->send();
 
-            //         } catch (\Exception $e) {
-            //             Notification::make()
-            //                 ->title('Import Failed')
-            //                 ->danger()
-            //                 ->body($e->getMessage())
-            //                 ->send();
-            //         }
-            //     }),
+                        if (!empty($results['errors'])) {
+                            foreach (array_slice($results['errors'], 0, 5) as $error) {
+                                Notification::make()
+                                    ->title('Import Error')
+                                    ->warning()
+                                    ->body($error)
+                                    ->send();
+                            }
+                        }
 
-            // TODO: Uncomment when ready to enable template download
-            // Action::make('download_template')
-            //     ->label('Download CSV Template')
-            //     ->icon('heroicon-o-document-arrow-down')
-            //     ->color('gray')
-            //     ->action(function () {
-            //         $service = app(ExpenseImportService::class);
-            //         $template = $service->getCsvTemplate();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Import Failed')
+                            ->danger()
+                            ->body($e->getMessage())
+                            ->send();
+                    }
+                }),
 
-            //         return Response::streamDownload(function () use ($template) {
-            //             echo $template;
-            //         }, 'expenses_import_template.csv', [
-            //             'Content-Type' => 'text/csv',
-            //         ]);
-            //     }),
+            Action::make('download_template')
+                ->label('Download CSV Template')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('gray')
+                ->action(function () {
+                    $service = app(ExpenseImportService::class);
+                    $template = $service->getCsvTemplate();
+
+                    return Response::streamDownload(function () use ($template) {
+                        echo $template;
+                    }, 'expenses_import_template.csv', [
+                        'Content-Type' => 'text/csv',
+                    ]);
+                }),
 
             Action::make('export')
                 ->label('Export Expenses')
@@ -161,7 +159,7 @@ class ListExpenses extends ListRecords
 
                         // Build query parameters for the download route
                         $params = ['format' => $format];
-                        
+
                         if (isset($data['from_date']) && !empty($data['from_date'])) {
                             $params['from_date'] = is_string($data['from_date']) ? $data['from_date'] : $data['from_date']->format('Y-m-d');
                         }
