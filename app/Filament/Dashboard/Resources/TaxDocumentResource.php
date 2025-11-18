@@ -105,7 +105,8 @@ class TaxDocumentResource extends Resource
 
                         Select::make('expense_id')
                             ->label('Link to Expense')
-                            ->relationship('expense', 'description', fn($query) => $query->where('user_id', auth()->id()))
+                            ->relationship('expense', 'description', fn($query) => $query->where('user_id', auth()->id())->whereNotNull('description'))
+                            ->getOptionLabelFromRecordUsing(fn($record) => $record->description ?? 'Untitled Expense')
                             ->searchable()
                             ->preload()
                             ->placeholder('Optional'),

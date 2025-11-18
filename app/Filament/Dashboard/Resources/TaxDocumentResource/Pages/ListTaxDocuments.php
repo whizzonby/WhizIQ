@@ -44,6 +44,12 @@ class ListTaxDocuments extends ListRecords
                     ->whereIn('document_type', ['receipt', 'invoice'])
                     ->count()),
 
+            'other' => Tab::make('Other')
+                ->modifyQueryUsing(fn(Builder $query) => $query->whereIn('document_type', ['w9', 'bank_statement', 'other']))
+                ->badge(fn() => \App\Models\TaxDocument::where('user_id', auth()->id())
+                    ->whereIn('document_type', ['w9', 'bank_statement', 'other'])
+                    ->count()),
+
             'pending' => Tab::make('Pending Verification')
                 ->modifyQueryUsing(fn(Builder $query) => $query->where('verification_status', 'pending'))
                 ->badge(fn() => \App\Models\TaxDocument::where('user_id', auth()->id())
