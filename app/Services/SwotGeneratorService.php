@@ -241,7 +241,19 @@ class SwotGeneratorService
         if ($data['latest_cash_flow'] > 0) {
             $prompt .= "- Do NOT list positive cash flow as a weakness. It is a strength.\n";
         }
-        $prompt .= "\nGenerate a SWOT analysis with 3-5 items per category based ONLY on the real data provided. Focus on actionable insights.";
+
+        // Add context about business stage and temporary situations
+        if (!$data['has_historical_data']) {
+            $prompt .= "- This is an EARLY-STAGE business with limited history. Negative profit margins are NORMAL during setup/ramp-up phase.\n";
+            $prompt .= "- Frame weaknesses constructively for a startup context (e.g., 'temporary negative margin reflects setup costs' not 'critical profitability issue').\n";
+        }
+
+        if ($data['profit_margin'] < -50) {
+            $prompt .= "- The deeply negative profit margin likely reflects ONE-TIME or SETUP expenses, not ongoing operational issues.\n";
+            $prompt .= "- Contextualize this as a temporary phase requiring monitoring, not a critical structural weakness.\n";
+        }
+
+        $prompt .= "\nGenerate a SWOT analysis with 3-5 items per category based ONLY on the real data provided. Focus on actionable insights that are appropriate for the business stage.";
 
         return $prompt;
     }
@@ -301,11 +313,34 @@ class SwotGeneratorService
             ];
         }
 
+        // Context-aware profit margin weakness detection
         if ($data['profit_margin'] < 10 && $data['total_revenue'] > 0) {
-            $swot['weaknesses'][] = [
-                'description' => "Low profit margin of " . number_format($data['profit_margin'], 1) . "% suggests high costs or pricing issues.",
-                'priority' => 8,
-            ];
+            // Check if this is an early-stage business or temporary situation
+            $isEarlyStage = !$data['has_historical_data'] || $data['period_days'] < 60;
+            $hasExpenseSpike = $this->detectExpenseSpike($data);
+
+            if ($isEarlyStage || $hasExpenseSpike) {
+                // Contextual weakness for temporary/setup phase
+                if ($data['profit_margin'] < -50) {
+                    // Significant negative margin - acknowledge but contextualize
+                    $swot['weaknesses'][] = [
+                        'description' => "High short-term expenses created a temporary negative profit margin of " . number_format($data['profit_margin'], 1) . "%. This reflects setup costs rather than operational performance. Monitor spending consistency as business stabilizes.",
+                        'priority' => 6,
+                    ];
+                } else {
+                    // Minor negative or low positive margin
+                    $swot['weaknesses'][] = [
+                        'description' => "Current profit margin of " . number_format($data['profit_margin'], 1) . "% reflects early-stage operations. Focus on stabilizing revenue and controlling ongoing expenses as the business matures.",
+                        'priority' => 5,
+                    ];
+                }
+            } else {
+                // Established business with consistently low margin - genuine concern
+                $swot['weaknesses'][] = [
+                    'description' => "Sustained low profit margin of " . number_format($data['profit_margin'], 1) . "% suggests structural issues with costs or pricing. Consider reviewing pricing strategy and operational efficiency.",
+                    'priority' => 8,
+                ];
+            }
         }
 
         // Opportunities
@@ -410,6 +445,34 @@ class SwotGeneratorService
             'created' => count($created),
             'items' => $created,
         ];
+    }
+
+    /**
+     * Detect if there's an expense spike (indicating temporary/one-time costs)
+     */
+    protected function detectExpenseSpike(array $data): bool
+    {
+        // If we don't have detailed expense data, can't detect spike
+        if (empty($data['top_expenses'])) {
+            return false;
+        }
+
+        // Calculate if current month's expenses are significantly higher than expected
+        // This is a simplified check - actual anomaly detection is more sophisticated
+        $totalTopExpenses = array_sum($data['top_expenses']);
+        $avgMonthlyExpenses = $data['total_expenses'];
+
+        // If top expenses represent > 80% of total expenses, suggests concentrated/one-time costs
+        if ($totalTopExpenses > 0 && ($totalTopExpenses / $avgMonthlyExpenses) > 0.8) {
+            return true;
+        }
+
+        // If profit margin is deeply negative (< -50%), suggests unusual expense period
+        if ($data['profit_margin'] < -50) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
