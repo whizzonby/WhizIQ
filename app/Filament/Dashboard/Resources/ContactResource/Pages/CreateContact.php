@@ -29,6 +29,13 @@ class CreateContact extends CreateRecord
     {
         $data['user_id'] = auth()->id();
 
+        // Ensure required fields have default values
+        $data['type'] = $data['type'] ?? 'lead';
+        $data['status'] = $data['status'] ?? 'active';
+        $data['priority'] = $data['priority'] ?? 'medium';
+        $data['relationship_strength'] = $data['relationship_strength'] ?? 'warm';
+        $data['country'] = $data['country'] ?? 'US';
+
         return $data;
     }
 

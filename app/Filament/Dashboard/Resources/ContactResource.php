@@ -68,8 +68,7 @@ class ContactResource extends Resource
                                         'other' => 'Other',
                                     ])
                                     ->default('lead')
-                                    ->native(false)
-                                    ->required(),
+                                    ->native(false),
 
                                 Forms\Components\Select::make('status')
                                     ->options([
@@ -78,8 +77,7 @@ class ContactResource extends Resource
                                         'archived' => 'Archived',
                                     ])
                                     ->default('active')
-                                    ->native(false)
-                                    ->required(),
+                                    ->native(false),
 
                                 Forms\Components\Select::make('priority')
                                     ->options([
@@ -89,8 +87,7 @@ class ContactResource extends Resource
                                         'vip' => 'VIP',
                                     ])
                                     ->default('medium')
-                                    ->native(false)
-                                    ->required(),
+                                    ->native(false),
                             ]),
                     ]),
 
@@ -101,6 +98,7 @@ class ContactResource extends Resource
                             ->schema([
                                 Forms\Components\TextInput::make('email')
                                     ->email()
+                                    ->required()
                                     ->maxLength(255),
 
                                 Forms\Components\TextInput::make('phone')
