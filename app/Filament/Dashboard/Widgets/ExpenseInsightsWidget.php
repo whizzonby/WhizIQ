@@ -42,11 +42,15 @@ class ExpenseInsightsWidget extends BaseWidget
             ->orderByDesc('total')
             ->first();
 
-        // Tax deductible expenses
-        $taxDeductibleTotal = Expense::where('user_id', $user->id)
+        // Tax deductible expenses - use deductible_amount or calculate from helper
+        $taxDeductibleExpenses = Expense::where('user_id', $user->id)
             ->where('date', '>=', $startOfMonth)
             ->where('is_tax_deductible', true)
-            ->sum('amount');
+            ->get();
+
+        $taxDeductibleTotal = $taxDeductibleExpenses->sum(function ($expense) {
+            return $expense->calculateDeductibleAmount();
+        });
 
         // Get expense trend for last 7 days
         $expenseTrend = [];

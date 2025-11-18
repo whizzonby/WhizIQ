@@ -571,11 +571,15 @@ PROMPT;
             ];
         }
 
-        // Tax deductible insights
-        $taxDeductible = \App\Models\Expense::where('user_id', $user->id)
+        // Tax deductible insights - use calculateDeductibleAmount() for accuracy
+        $taxDeductibleExpenses = \App\Models\Expense::where('user_id', $user->id)
             ->where('date', '>=', $startOfMonth)
             ->where('is_tax_deductible', true)
-            ->sum('amount');
+            ->get();
+
+        $taxDeductible = $taxDeductibleExpenses->sum(function ($expense) {
+            return $expense->calculateDeductibleAmount();
+        });
 
         $deductiblePercentage = $currentExpenses > 0 ? ($taxDeductible / $currentExpenses) * 100 : 0;
 

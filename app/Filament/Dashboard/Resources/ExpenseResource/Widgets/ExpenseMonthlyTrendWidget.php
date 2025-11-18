@@ -29,10 +29,14 @@ class ExpenseMonthlyTrendWidget extends ChartWidget
                 ->whereBetween('date', [$startDate, $endDate])
                 ->sum('amount');
 
-            $monthTaxDeductible = Expense::where('user_id', $user->id)
+            $monthTaxDeductibleExpenses = Expense::where('user_id', $user->id)
                 ->whereBetween('date', [$startDate, $endDate])
                 ->where('is_tax_deductible', true)
-                ->sum('amount');
+                ->get();
+
+            $monthTaxDeductible = $monthTaxDeductibleExpenses->sum(function ($expense) {
+                return $expense->calculateDeductibleAmount();
+            });
 
             $totalExpenses[] = (float) $monthTotal;
             $taxDeductible[] = (float) $monthTaxDeductible;
