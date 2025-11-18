@@ -34,6 +34,11 @@ class AIBusinessInsightsWidget extends Widget
 
     public function mount()
     {
+        // Clear old cache to force regeneration with new prompt
+        $user = auth()->user();
+        $cacheKey = "ai_insights_{$user->id}_" . now()->format('Y-m-d-H');
+        \Illuminate\Support\Facades\Cache::forget($cacheKey);
+
         $this->loadInsights();
     }
 
@@ -272,20 +277,10 @@ class AIBusinessInsightsWidget extends Widget
             }
         }
 
-        $marketingText = '';
-        if ($data['total_ad_spend'] > 0) {
-            $marketingText = "\n\nMarketing Performance:
-- Total Ad Spend: \${$data['total_ad_spend']} ({$data['ad_spend_change']}% change)
-- Average Marketing ROI: {$data['avg_marketing_roi']}%
-- Marketing Conversions: {$data['total_marketing_conversions']} ({$data['marketing_conversion_change']}% change)
-- Marketing Leads: {$data['total_marketing_leads']}
-- Avg Customer Acquisition Cost (CAC): \${$data['avg_cac']}
-- Avg CLV:CAC Ratio: {$data['avg_clv_cac_ratio']}:1
-- Avg Cost Per Conversion: \${$data['avg_cost_per_conversion']}";
-        }
+        // Skip marketing data - too technical for business owners
 
         return <<<PROMPT
-You are a business intelligence advisor. Analyze the following business metrics and provide 3-5 actionable insights and recommendations.
+You are a business advisor helping a small business owner. Provide simple, practical advice they can act on.
 
 Current Business Performance:
 - Current Month Revenue: \${$data['current_revenue']}
@@ -295,40 +290,40 @@ Current Business Performance:
 - Current Month Expenses: \${$data['current_expenses']}
 - Historical Average Expenses: \${$data['avg_historical_expenses']}
 - Expense Change vs Historical Average: {$data['expense_change']}%
-- Cash Flow: \${$data['cash_flow']}
 - New Customers This Month: {$data['new_customers_this_month']}
 - Top Expense Category: {$data['top_expense_category']}
-{$marketingText}
 {$anomalyText}
 
 IMPORTANT: The percentage changes shown are vs HISTORICAL AVERAGE (not previous month), providing a true baseline comparison.
 
-Provide insights in this exact format (no markdown, just plain text with numbers):
+Provide 2-4 simple, actionable insights in this exact format (no markdown, just plain text):
 
 1. [Insight Type]: [Insight Title]
-   [2-3 sentence description with specific recommendations]
+   [1-2 sentence description with specific action to take]
 
 2. [Insight Type]: [Insight Title]
-   [2-3 sentence description with specific recommendations]
+   [1-2 sentence description with specific action to take]
 
-Focus on:
-- Revenue optimization opportunities
-- Cost reduction strategies
-- Cash flow management (ONLY if negative or presents a risk)
-- Marketing ROI and customer acquisition efficiency
-- Correlation between marketing spend and revenue growth
-- CLV:CAC health and unit economics
-- Growth opportunities
-- Risk mitigation
+Focus ONLY on:
+- Revenue trends (growing/declining/stable)
+- Expense management (increases/decreases)
+- Profit margin health
+- Customer acquisition trends
+- Revenue diversification
+
+DO NOT mention:
+- Marketing ROI, CLV:CAC, or any marketing metrics
+- Cash flow (unless it's causing immediate problems)
+- Technical financial jargon
+- Small fluctuations under 10%
 
 CRITICAL CONSTRAINTS:
-- Do NOT call small changes (<10%) "volatile" or "significant" - these are normal fluctuations
-- Do NOT highlight positive cash flow as an insight - this is expected normal operation
-- Only flag volatility if changes exceed 40% vs historical average
-- Only mention cash flow if negative or presents immediate concern
-- Focus on actionable issues and opportunities, not routine business operations
+- Use simple language a non-technical business owner can understand
+- Keep insights practical and immediately actionable
+- Do NOT call changes under 10% "volatile" or "significant"
+- Focus on what the owner should DO, not just what the numbers show
 
-Keep each insight actionable and specific to the data provided. When marketing data is available, highlight relationships between marketing performance and business outcomes.
+Keep each insight short, clear, and actionable.
 PROMPT;
     }
 
