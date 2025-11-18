@@ -44,12 +44,20 @@ class DocumentAnalysisService
             $textForAnalysis = substr($text, 0, 10000);
 
             // Generate comprehensive analysis
-            $analysis = $this->generateAnalysis($document, $textForAnalysis);
+            try {
+                $analysis = $this->generateAnalysis($document, $textForAnalysis);
 
-            if (!$analysis) {
+                if (!$analysis) {
+                    return [
+                        'success' => false,
+                        'error' => 'AI analysis failed. The AI service returned no response. Please try again.',
+                    ];
+                }
+            } catch (\Exception $e) {
+                // Catch exceptions from generateAnalysis and return user-friendly error
                 return [
                     'success' => false,
-                    'error' => 'AI analysis failed. Please check your OpenAI API configuration.',
+                    'error' => $e->getMessage(),
                 ];
             }
 
@@ -159,27 +167,43 @@ class DocumentAnalysisService
         $systemPrompt = $this->getSystemPromptForCategory($category);
         $userPrompt = $this->buildAnalysisPrompt($document, $text, $category);
 
-        $response = $this->openAI->chat([
-            [
-                'role' => 'system',
-                'content' => $systemPrompt,
-            ],
-            [
-                'role' => 'user',
-                'content' => $userPrompt,
-            ],
-        ], [
-            'feature' => 'document_analysis',
-            'action' => 'analyze',
-            'max_tokens' => 2000,
-            'temperature' => 0.3,
-        ]);
+        try {
+            $response = $this->openAI->chat([
+                [
+                    'role' => 'system',
+                    'content' => $systemPrompt,
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $userPrompt,
+                ],
+            ], [
+                'feature' => 'task_extraction', // Use same feature as Extract Tasks for consistent permissions
+                'action' => 'analyze',
+                'max_tokens' => 2000,
+                'temperature' => 0.3,
+            ]);
 
-        if (!$response) {
-            return null;
+            if (!$response) {
+                Log::warning('OpenAI returned null response for document analysis', [
+                    'document_id' => $document->id,
+                    'category' => $category,
+                    'text_length' => strlen($text),
+                ]);
+                return null;
+            }
+
+            return $this->parseAnalysisResponse($response, $category);
+        } catch (\Exception $e) {
+            Log::error('OpenAI chat failed in document analysis', [
+                'document_id' => $document->id,
+                'error' => $e->getMessage(),
+                'category' => $category,
+            ]);
+
+            // Re-throw to let the caller handle it with proper error message
+            throw $e;
         }
-
-        return $this->parseAnalysisResponse($response, $category);
     }
 
     /**

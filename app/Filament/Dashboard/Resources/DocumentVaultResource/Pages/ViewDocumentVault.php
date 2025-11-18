@@ -17,44 +17,45 @@ class ViewDocumentVault extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('analyze')
-                ->label('AI Analyze')
-                ->icon('heroicon-o-sparkles')
-                ->color('primary')
-                ->visible(fn () => config('services.openai.key'))
-                ->requiresConfirmation()
-                ->modalHeading('AI Document Analysis')
-                ->modalDescription('This will analyze your document using AI and generate a comprehensive summary, key points, and detailed insights. This may take a few moments.')
-                ->modalSubmitActionLabel('Analyze Now')
-                ->action(function () {
-                    try {
-                        $service = app(DocumentAnalysisService::class);
-                        $result = $service->analyzeDocument($this->getRecord());
-
-                        if ($result['success']) {
-                            Notification::make()
-                                ->title('Analysis Complete!')
-                                ->body('Your document has been analyzed successfully.')
-                                ->success()
-                                ->send();
-
-                            // Refresh the page to show analysis
-                            redirect()->to($this->getUrl());
-                        } else {
-                            Notification::make()
-                                ->title('Analysis Failed')
-                                ->body($result['error'] ?? 'Could not analyze document')
-                                ->danger()
-                                ->send();
-                        }
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->title('Error')
-                            ->body('An error occurred during analysis: ' . $e->getMessage())
-                            ->danger()
-                            ->send();
-                    }
-                }),
+            // AI Analyze button hidden - will be fixed later
+            // Actions\Action::make('analyze')
+            //     ->label('AI Analyze')
+            //     ->icon('heroicon-o-sparkles')
+            //     ->color('primary')
+            //     ->visible(fn () => config('services.openai.key'))
+            //     ->requiresConfirmation()
+            //     ->modalHeading('AI Document Analysis')
+            //     ->modalDescription('This will analyze your document using AI and generate a comprehensive summary, key points, and detailed insights. This may take a few moments.')
+            //     ->modalSubmitActionLabel('Analyze Now')
+            //     ->action(function () {
+            //         try {
+            //             $service = app(DocumentAnalysisService::class);
+            //             $result = $service->analyzeDocument($this->getRecord());
+            //
+            //             if ($result['success']) {
+            //                 Notification::make()
+            //                     ->title('Analysis Complete!')
+            //                     ->body('Your document has been analyzed successfully.')
+            //                     ->success()
+            //                     ->send();
+            //
+            //                 // Refresh the page to show analysis
+            //                 redirect()->to($this->getUrl());
+            //             } else {
+            //                 Notification::make()
+            //                     ->title('Analysis Failed')
+            //                     ->body($result['error'] ?? 'Could not analyze document')
+            //                     ->danger()
+            //                     ->send();
+            //             }
+            //         } catch (\Exception $e) {
+            //             Notification::make()
+            //                 ->title('Error')
+            //                 ->body('An error occurred during analysis: ' . $e->getMessage())
+            //                 ->danger()
+            //                 ->send();
+            //         }
+            //     }),
 
             Actions\Action::make('download')
                 ->label('Download')

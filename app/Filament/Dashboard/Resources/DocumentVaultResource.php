@@ -272,7 +272,7 @@ class DocumentVaultResource extends Resource
                     ->modalIcon('heroicon-o-sparkles'),
 
                 Action::make('view')
-                    ->label('View & Analyze')
+                    ->label('View')
                     ->icon('heroicon-o-eye')
                     ->color('primary')
                     ->url(fn (DocumentVault $record) => DocumentVaultResource::getUrl('view', ['record' => $record])),
