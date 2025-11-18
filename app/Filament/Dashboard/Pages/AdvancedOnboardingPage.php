@@ -3,6 +3,7 @@
 namespace App\Filament\Dashboard\Pages;
 
 use App\Models\BusinessProfile;
+use App\Services\CountriesService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -49,79 +50,7 @@ class AdvancedOnboardingPage extends OnboardingPage
                                     Grid::make(2)->schema([
                                         Select::make('biz_country')
                                             ->label('Country')
-                                            ->options([
-                                                // North America
-                                                'US' => 'United States',
-                                                'CA' => 'Canada',
-                                                'MX' => 'Mexico',
-                                                // Europe
-                                                'GB' => 'United Kingdom',
-                                                'IE' => 'Ireland',
-                                                'DE' => 'Germany',
-                                                'FR' => 'France',
-                                                'IT' => 'Italy',
-                                                'ES' => 'Spain',
-                                                'NL' => 'Netherlands',
-                                                'BE' => 'Belgium',
-                                                'CH' => 'Switzerland',
-                                                'AT' => 'Austria',
-                                                'SE' => 'Sweden',
-                                                'NO' => 'Norway',
-                                                'DK' => 'Denmark',
-                                                'FI' => 'Finland',
-                                                'PT' => 'Portugal',
-                                                'PL' => 'Poland',
-                                                'CZ' => 'Czech Republic',
-                                                'GR' => 'Greece',
-                                                'RO' => 'Romania',
-                                                'HU' => 'Hungary',
-                                                // Oceania
-                                                'AU' => 'Australia',
-                                                'NZ' => 'New Zealand',
-                                                // Asia
-                                                'JP' => 'Japan',
-                                                'KR' => 'South Korea',
-                                                'SG' => 'Singapore',
-                                                'HK' => 'Hong Kong',
-                                                'MY' => 'Malaysia',
-                                                'IN' => 'India',
-                                                'PH' => 'Philippines',
-                                                'TH' => 'Thailand',
-                                                'ID' => 'Indonesia',
-                                                'VN' => 'Vietnam',
-                                                'CN' => 'China',
-                                                'PK' => 'Pakistan',
-                                                'BD' => 'Bangladesh',
-                                                'LK' => 'Sri Lanka',
-                                                'AE' => 'United Arab Emirates',
-                                                'SA' => 'Saudi Arabia',
-                                                'IL' => 'Israel',
-                                                'TR' => 'Turkey',
-                                                // Africa
-                                                'ZA' => 'South Africa',
-                                                'NG' => 'Nigeria',
-                                                'KE' => 'Kenya',
-                                                'GH' => 'Ghana',
-                                                'EG' => 'Egypt',
-                                                'TZ' => 'Tanzania',
-                                                'UG' => 'Uganda',
-                                                'ET' => 'Ethiopia',
-                                                'MA' => 'Morocco',
-                                                'RW' => 'Rwanda',
-                                                // South America
-                                                'BR' => 'Brazil',
-                                                'AR' => 'Argentina',
-                                                'CL' => 'Chile',
-                                                'CO' => 'Colombia',
-                                                'PE' => 'Peru',
-                                                'VE' => 'Venezuela',
-                                                'EC' => 'Ecuador',
-                                                // Central America & Caribbean
-                                                'CR' => 'Costa Rica',
-                                                'PA' => 'Panama',
-                                                'JM' => 'Jamaica',
-                                                'TT' => 'Trinidad and Tobago',
-                                            ])
+                                            ->options(CountriesService::getAllCountries())
                                             ->required()
                                             ->searchable(),
 
