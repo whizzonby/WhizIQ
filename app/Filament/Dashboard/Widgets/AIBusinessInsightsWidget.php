@@ -99,19 +99,26 @@ class AIBusinessInsightsWidget extends Widget
         $currentMetrics = $calculator->getCurrentMonthMetrics($user);
         $previousMetrics = $calculator->getLastMonthMetrics($user);
 
-        // Calculate changes
-        $revenueChange = $calculator->calculatePercentageChange(
-            $currentMetrics['revenue'],
-            $previousMetrics['revenue']
-        );
-
-        $expenseChange = $calculator->calculatePercentageChange(
-            $currentMetrics['expenses'],
-            $previousMetrics['expenses']
-        );
-
-        // Get revenue trend
+        // Get revenue trend (all months)
         $revenueTrend = $calculator->getMonthlyTrend($user, 'revenue');
+
+        // Calculate historical average (EXCLUDING current month for accurate comparison)
+        $historicalRevenue = array_slice($revenueTrend, 0, -1); // Remove current month
+        $avgHistoricalRevenue = count($historicalRevenue) > 0 ? array_sum($historicalRevenue) / count($historicalRevenue) : 0;
+
+        // Calculate expense trend
+        $expenseTrend = $calculator->getMonthlyTrend($user, 'expenses');
+        $historicalExpenses = array_slice($expenseTrend, 0, -1); // Remove current month
+        $avgHistoricalExpenses = count($historicalExpenses) > 0 ? array_sum($historicalExpenses) / count($historicalExpenses) : 0;
+
+        // Calculate changes vs HISTORICAL AVERAGE (not just previous month)
+        $revenueChange = $avgHistoricalRevenue > 0
+            ? (($currentMetrics['revenue'] - $avgHistoricalRevenue) / $avgHistoricalRevenue) * 100
+            : ($currentMetrics['revenue'] > 0 ? 100 : 0);
+
+        $expenseChange = $avgHistoricalExpenses > 0
+            ? (($currentMetrics['expenses'] - $avgHistoricalExpenses) / $avgHistoricalExpenses) * 100
+            : ($currentMetrics['expenses'] > 0 ? 100 : 0);
 
         // Get marketing metrics
         $currentMarketingMetrics = MarketingMetric::where('user_id', $user->id)
@@ -152,14 +159,16 @@ class AIBusinessInsightsWidget extends Widget
             'current_revenue' => $currentMetrics['revenue'],
             'previous_revenue' => $previousMetrics['revenue'],
             'revenue_change' => $revenueChange,
+            'avg_historical_revenue' => $avgHistoricalRevenue,
             'current_profit' => $currentMetrics['profit'],
             'current_expenses' => $currentMetrics['expenses'],
             'expense_change' => $expenseChange,
+            'avg_historical_expenses' => $avgHistoricalExpenses,
             'cash_flow' => $currentMetrics['cash_flow'],
             'profit_margin' => $currentMetrics['profit_margin'],
             'metrics_count' => count(array_filter($revenueTrend)),
-            'avg_revenue' => count($revenueTrend) > 0 ? array_sum($revenueTrend) / count($revenueTrend) : 0,
-            'avg_expenses' => $currentMetrics['expenses'],
+            'avg_revenue' => $avgHistoricalRevenue, // Use historical average
+            'avg_expenses' => $avgHistoricalExpenses, // Use historical average
             'revenue_trend' => $revenueTrend,
             'new_customers_this_month' => Contact::where('user_id', $user->id)
                 ->where('created_at', '>=', $startOfMonth)
@@ -279,14 +288,20 @@ class AIBusinessInsightsWidget extends Widget
 You are a business intelligence advisor. Analyze the following business metrics and provide 3-5 actionable insights and recommendations.
 
 Current Business Performance:
-- Revenue: \${$data['current_revenue']} ({$data['revenue_change']}% change)
+- Current Month Revenue: \${$data['current_revenue']}
+- Historical Average Revenue: \${$data['avg_historical_revenue']}
+- Change vs Historical Average: {$data['revenue_change']}%
 - Profit: \${$data['current_profit']} (Margin: {$data['profit_margin']}%)
-- Expenses: \${$data['current_expenses']} ({$data['expense_change']}% change)
+- Current Month Expenses: \${$data['current_expenses']}
+- Historical Average Expenses: \${$data['avg_historical_expenses']}
+- Expense Change vs Historical Average: {$data['expense_change']}%
 - Cash Flow: \${$data['cash_flow']}
 - New Customers This Month: {$data['new_customers_this_month']}
 - Top Expense Category: {$data['top_expense_category']}
 {$marketingText}
 {$anomalyText}
+
+IMPORTANT: The percentage changes shown are vs HISTORICAL AVERAGE (not previous month), providing a true baseline comparison.
 
 Provide insights in this exact format (no markdown, just plain text with numbers):
 
@@ -299,12 +314,19 @@ Provide insights in this exact format (no markdown, just plain text with numbers
 Focus on:
 - Revenue optimization opportunities
 - Cost reduction strategies
-- Cash flow management
+- Cash flow management (ONLY if negative or presents a risk)
 - Marketing ROI and customer acquisition efficiency
 - Correlation between marketing spend and revenue growth
 - CLV:CAC health and unit economics
 - Growth opportunities
 - Risk mitigation
+
+CRITICAL CONSTRAINTS:
+- Do NOT call small changes (<10%) "volatile" or "significant" - these are normal fluctuations
+- Do NOT highlight positive cash flow as an insight - this is expected normal operation
+- Only flag volatility if changes exceed 40% vs historical average
+- Only mention cash flow if negative or presents immediate concern
+- Focus on actionable issues and opportunities, not routine business operations
 
 Keep each insight actionable and specific to the data provided. When marketing data is available, highlight relationships between marketing performance and business outcomes.
 PROMPT;
@@ -424,13 +446,22 @@ PROMPT;
         $marketingInsights = $this->getMarketingInsights($data);
         $insights = array_merge($insights, $marketingInsights);
 
-        // Profit margin insight
-        if ($data['profit_margin'] < 10) {
+        // Profit margin insight - contextual based on whether it's negative or just low
+        if ($data['profit_margin'] < 0) {
+            // Negative margin - expenses exceeded revenue
             $insights[] = [
                 'type' => 'warning',
-                'title' => 'Low Profit Margin',
-                'description' => "Your profit margin is {$data['profit_margin']}%, which is below healthy benchmarks. Review pricing strategy and identify cost optimization opportunities, especially in {$data['top_expense_category']}.",
+                'title' => 'Negative Profit Margin',
+                'description' => "Profit margin is currently " . number_format($data['profit_margin'], 1) . "% because expenses exceeded revenue this month. Review whether this is due to one-time costs or ongoing cost structure. Top expense category: {$data['top_expense_category']}.",
                 'icon' => 'heroicon-o-exclamation-triangle',
+            ];
+        } elseif ($data['profit_margin'] < 10 && $data['profit_margin'] >= 0) {
+            // Positive but low margin
+            $insights[] = [
+                'type' => 'info',
+                'title' => 'Low Profit Margin',
+                'description' => "Your profit margin is {$data['profit_margin']}%. While positive, there's room for improvement. Consider reviewing pricing strategy and cost optimization opportunities, especially in {$data['top_expense_category']}.",
+                'icon' => 'heroicon-o-information-circle',
             ];
         }
 
@@ -666,7 +697,7 @@ PROMPT;
                 $insights[] = [
                     'type' => 'success',
                     'title' => 'Strong Recurring Revenue Base',
-                    'description' => "Excellent! " . number_format($mrrPercentage, 0) . "% of revenue is recurring (MRR: $" . number_format($mrr, 0) . "). This provides predictable cash flow and business stability.",
+                    'description' => "Excellent! " . number_format($mrrPercentage, 0) . "% of revenue is recurring (MRR: $" . number_format($mrr, 0) . "). This provides revenue predictability and business stability.",
                     'icon' => 'heroicon-o-arrow-path',
                 ];
             } elseif ($mrrChange > 10) {
@@ -681,23 +712,28 @@ PROMPT;
             $insights[] = [
                 'type' => 'info',
                 'title' => 'Consider Recurring Revenue',
-                'description' => "You have no recurring revenue streams yet. Consider subscription-based offerings or retainer contracts to create predictable monthly income and improve cash flow stability.",
+                'description' => "You have no recurring revenue streams yet. Consider subscription-based offerings or retainer contracts to create predictable monthly income and business stability.",
                 'icon' => 'heroicon-o-arrow-path',
             ];
         }
 
-        // Revenue volatility check
-        if ($lastRevenue > 0) {
-            $revenueChange = (($currentRevenue - $lastRevenue) / $lastRevenue) * 100;
+        // Revenue volatility check - compare to HISTORICAL AVERAGE not last month
+        // Use the change from business data which is already calculated vs historical average
+        if ($data['avg_historical_revenue'] > 0) {
+            $revenueChangeVsAverage = $data['revenue_change'];
 
-            if (abs($revenueChange) > 40) {
-                $direction = $revenueChange > 0 ? 'increased' : 'decreased';
+            // Only flag as volatile if deviation exceeds 40% from historical average
+            if (abs($revenueChangeVsAverage) > 40) {
+                $direction = $revenueChangeVsAverage > 0 ? 'increased' : 'decreased';
                 $insights[] = [
                     'type' => 'warning',
                     'title' => 'High Revenue Volatility',
-                    'description' => "Revenue {$direction} " . number_format(abs($revenueChange), 0) . "% this month. High volatility can make planning difficult. Focus on building recurring revenue to stabilize income.",
+                    'description' => "Revenue {$direction} " . number_format(abs($revenueChangeVsAverage), 0) . "% compared to your historical average. High volatility can make planning difficult. Focus on building recurring revenue to stabilize income.",
                     'icon' => 'heroicon-o-chart-bar',
                 ];
+            } elseif (abs($revenueChangeVsAverage) <= 10) {
+                // If within 10% of historical average, it's stable (don't show as insight unless there's nothing else)
+                // This prevents false "volatility" warnings
             }
         }
 

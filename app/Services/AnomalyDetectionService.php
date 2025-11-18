@@ -150,9 +150,32 @@ class AnomalyDetectionService
                 $zScore = ($latest->$field - $mean) / $stdDev;
 
                 if (abs($zScore) > $threshold) {
+                    // Calculate percentage variance for contextual severity
+                    $percentageVariance = abs($mean) > 0 ? abs((($latest->$field - $mean) / $mean) * 100) : 0;
+
+                    // Determine severity based on variance bands (not just Z-score)
+                    // Within ±10% = info (normal fluctuation)
+                    // 10-30% = medium (moderate change)
+                    // >30% = high (significant change)
+                    $severity = 'info';
+                    if ($percentageVariance > 30) {
+                        $severity = 'high';
+                    } elseif ($percentageVariance > 10) {
+                        $severity = 'medium';
+                    }
+
+                    // For negative profit/cash flow, check if it's getting better or worse
+                    if (($field === 'profit' || $field === 'cash_flow') && $latest->$field < 0 && $mean < 0) {
+                        // Both negative - check if improving or deteriorating
+                        if ($latest->$field > $mean) {
+                            // Less negative = improving (lower severity)
+                            $severity = $percentageVariance > 30 ? 'medium' : 'info';
+                        }
+                    }
+
                     $anomalies[] = [
                         'metric' => ucfirst(str_replace('_', ' ', $field)),
-                        'severity' => abs($zScore) > 3 ? 'high' : 'medium',
+                        'severity' => $severity,
                         'description' => $this->getAnomalyDescription($field, $latest->$field, $mean, $zScore),
                         'recommendation' => $this->getRecommendation($field, $zScore),
                         'type' => 'statistical',
@@ -203,16 +226,33 @@ class AnomalyDetectionService
     protected function getAnomalyDescription(string $field, float $current, float $mean, float $zScore): string
     {
         $direction = $zScore > 0 ? 'higher' : 'lower';
-        $percentage = abs((($current - $mean) / $mean) * 100);
+        $absoluteDiff = abs($current - $mean);
 
-        return sprintf(
-            'Current %s ($%s) is %.1f%% %s than the 30-day average ($%s).',
-            str_replace('_', ' ', $field),
-            number_format($current, 2),
-            $percentage,
-            $direction,
-            number_format($mean, 2)
-        );
+        // For negative numbers or when both values have the same sign and are close to zero,
+        // use absolute difference instead of percentage to avoid meaningless spikes
+        $useAbsoluteDiff = ($current < 0 && $mean < 0) || (abs($mean) < 1000);
+
+        if ($useAbsoluteDiff) {
+            return sprintf(
+                'Current %s ($%s) is $%s %s than the historical average ($%s).',
+                str_replace('_', ' ', $field),
+                number_format($current, 2),
+                number_format($absoluteDiff, 2),
+                $direction,
+                number_format($mean, 2)
+            );
+        } else {
+            // Only use percentage for positive numbers with meaningful baseline
+            $percentage = abs((($current - $mean) / $mean) * 100);
+            return sprintf(
+                'Current %s ($%s) is %.1f%% %s than the historical average ($%s).',
+                str_replace('_', ' ', $field),
+                number_format($current, 2),
+                $percentage,
+                $direction,
+                number_format($mean, 2)
+            );
+        }
     }
 
     /**
