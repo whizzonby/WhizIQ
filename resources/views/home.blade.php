@@ -1,6 +1,6 @@
 <x-layouts.app>
     <x-slot name="title">
-        {{ __('WhizIQ: All-in-One Business Management Platform | Replace 10+ Tools') }}
+        {{ __('WhizzIQ: All-in-One Business Management Platform | Replace 10+ Tools') }}
     </x-slot>
 
     {{-- Hero Section --}}
@@ -51,7 +51,7 @@
             </div>
 
             <div class="mx-auto md:max-w-3xl lg:max-w-5xl">
-                <img class="drop-shadow-2xl mt-8 transition hover:scale-101 rounded-2xl border-4 border-white/20" src="{{URL::asset('/images/features/hero-image.png')}}" alt="WhizIQ Dashboard" />
+                <img class="drop-shadow-2xl mt-8 transition hover:scale-101 rounded-2xl border-4 border-white/20" src="{{URL::asset('/images/features/hero-image.png')}}" alt="WhizzIQ Dashboard" />
             </div>
         </div>
     </x-section.hero>
@@ -62,7 +62,7 @@
             <div class="text-center mb-12">
                 <x-heading.h6 class="text-primary-500">{{ __('The Solution') }}</x-heading.h6>
                 <x-heading.h2 class="text-gray-900">{{ __('Everything Your Business Needs in One Platform') }}</x-heading.h2>
-                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">{{ __('Stop paying for 10+ tools. WhizIQ gives you a complete business operating system for less than the cost of a single CRM.') }}</p>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">{{ __('Stop paying for 10+ tools. WhizzIQ gives you a complete business operating system for less than the cost of a single CRM.') }}</p>
             </div>
 
             {{-- Feature Grid --}}
@@ -74,19 +74,19 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">{{ __('Complete CRM') }}</h3>
-                    <p class="text-gray-600 mb-4">{{ __('Manage all your contacts, track interactions, score relationships, and never miss a follow-up. Replace HubSpot or Salesforce.') }}</p>
-                    <ul class="space-y-2 text-sm text-gray-600">
+                    <h3 class="text-xl font-semibold mb-3">{{ __('Complete CRM') }}</h3>
+                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Manage all your contacts, track interactions, score relationships, and never miss a follow-up. Replace HubSpot or Salesforce.') }}</p>
+                    <ul class="space-y-2 text-base text-gray-600">
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Contact relationship scoring') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Interaction history & notes') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Automatic follow-up reminders') }}
                         </li>
                     </ul>
@@ -99,19 +99,19 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">{{ __('Sales Pipeline') }}</h3>
-                    <p class="text-gray-600 mb-4">{{ __('Track deals from lead to close, forecast revenue, and know exactly where every opportunity stands. Replace Pipedrive.') }}</p>
-                    <ul class="space-y-2 text-sm text-gray-600">
+                    <h3 class="text-xl font-semibold mb-3">{{ __('Sales Pipeline') }}</h3>
+                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Track deals from lead to close, forecast revenue, and know exactly where every opportunity stands. Replace Pipedrive.') }}</p>
+                    <ul class="space-y-2 text-base text-gray-600">
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Visual deal pipeline') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Weighted revenue forecasting') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Win/loss tracking & analysis') }}
                         </li>
                     </ul>
@@ -124,19 +124,19 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">{{ __('Appointment Booking') }}</h3>
-                    <p class="text-gray-600 mb-4">{{ __('Public booking pages, calendar sync, automatic Zoom/Meet links, and attendance tracking. Replace Calendly and Acuity.') }}</p>
-                    <ul class="space-y-2 text-sm text-gray-600">
+                    <h3 class="text-xl font-semibold mb-3">{{ __('Appointment Booking') }}</h3>
+                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Public booking pages, calendar sync, automatic Zoom/Meet links, and attendance tracking. Replace Calendly and Acuity.') }}</p>
+                    <ul class="space-y-2 text-base text-gray-600">
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Google/Outlook/Apple sync') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Auto Zoom/Meet link generation') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Recurring appointments') }}
                         </li>
                     </ul>
@@ -149,19 +149,19 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">{{ __('Invoicing & Payments') }}</h3>
-                    <p class="text-gray-600 mb-4">{{ __('Create professional invoices, accept payments via Stripe, track overdue invoices, and automate reminders. Replace FreshBooks.') }}</p>
-                    <ul class="space-y-2 text-sm text-gray-600">
+                    <h3 class="text-xl font-semibold mb-3">{{ __('Invoicing & Payments') }}</h3>
+                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Create professional invoices, accept payments via Stripe, track overdue invoices, and automate reminders. Replace FreshBooks.') }}</p>
+                    <ul class="space-y-2 text-base text-gray-600">
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Stripe/Paddle integration') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Custom branded templates') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Payment reminders & tracking') }}
                         </li>
                     </ul>
@@ -174,19 +174,19 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">{{ __('Task & Project Management') }}</h3>
-                    <p class="text-gray-600 mb-4">{{ __('Kanban boards, AI-powered prioritization, goal tracking (OKRs), and deadline management. Replace Asana or Monday.') }}</p>
-                    <ul class="space-y-2 text-sm text-gray-600">
+                    <h3 class="text-xl font-semibold mb-3">{{ __('Task & Project Management') }}</h3>
+                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Kanban boards, AI-powered prioritization, goal tracking (OKRs), and deadline management. Replace Asana or Monday.') }}</p>
+                    <ul class="space-y-2 text-base text-gray-600">
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('AI task extraction from notes') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Kanban board views') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('OKR-style goal tracking') }}
                         </li>
                     </ul>
@@ -199,19 +199,19 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">{{ __('Marketing Automation') }}</h3>
-                    <p class="text-gray-600 mb-4">{{ __('Email campaigns, social media management, analytics tracking, and ROI calculations. Replace Mailchimp and Hootsuite.') }}</p>
-                    <ul class="space-y-2 text-sm text-gray-600">
+                    <h3 class="text-xl font-semibold mb-3">{{ __('Marketing Automation') }}</h3>
+                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Email campaigns, social media management, analytics tracking, and ROI calculations. Replace Mailchimp and Hootsuite.') }}</p>
+                    <ul class="space-y-2 text-base text-gray-600">
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Email campaigns with templates') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('Social media integration') }}
                         </li>
                         <li class="flex items-start">
-                            <svg class="w-4 h-4 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
                             {{ __('CLV/CAC tracking') }}
                         </li>
                     </ul>
@@ -246,12 +246,12 @@
 
             <x-accordion class="mt-4">
                 <x-accordion.item active="true" name="faqs">
-                    <x-slot name="title">{{ __('What exactly is WhizIQ?') }}</x-slot>
-                    <p>{{ __('WhizIQ is a complete business operating system that replaces 10+ separate tools. You get CRM, sales pipeline, invoicing, appointment booking, task management, marketing automation, financial tracking, document storage, and AI-powered insights—all in one platform. Built specifically for solopreneurs and service businesses making $50K-$500K annually.') }}</p>
+                    <x-slot name="title">{{ __('What exactly is WhizzIQ?') }}</x-slot>
+                    <p>{{ __('WhizzIQ is a complete business operating system that replaces 10+ separate tools. You get CRM, sales pipeline, invoicing, appointment booking, task management, marketing automation, financial tracking, document storage, and AI-powered insights—all in one platform. Built specifically for solopreneurs and service businesses making $50K-$500K annually.') }}</p>
                 </x-accordion.item>
 
                 <x-accordion.item active="false" name="faqs">
-                    <x-slot name="title">{{ __('How does WhizIQ compare to HubSpot, QuickBooks, or other tools?') }}</x-slot>
+                    <x-slot name="title">{{ __('How does WhizzIQ compare to HubSpot, QuickBooks, or other tools?') }}</x-slot>
                     <p>{{ __('HubSpot costs $800+/month for CRM and marketing. QuickBooks is $50-200/month. Calendly is $15-50/month. Asana is $10-25/month. Add up your tools and you\'re easily spending $500-1,000/month. WhizIQ gives you all of this functionality for $29.99-49.99/month—a 90% cost savings with zero data silos.') }}</p>
                 </x-accordion.item>
 
