@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\BlogPostCategory;
+use App\Models\Page;
 use App\Services\BlogService;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Console\Isolatable;
@@ -51,6 +52,10 @@ class GenerateSitemap extends Command implements Isolatable
             }
 
             return false;
+        })->filter(function ($route) {
+            // Skip routes with required parameters (they will be handled separately)
+            $parameters = $route->parameterNames();
+            return empty($parameters);
         })->map(function ($route) {
             return route($route->getName());
         })->values()->toArray();
@@ -70,6 +75,17 @@ class GenerateSitemap extends Command implements Isolatable
 
         foreach ($categories as $category) {
             $routes[] = route('blog.category', $category->slug);
+        }
+
+        // add all published pages to the sitemap
+        $pages = Page::published()->get();
+        foreach ($pages as $page) {
+            try {
+                $routes[] = route('page.show', $page->slug);
+            } catch (\Exception $e) {
+                // Skip pages that can't generate a URL
+                $this->warn("Skipping page: {$page->slug} - {$e->getMessage()}");
+            }
         }
 
         $sitemap = Sitemap::create();
