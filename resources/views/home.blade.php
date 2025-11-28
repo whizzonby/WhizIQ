@@ -694,7 +694,7 @@
 
         .pricing-section ul li {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
             padding: 12px 0;
             line-height: 1.6;
@@ -705,14 +705,17 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 20px;
-            height: 20px;
-            min-width: 20px;
-            color: var(--color-green);
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            background: var(--color-purple);
+            color: white;
+            border-radius: 50%;
             font-weight: 900;
-            font-size: 18px;
-            margin-top: 2px;
+            font-size: 16px;
+            margin-top: 0;
             flex-shrink: 0;
+            line-height: 1;
         }
 
         .pricing-section .section-label {
