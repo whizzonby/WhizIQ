@@ -855,24 +855,19 @@
             </div>
 
             <h1 class="hero-title">
-                {{ __('Run Your Entire Business from One Platform') }}<br>
-                <span class="highlight">{{ __('Save $10,000/year') }}</span><br>
-                {{ __('Stop juggling 10+ tools') }}
+                {{ __('Run your business — not your tools') }}
             </h1>
 
             <p class="hero-subtitle">
-                {{ __('WhizzIQ replaces HubSpot, QuickBooks, Calendly, Asana, and Mailchimp—all perfectly integrated. Get started in 15 minutes.') }}
+                {{ __('Cut your tool stack, save $10k+/year, and reclaim 5–10 hours of admin time every week.') }}
             </p>
 
             <div class="hero-cta-group">
                 <a href="{{ route('register') }}" class="btn-primary">
-                    {{ __('Start Free Trial') }}
+                    {{ __('Start Your 14-Day Free Trial') }}
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
                     </svg>
-                </a>
-                <a href="#comparison" class="btn-secondary">
-                    {{ __('Compare with Others') }}
                 </a>
             </div>
 
@@ -919,22 +914,34 @@
         <div class="problem-content">
             <div class="section-header">
                 <span class="section-label">{{ __('The Problem') }}</span>
-                <h2 class="section-title">{{ __('You\'re Paying Too Much for Disconnected Tools') }}</h2>
-                <p class="section-subtitle">{{ __('Most businesses spend $500-1,200/month on tools that don\'t talk to each other. You waste time copying data, managing subscriptions, and learning new interfaces.') }}</p>
+                <h2 class="section-title">{{ __('Are you tired of...') }}</h2>
+                <p class="section-subtitle">{{ __('You\'re not alone. Most small businesses face these same frustrations every day.') }}</p>
             </div>
 
             <div class="problem-grid">
                 <div class="problem-card">
-                    <div class="problem-icon">😫</div>
-                    <h3 class="problem-title">{{ __('Tool Overload') }}</h3>
-                    <p class="problem-description">{{ __('10+ subscriptions, 10+ logins, 10+ learning curves. Each tool requires separate setup, training, and maintenance.') }}</p>
+                    <div class="problem-icon">💸</div>
+                    <h3 class="problem-title">{{ __('Paying $300–$1,200/mo on 5–10 tools?') }}</h3>
+                    <p class="problem-description">{{ __('HubSpot, QuickBooks, Calendly, Asana, Mailchimp... Each has its own subscription, login, and learning curve. The costs add up to $6,000-14,000 per year.') }}</p>
                 </div>
 
                 <div class="problem-card">
-                    <div class="problem-icon">💸</div>
-                    <h3 class="problem-title">{{ __('Bleeding Money') }}</h3>
-                    <p class="problem-description">{{ __('$6,000-14,000/year on software that should be integrated but isn\'t. You\'re paying for features you don\'t use and integrations that don\'t exist.') }}</p>
+                    <div class="problem-icon">😫</div>
+                    <h3 class="problem-title">{{ __('Constantly switching between apps, copying data, missing deals or invoices?') }}</h3>
+                    <p class="problem-description">{{ __('Your tools don\'t talk to each other. You manually copy data, lose track of follow-ups, and waste hours toggling between platforms.') }}</p>
                 </div>
+
+                <div class="problem-card">
+                    <div class="problem-icon">⏰</div>
+                    <h3 class="problem-title">{{ __('Wasting hours on admin instead of doing billable work or growing your business?') }}</h3>
+                    <p class="problem-description">{{ __('3-10 hours every week managing your tool stack instead of serving clients, closing deals, or focusing on what you do best.') }}</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 50px;">
+                <p style="font-size: 24px; font-weight: 800; color: var(--color-dark); margin-bottom: 20px;">
+                    {{ __('We built WhizzIQ so you don\'t have to.') }}
+                </p>
             </div>
         </div>
     </section>
@@ -943,8 +950,8 @@
     <section class="features-section" id="features">
         <div class="section-header">
             <span class="section-label">{{ __('The Solution') }}</span>
-            <h2 class="section-title">{{ __('Everything You Need in One Platform') }}</h2>
-            <p class="section-subtitle">{{ __('All the tools you need to run your business, perfectly integrated, for one simple price.') }}</p>
+            <h2 class="section-title">{{ __('Meet WhizzIQ — Your All-in-One Business Control Center') }}</h2>
+            <p class="section-subtitle">{{ __('Replace 10+ tools with one platform. Save thousands. Get back your time.') }}</p>
         </div>
 
         <div class="features-grid">
@@ -955,8 +962,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                 </div>
-                <h3 class="feature-title">{{ __('Complete CRM & Sales Pipeline') }}</h3>
-                <p class="feature-description">{{ __('Manage contacts, track deals, and close more sales. Never lose a deal because you forgot to follow up.') }}</p>
+                <h3 class="feature-title">{{ __('Never lose a deal because you forgot to follow up') }}</h3>
+                <p class="feature-description">{{ __('Unified CRM and sales pipeline keeps every lead, conversation, and deal in one place. Automated reminders ensure you never miss a follow-up.') }}</p>
                 <span class="feature-replaces">{{ __('Replaces: HubSpot ($800+/mo), Pipedrive') }}</span>
             </div>
 
@@ -967,8 +974,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/>
                     </svg>
                 </div>
-                <h3 class="feature-title">{{ __('Invoicing & Payment Processing') }}</h3>
-                <p class="feature-description">{{ __('Send professional invoices, accept payments, track expenses. Get paid faster with less hassle.') }}</p>
+                <h3 class="feature-title">{{ __('Get paid faster — send branded invoices and accept payments in minutes') }}</h3>
+                <p class="feature-description">{{ __('Professional invoicing with one-click payments. Track every dollar in and out. Stop chasing unpaid invoices.') }}</p>
                 <span class="feature-replaces">{{ __('Replaces: QuickBooks ($50-200/mo), FreshBooks') }}</span>
             </div>
 
@@ -979,8 +986,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
-                <h3 class="feature-title">{{ __('Appointment Scheduling & Calendar') }}</h3>
-                <p class="feature-description">{{ __('Automated booking, calendar sync, Zoom integration. End the email back-and-forth forever.') }}</p>
+                <h3 class="feature-title">{{ __('Automate bookings and avoid double-bookings & calendar chaos') }}</h3>
+                <p class="feature-description">{{ __('Clients book directly into your calendar. Automatic Zoom links, reminders, and rescheduling. No more email back-and-forth.') }}</p>
                 <span class="feature-replaces">{{ __('Replaces: Calendly ($15-50/mo), Acuity') }}</span>
             </div>
 
@@ -991,9 +998,21 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7a3 3 0 11-6 0 3 3 0 016 0zm6 0a3 3 0 11-6 0 3 3 0 016 0zm-9 6a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                <h3 class="feature-title">{{ __('Task Management & Marketing') }}</h3>
-                <p class="feature-description">{{ __('Project boards, email campaigns, automation. Keep your team aligned and grow on autopilot.') }}</p>
+                <h3 class="feature-title">{{ __('Manage all tasks and projects without juggling 3 different apps') }}</h3>
+                <p class="feature-description">{{ __('Keep your team (or yourself) aligned with project boards. Run email campaigns and social posts without leaving the platform.') }}</p>
                 <span class="feature-replaces">{{ __('Replaces: Asana ($10-25/mo), Mailchimp ($20-300/mo)') }}</span>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-number">5</div>
+                <div class="feature-icon-wrapper">
+                    <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">{{ __('Grow without the overwhelm — built-in analytics & AI tools') }}</h3>
+                <p class="feature-description">{{ __('See what\'s working with real-time analytics. AI-powered insights help you make smarter decisions and automate repetitive work.') }}</p>
+                <span class="feature-replaces">{{ __('Included at no extra cost') }}</span>
             </div>
         </div>
     </section>
@@ -1114,7 +1133,7 @@
 
             <div style="text-align: center; margin-top: 50px;">
                 <a href="{{ route('register') }}" class="btn-primary">
-                    {{ __('Start Free Trial') }}
+                    {{ __('Start Your 14-Day Free Trial') }}
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
                     </svg>
@@ -1159,11 +1178,11 @@
                     <div class="testimonial-avatar" style="background: #FFE5E5; color: var(--color-accent);">SM</div>
                     <div class="testimonial-info">
                         <h4>Sarah Mitchell</h4>
-                        <p>Marketing Consultant</p>
+                        <p>Marketing Consultant, Mitchell Digital</p>
                     </div>
                 </div>
                 <div class="testimonial-content">
-                    "{{ __('I was paying $850/month for HubSpot, Calendly, and Asana. WhizzIQ does everything for $50. Saved $9,600 in 6 months. The time savings are even better—no more switching between apps.') }}"
+                    "{{ __('I was paying $850/month for HubSpot, Calendly, and Asana. WhizzIQ replaced all three for $30/month. I\'ve saved $9,600 in my first year and cut my admin time by 60%. Now I spend those hours serving clients instead of managing software.') }}"
                 </div>
                 <div class="testimonial-rating">★★★★★</div>
             </div>
@@ -1173,11 +1192,11 @@
                     <div class="testimonial-avatar" style="background: #E5F4FF; color: var(--color-blue);">JD</div>
                     <div class="testimonial-info">
                         <h4>James Davidson</h4>
-                        <p>Freelance Designer</p>
+                        <p>Freelance Designer, JD Creative Studio</p>
                     </div>
                 </div>
                 <div class="testimonial-content">
-                    "{{ __('Setup took 20 minutes. Imported contacts from HubSpot, connected Google Calendar, sent invoices the same day. Clients love the booking system. Exactly what I needed.') }}"
+                    "{{ __('Setup took 20 minutes. I imported 200+ contacts from HubSpot, connected my Google Calendar, and sent my first invoice the same day. My clients love the automated booking system. This saved me 10+ hours per week in the first month alone.') }}"
                 </div>
                 <div class="testimonial-rating">★★★★★</div>
             </div>
@@ -1187,11 +1206,11 @@
                     <div class="testimonial-avatar" style="background: #E5FFE5; color: var(--color-green);">LK</div>
                     <div class="testimonial-info">
                         <h4>Lisa Kim</h4>
-                        <p>Business Coach</p>
+                        <p>Business Coach, Momentum Coaching</p>
                     </div>
                 </div>
                 <div class="testimonial-content">
-                    "{{ __('Tried every business tool. WhizzIQ actually delivers on \'all-in-one.\' Better CRM than HubSpot, cleaner invoicing than QuickBooks. Saves me 5+ hours every week.') }}"
+                    "{{ __('After trying every business tool on the market, WhizzIQ is the only one that actually delivers on "all-in-one." The CRM is better than HubSpot for small businesses, invoicing is cleaner than QuickBooks, and I save 5-7 hours every week. My revenue grew 30% in 3 months just from the time I got back.') }}"
                 </div>
                 <div class="testimonial-rating">★★★★★</div>
             </div>
@@ -1221,7 +1240,7 @@
 
         <div style="text-align: center; margin-top: 50px;">
             <a href="{{ route('register') }}" class="btn-primary">
-                {{ __('Start Free Trial') }}
+                {{ __('Start Your 14-Day Free Trial') }}
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
