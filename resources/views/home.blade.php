@@ -1,278 +1,1272 @@
 <x-layouts.app>
     <x-slot name="title">
-        {{ __('WhizzIQ: All-in-One Business Management Platform | Replace 10+ Tools') }}
+        {{ __('WhizzIQ: All-in-One Business Platform | Save $10,000/Year | Free Trial') }}
     </x-slot>
 
-    {{-- Hero Section --}}
-    <x-section.hero class="w-full mb-8 md:mb-72">
-        <div class="mx-auto text-center h-160 md:h-180 px-4">
-            <x-pill class="text-primary-500 bg-primary-50">{{ __('The Complete Business Operating System') }}</x-pill>
-            <x-heading.h1 class="mt-4 text-primary-50 font-bold text-4xl md:text-6xl">
-                {{ __('Stop Juggling 10+ Tools.') }}
-                <br class="hidden sm:block">
-                {{ __('Run Your Entire Business from One Platform.') }}
-            </x-heading.h1>
+    <style>
+        /* Bloom-inspired Complete Redesign */
+        * {
+            box-sizing: border-box;
+        }
 
-            <p class="text-primary-50 m-3 text-lg md:text-xl max-w-3xl mx-auto">
-                {{ __('CRM, invoicing, scheduling, project management, and marketing—all in one platform.') }}
+        :root {
+            --color-cream: #FAF7F0;
+            --color-beige: #F5EFE6;
+            --color-dark: #1a1a1a;
+            --color-accent: #E94560;
+            --color-blue: #3B82F6;
+            --color-green: #10B981;
+            --color-purple: #8B5CF6;
+            --color-orange: #F97316;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: var(--color-dark);
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-beige) 100%);
+            min-height: 90vh;
+            position: relative;
+            overflow: hidden;
+            padding: 100px 20px 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: white;
+            border: 3px solid var(--color-dark);
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 5px 5px 0 var(--color-dark);
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .hero-title {
+            font-size: clamp(40px, 7vw, 80px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin: 30px 0;
+            color: var(--color-dark);
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .hero-title .highlight {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-title .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: -5px;
+            right: -5px;
+            height: 20px;
+            background: var(--color-accent);
+            opacity: 0.3;
+            z-index: -1;
+            border-radius: 5px;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(18px, 3vw, 24px);
+            color: #4a4a4a;
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+            animation: slideUp 1s ease-out;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            animation: slideUp 1.2s ease-out;
+        }
+
+        .btn-primary {
+            padding: 18px 40px;
+            background: var(--color-dark);
+            color: white;
+            border: 3px solid var(--color-dark);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+        }
+
+        .btn-primary:hover {
+            background: white;
+            color: var(--color-dark);
+            transform: translate(-2px, -2px);
+            box-shadow: 7px 7px 0 rgba(0,0,0,0.15);
+        }
+
+        .btn-secondary {
+            padding: 18px 40px;
+            background: transparent;
+            color: var(--color-dark);
+            border: 3px solid var(--color-dark);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-dark);
+            color: white;
+        }
+
+        .hero-trust {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 50px;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            background: white;
+            padding: 15px 25px;
+            border: 3px solid var(--color-dark);
+            border-radius: 100px;
+            font-weight: 700;
+            box-shadow: 5px 5px 0 var(--color-dark);
+            animation: float 6s ease-in-out infinite;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .float-1 {
+            top: 15%;
+            left: 5%;
+            animation-delay: 0s;
+            background: #FFE5E5;
+            border-color: var(--color-accent);
+            box-shadow: 5px 5px 0 var(--color-accent);
+        }
+
+        .float-2 {
+            top: 25%;
+            right: 8%;
+            animation-delay: 1s;
+            background: #E5F4FF;
+            border-color: var(--color-blue);
+            box-shadow: 5px 5px 0 var(--color-blue);
+        }
+
+        .float-3 {
+            top: 50%;
+            left: 3%;
+            animation-delay: 2s;
+            background: #E5FFE5;
+            border-color: var(--color-green);
+            box-shadow: 5px 5px 0 var(--color-green);
+        }
+
+        .float-4 {
+            bottom: 20%;
+            right: 5%;
+            animation-delay: 3s;
+            background: #F3E5FF;
+            border-color: var(--color-purple);
+            box-shadow: 5px 5px 0 var(--color-purple);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Logo Bar */
+        .logo-bar {
+            background: white;
+            padding: 40px 20px;
+            border-top: 3px solid var(--color-dark);
+            border-bottom: 3px solid var(--color-dark);
+        }
+
+        .logo-bar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .logo-bar-title {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .logo-grid {
+            display: flex;
+            gap: 50px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo-item {
+            padding: 12px 25px;
+            background: var(--color-beige);
+            border: 2px solid var(--color-dark);
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--color-dark);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 80px 20px;
+            background: var(--color-dark);
+            color: white;
+        }
+
+        .stats-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 50px;
+            text-align: center;
+        }
+
+        .stat-item {
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .stat-number {
+            font-size: 60px;
+            font-weight: 900;
+            color: var(--color-accent);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 18px;
+            color: #ccc;
+            font-weight: 600;
+        }
+
+        /* Problem Section */
+        .problem-section {
+            padding: 100px 20px;
+            background: white;
+        }
+
+        .problem-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 70px;
+        }
+
+        .section-label {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--color-beige);
+            border: 2px solid var(--color-dark);
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            color: var(--color-dark);
+        }
+
+        .section-subtitle {
+            font-size: 20px;
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .problem-card {
+            background: #FFF5F5;
+            border: 3px solid var(--color-accent);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 6px 6px 0 var(--color-accent);
+            transition: all 0.3s;
+        }
+
+        .problem-card:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0 var(--color-accent);
+        }
+
+        .problem-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        .problem-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .problem-description {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Solution/Features Section */
+        .features-section {
+            padding: 100px 20px;
+            background: var(--color-beige);
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            border: 3px solid var(--color-dark);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 6px 6px 0 var(--color-dark);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .feature-card:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0 var(--color-dark);
+        }
+
+        .feature-number {
+            position: absolute;
+            top: -15px;
+            right: 30px;
+            width: 40px;
+            height: 40px;
+            background: var(--color-accent);
+            border: 3px solid var(--color-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: white;
+        }
+
+        .feature-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            background: var(--color-beige);
+            border: 3px solid var(--color-dark);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: var(--color-dark);
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .feature-replaces {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #FFF5E5;
+            border: 2px solid var(--color-orange);
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-dark);
+        }
+
+        /* Comparison Table */
+        .comparison-section {
+            padding: 100px 20px;
+            background: white;
+        }
+
+        .comparison-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .comparison-table-wrapper {
+            overflow-x: auto;
+            margin-top: 50px;
+            border: 3px solid var(--color-dark);
+            border-radius: 20px;
+            background: white;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .comparison-table thead {
+            background: var(--color-beige);
+        }
+
+        .comparison-table th {
+            padding: 30px 20px;
+            text-align: center;
+            border-right: 2px solid #e5e5e5;
+            vertical-align: middle;
+        }
+
+        .comparison-table th:first-child {
+            text-align: left;
+            background: var(--color-dark);
+            color: white;
+            font-size: 18px;
+            font-weight: 900;
+            vertical-align: middle;
+        }
+
+        .comparison-table th:last-child {
+            border-right: none;
+        }
+
+        .company-logo {
+            font-size: 18px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            color: var(--color-dark);
+            line-height: 1.3;
+        }
+
+        .company-logo.highlight {
+            color: var(--color-accent);
+            font-size: 20px;
+        }
+
+        .company-tagline {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            line-height: 1.4;
+            margin: 0 auto;
+            max-width: 140px;
+        }
+
+        .comparison-table tbody tr {
+            border-bottom: 2px solid #e5e5e5;
+            min-height: 60px;
+        }
+
+        .comparison-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-table td {
+            padding: 20px;
+            text-align: center;
+            border-right: 2px solid #e5e5e5;
+            font-size: 15px;
+            vertical-align: middle;
+            min-height: 60px;
+        }
+
+        .comparison-table td:first-child {
+            text-align: left;
+            font-weight: 700;
+            background: var(--color-beige);
+            color: var(--color-dark);
+        }
+
+        .comparison-table td:last-child {
+            border-right: none;
+        }
+
+        .feature-check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-green);
+            font-size: 28px;
+            font-weight: 900;
+            line-height: 1;
+            width: 30px;
+            height: 30px;
+        }
+
+        .feature-none {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1;
+            width: 30px;
+            height: 30px;
+        }
+
+        .feature-price {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .highlight-col {
+            background: #fffbf0;
+        }
+
+        .pricing-row {
+            background: var(--color-beige);
+            font-weight: 900;
+        }
+
+        .pricing-row td {
+            padding: 30px 20px;
+            font-size: 20px;
+            vertical-align: middle;
+        }
+
+        .pricing-highlight {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-green);
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .pricing-competitor {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-accent);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* Testimonials */
+        .testimonials-section {
+            padding: 100px 20px;
+            background: var(--color-cream);
+        }
+
+        .testimonials-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background: var(--color-beige);
+            border: 3px solid var(--color-dark);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 6px 6px 0 var(--color-dark);
+            transition: all 0.3s;
+        }
+
+        .testimonial-card:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0 var(--color-dark);
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .testimonial-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid var(--color-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 24px;
+            background: white;
+        }
+
+        .testimonial-info h4 {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .testimonial-info p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .testimonial-content {
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--color-dark);
+            font-style: italic;
+        }
+
+        .testimonial-rating {
+            margin-top: 20px;
+            color: var(--color-orange);
+            font-size: 20px;
+        }
+
+        /* Pricing Section */
+        .pricing-section {
+            padding: 100px 20px;
+            background: var(--color-beige);
+            color: var(--color-dark);
+        }
+
+        .pricing-cards {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Override pricing card styles for better alignment */
+        .pricing-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .pricing-section ul li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            line-height: 1.6;
+        }
+
+        .pricing-section ul li::before {
+            content: '✓';
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            color: var(--color-green);
+            font-weight: 900;
+            font-size: 18px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .pricing-section .section-label {
+            background: var(--color-dark);
+            color: white;
+        }
+
+        .pricing-section .section-title {
+            color: var(--color-dark);
+        }
+
+        .pricing-section .section-subtitle {
+            color: #666;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            padding: 100px 20px;
+            background: var(--color-beige);
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .floating-element {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 40px;
+            }
+
+            .problem-grid,
+            .features-grid,
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-number {
+                font-size: 48px;
+            }
+
+            .section-title {
+                font-size: 36px;
+            }
+
+            .comparison-table-wrapper {
+                border-radius: 10px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+
+            .company-logo {
+                font-size: 13px;
+            }
+
+            .company-tagline {
+                font-size: 9px;
+                max-width: 100px;
+            }
+
+            .feature-check {
+                font-size: 20px;
+                width: 24px;
+                height: 24px;
+            }
+
+            .feature-none {
+                font-size: 18px;
+                width: 24px;
+                height: 24px;
+            }
+
+            .pricing-highlight {
+                font-size: 16px;
+            }
+
+            .pricing-competitor {
+                font-size: 13px;
+            }
+        }
+    </style>
+
+    {{-- HERO SECTION --}}
+    <section class="hero-section">
+        <div class="floating-element float-1">💰 Save $10,000/year</div>
+        <div class="floating-element float-2">⚡ Set up in 15 min</div>
+        <div class="floating-element float-3">🎯 Replace 10+ tools</div>
+        <div class="floating-element float-4">✨ 14-day free trial</div>
+
+        <div class="hero-content">
+            <div class="hero-badge">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+                {{ __('The All-in-One Business Operating System') }}
+            </div>
+
+            <h1 class="hero-title">
+                {{ __('Run Your Entire Business from One Platform') }}<br>
+                <span class="highlight">{{ __('Save $10,000/year') }}</span><br>
+                {{ __('Stop juggling 10+ tools') }}
+            </h1>
+
+            <p class="hero-subtitle">
+                {{ __('WhizzIQ replaces HubSpot, QuickBooks, Calendly, Asana, and Mailchimp—all perfectly integrated. Get started in 15 minutes.') }}
             </p>
 
-            <div class="flex flex-wrap gap-4 justify-center flex-col md:flex-row mt-8">
-                <x-effect.glow></x-effect.glow>
-
-                <x-button-link.secondary href="{{ route('register') }}" class="self-center py-4 px-8 text-lg font-semibold" elementType="a">
-                    {{ __('Start Free 14-Day Trial') }}
-                </x-button-link.secondary>
-                <x-button-link.primary-outline href="#features" class="bg-transparent self-center py-4 px-8 text-lg font-semibold text-white border-white hover:bg-white hover:text-primary-600">
-                    {{ __('See All Features') }}
-                </x-button-link.primary-outline>
+            <div class="hero-cta-group">
+                <a href="{{ route('register') }}" class="btn-primary">
+                    {{ __('Start Free Trial') }}
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </a>
+                <a href="#comparison" class="btn-secondary">
+                    {{ __('Compare with Others') }}
+                </a>
             </div>
 
-            {{-- Trust Indicators --}}
-            <div class="mt-6 flex flex-wrap justify-center items-center gap-6 text-primary-50 text-sm">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <div class="hero-trust">
+                <div class="trust-item">
+                    <svg width="20" height="20" fill="#10B981" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    <span>{{ __('Cancel Anytime') }}</span>
+                    {{ __('14-day free trial') }}
                 </div>
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                <div class="trust-item">
+                    <svg width="20" height="20" fill="#10B981" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    <span>{{ __('14-Day Free Trial') }}</span>
+                    {{ __('Cancel anytime') }}
                 </div>
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                <div class="trust-item">
+                    <svg width="20" height="20" fill="#10B981" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    <span>{{ __('Replace $500+/Month in Tools') }}</span>
-                </div>
-            </div>
-
-            <div class="mx-auto md:max-w-3xl lg:max-w-5xl">
-                <img class="drop-shadow-2xl mt-8 transition hover:scale-101 rounded-2xl border-4 border-white/20" src="{{URL::asset('/images/features/hero-image.png')}}" alt="WhizzIQ Dashboard" />
-            </div>
-        </div>
-    </x-section.hero>
-
-    {{-- Solution Section --}}
-    <section class="pt-64 md:pt-96 pb-16 bg-white" id="features">
-        <div class="max-w-6xl mx-auto px-4">
-            <div class="text-center mb-12">
-                <x-heading.h6 class="text-primary-500">{{ __('The Solution') }}</x-heading.h6>
-                <x-heading.h2 class="text-gray-900">{{ __('Everything Your Business Needs in One Platform') }}</x-heading.h2>
-                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">{{ __('Stop paying for 10+ tools. WhizzIQ gives you a complete business operating system for less than the cost of a single CRM.') }}</p>
-            </div>
-
-            {{-- Feature Grid --}}
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-                {{-- CRM --}}
-                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-lg transition">
-                    <div class="bg-primary-100 text-primary-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">{{ __('Complete CRM') }}</h3>
-                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Manage all your contacts, track interactions, score relationships, and never miss a follow-up. Replace HubSpot or Salesforce.') }}</p>
-                    <ul class="space-y-2 text-base text-gray-600">
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Contact relationship scoring') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Interaction history & notes') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Automatic follow-up reminders') }}
-                        </li>
-                    </ul>
-                </div>
-
-                {{-- Sales Pipeline --}}
-                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-lg transition">
-                    <div class="bg-primary-100 text-primary-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">{{ __('Sales Pipeline') }}</h3>
-                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Track deals from lead to close, forecast revenue, and know exactly where every opportunity stands. Replace Pipedrive.') }}</p>
-                    <ul class="space-y-2 text-base text-gray-600">
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Visual deal pipeline') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Weighted revenue forecasting') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Win/loss tracking & analysis') }}
-                        </li>
-                    </ul>
-                </div>
-
-                {{-- Appointment Booking --}}
-                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-lg transition">
-                    <div class="bg-primary-100 text-primary-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">{{ __('Appointment Booking') }}</h3>
-                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Public booking pages, calendar sync, automatic Zoom/Meet links, and attendance tracking. Replace Calendly and Acuity.') }}</p>
-                    <ul class="space-y-2 text-base text-gray-600">
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Google/Outlook/Apple sync') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Auto Zoom/Meet link generation') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Recurring appointments') }}
-                        </li>
-                    </ul>
-                </div>
-
-                {{-- Invoicing & Payments --}}
-                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-lg transition">
-                    <div class="bg-primary-100 text-primary-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">{{ __('Invoicing & Payments') }}</h3>
-                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Create professional invoices, accept payments via Stripe, track overdue invoices, and automate reminders. Replace FreshBooks.') }}</p>
-                    <ul class="space-y-2 text-base text-gray-600">
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Stripe/Paddle integration') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Custom branded templates') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Payment reminders & tracking') }}
-                        </li>
-                    </ul>
-                </div>
-
-                {{-- Task Management --}}
-                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-lg transition">
-                    <div class="bg-primary-100 text-primary-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">{{ __('Task & Project Management') }}</h3>
-                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Kanban boards, AI-powered prioritization, goal tracking (OKRs), and deadline management. Replace Asana or Monday.') }}</p>
-                    <ul class="space-y-2 text-base text-gray-600">
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('AI task extraction from notes') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Kanban board views') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('OKR-style goal tracking') }}
-                        </li>
-                    </ul>
-                </div>
-
-                {{-- Marketing Automation --}}
-                <div class="bg-gray-50 p-6 rounded-xl hover:shadow-lg transition">
-                    <div class="bg-primary-100 text-primary-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-3">{{ __('Marketing Automation') }}</h3>
-                    <p class="text-gray-700 text-base leading-relaxed mb-4">{{ __('Email campaigns, social media management, analytics tracking, and ROI calculations. Replace Mailchimp and Hootsuite.') }}</p>
-                    <ul class="space-y-2 text-base text-gray-600">
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Email campaigns with templates') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('Social media integration') }}
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            {{ __('CLV/CAC tracking') }}
-                        </li>
-                    </ul>
+                    {{ __('Setup in 15 minutes') }}
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- Pricing Section --}}
-    <section class="mt-24 pt-64 md:pt-80 pb-16 bg-gray-50" id="pricing">
-        <div class="max-w-6xl mx-auto px-4">
-            <div class="text-center mb-12">
-                <x-heading.h6 class="text-primary-500">{{ __('Pricing') }}</x-heading.h6>
-                <x-heading.h2 class="text-gray-900">{{ __('One Platform. One Price. Everything You Need.') }}</x-heading.h2>
-                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">{{ __('Stop paying for HubSpot, QuickBooks, Calendly, Mailchimp, Asana, and more. Get everything in one platform.') }}</p>
-            </div>
-
-            <div class="pricing">
-                <x-plans.all calculate-saving-rates="true" show-default-product="1"/>
-                <x-products.all />
+    {{-- LOGO BAR --}}
+    <section class="logo-bar">
+        <div class="logo-bar-content">
+            <div class="logo-bar-title">{{ __('Trusted by businesses replacing:') }}</div>
+            <div class="logo-grid">
+                <div class="logo-item">HubSpot</div>
+                <div class="logo-item">QuickBooks</div>
+                <div class="logo-item">Calendly</div>
+                <div class="logo-item">Asana</div>
+                <div class="logo-item">Mailchimp</div>
+                <div class="logo-item">FreshBooks</div>
             </div>
         </div>
     </section>
 
-    {{-- FAQ Section --}}
-    <section class="py-16 bg-white" id="faq">
-        <div class="max-w-4xl mx-auto px-4">
-            <div class="text-center mb-12">
-                <x-heading.h6 class="text-primary-500">{{ __('Common Questions') }}</x-heading.h6>
-                <x-heading.h2 class="text-gray-900">{{ __('Everything You Need to Know') }}</x-heading.h2>
+    {{-- PROBLEM SECTION --}}
+    <section class="problem-section">
+        <div class="problem-content">
+            <div class="section-header">
+                <span class="section-label">{{ __('The Problem') }}</span>
+                <h2 class="section-title">{{ __('You\'re Paying Too Much for Disconnected Tools') }}</h2>
+                <p class="section-subtitle">{{ __('Most businesses spend $500-1,200/month on tools that don\'t talk to each other. You waste time copying data, managing subscriptions, and learning new interfaces.') }}</p>
+            </div>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">😫</div>
+                    <h3 class="problem-title">{{ __('Tool Overload') }}</h3>
+                    <p class="problem-description">{{ __('10+ subscriptions, 10+ logins, 10+ learning curves. Each tool requires separate setup, training, and maintenance.') }}</p>
+                </div>
+
+                <div class="problem-card">
+                    <div class="problem-icon">💸</div>
+                    <h3 class="problem-title">{{ __('Bleeding Money') }}</h3>
+                    <p class="problem-description">{{ __('$6,000-14,000/year on software that should be integrated but isn\'t. You\'re paying for features you don\'t use and integrations that don\'t exist.') }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- SOLUTION/FEATURES SECTION --}}
+    <section class="features-section" id="features">
+        <div class="section-header">
+            <span class="section-label">{{ __('The Solution') }}</span>
+            <h2 class="section-title">{{ __('Everything You Need in One Platform') }}</h2>
+            <p class="section-subtitle">{{ __('All the tools you need to run your business, perfectly integrated, for one simple price.') }}</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-number">1</div>
+                <div class="feature-icon-wrapper">
+                    <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">{{ __('Complete CRM & Sales Pipeline') }}</h3>
+                <p class="feature-description">{{ __('Manage contacts, track deals, and close more sales. Never lose a deal because you forgot to follow up.') }}</p>
+                <span class="feature-replaces">{{ __('Replaces: HubSpot ($800+/mo), Pipedrive') }}</span>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-number">2</div>
+                <div class="feature-icon-wrapper">
+                    <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">{{ __('Invoicing & Payment Processing') }}</h3>
+                <p class="feature-description">{{ __('Send professional invoices, accept payments, track expenses. Get paid faster with less hassle.') }}</p>
+                <span class="feature-replaces">{{ __('Replaces: QuickBooks ($50-200/mo), FreshBooks') }}</span>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-number">3</div>
+                <div class="feature-icon-wrapper">
+                    <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">{{ __('Appointment Scheduling & Calendar') }}</h3>
+                <p class="feature-description">{{ __('Automated booking, calendar sync, Zoom integration. End the email back-and-forth forever.') }}</p>
+                <span class="feature-replaces">{{ __('Replaces: Calendly ($15-50/mo), Acuity') }}</span>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-number">4</div>
+                <div class="feature-icon-wrapper">
+                    <svg width="36" height="36" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7a3 3 0 11-6 0 3 3 0 016 0zm6 0a3 3 0 11-6 0 3 3 0 016 0zm-9 6a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </div>
+                <h3 class="feature-title">{{ __('Task Management & Marketing') }}</h3>
+                <p class="feature-description">{{ __('Project boards, email campaigns, automation. Keep your team aligned and grow on autopilot.') }}</p>
+                <span class="feature-replaces">{{ __('Replaces: Asana ($10-25/mo), Mailchimp ($20-300/mo)') }}</span>
+            </div>
+        </div>
+    </section>
+
+    {{-- COMPARISON SECTION --}}
+    <section class="comparison-section" id="comparison">
+        <div class="comparison-container">
+            <div class="section-header">
+                <span class="section-label">{{ __('The Comparison') }}</span>
+                <h2 class="section-title">{{ __('WhizzIQ vs Others') }}</h2>
+                <p class="section-subtitle">{{ __('See how WhizzIQ compares to the tools you\'re probably using right now') }}</p>
+            </div>
+
+            <div class="comparison-table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>{{ __('Features') }}</th>
+                            <th class="highlight-col">
+                                <div class="company-logo highlight">WhizzIQ</div>
+                                <div class="company-tagline">{{ __('All-in-one for small businesses') }}</div>
+                            </th>
+                            <th>
+                                <div class="company-logo">HubSpot</div>
+                                <div class="company-tagline">{{ __('Enterprise CRM & Marketing') }}</div>
+                            </th>
+                            <th>
+                                <div class="company-logo">QuickBooks</div>
+                                <div class="company-tagline">{{ __('Accounting software') }}</div>
+                            </th>
+                            <th>
+                                <div class="company-logo">Calendly</div>
+                                <div class="company-tagline">{{ __('Scheduling tool') }}</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ __('CRM & Contact Management') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('Sales Pipeline') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('Invoicing & Payments') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('Appointment Scheduling') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-check">✓</span></td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('Task & Project Management') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('Marketing Automation') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('Email Campaigns') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('Financial Tracking') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('Client Portal') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                        </tr>
+                        <tr>
+                            <td>{{ __('AI-Powered Insights') }}</td>
+                            <td class="highlight-col"><span class="feature-check">✓</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                            <td><span class="feature-none">—</span></td>
+                        </tr>
+                        <tr class="pricing-row">
+                            <td>{{ __('Total Cost (All Features)') }}</td>
+                            <td class="highlight-col"><span class="pricing-highlight">$29.99/mo</span></td>
+                            <td><span class="pricing-competitor">$800+/mo</span></td>
+                            <td><span class="pricing-competitor">$50-200/mo</span></td>
+                            <td><span class="pricing-competitor">$15-50/mo</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="text-align: center; margin-top: 50px;">
+                <a href="{{ route('register') }}" class="btn-primary">
+                    {{ __('Start Free Trial') }}
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {{-- STATS SECTION --}}
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">$6,000-14,000</div>
+                <div class="stat-label">{{ __('Average Savings Per Year') }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">10+</div>
+                <div class="stat-label">{{ __('Tools You Can Replace') }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">15 min</div>
+                <div class="stat-label">{{ __('Average Setup Time') }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">{{ __('Businesses Already Saving') }}</div>
+            </div>
+        </div>
+    </section>
+
+    {{-- TESTIMONIALS --}}
+    <section class="testimonials-section">
+        <div class="section-header">
+            <span class="section-label">{{ __('Social Proof') }}</span>
+            <h2 class="section-title">{{ __('Join 500+ Businesses Already Saving') }}</h2>
+            <p class="section-subtitle">{{ __('See how entrepreneurs simplified their business and saved thousands with WhizzIQ') }}</p>
+        </div>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar" style="background: #FFE5E5; color: var(--color-accent);">SM</div>
+                    <div class="testimonial-info">
+                        <h4>Sarah Mitchell</h4>
+                        <p>Marketing Consultant</p>
+                    </div>
+                </div>
+                <div class="testimonial-content">
+                    "{{ __('I was paying $850/month for HubSpot, Calendly, and Asana. WhizzIQ does everything for $50. Saved $9,600 in 6 months. The time savings are even better—no more switching between apps.') }}"
+                </div>
+                <div class="testimonial-rating">★★★★★</div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar" style="background: #E5F4FF; color: var(--color-blue);">JD</div>
+                    <div class="testimonial-info">
+                        <h4>James Davidson</h4>
+                        <p>Freelance Designer</p>
+                    </div>
+                </div>
+                <div class="testimonial-content">
+                    "{{ __('Setup took 20 minutes. Imported contacts from HubSpot, connected Google Calendar, sent invoices the same day. Clients love the booking system. Exactly what I needed.') }}"
+                </div>
+                <div class="testimonial-rating">★★★★★</div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar" style="background: #E5FFE5; color: var(--color-green);">LK</div>
+                    <div class="testimonial-info">
+                        <h4>Lisa Kim</h4>
+                        <p>Business Coach</p>
+                    </div>
+                </div>
+                <div class="testimonial-content">
+                    "{{ __('Tried every business tool. WhizzIQ actually delivers on \'all-in-one.\' Better CRM than HubSpot, cleaner invoicing than QuickBooks. Saves me 5+ hours every week.') }}"
+                </div>
+                <div class="testimonial-rating">★★★★★</div>
+            </div>
+        </div>
+    </section>
+
+    {{-- PRICING --}}
+    <section class="pricing-section" id="pricing">
+        <div class="section-header">
+            <span class="section-label">{{ __('Pricing') }}</span>
+            <h2 class="section-title">{{ __('Simple, Transparent Pricing') }}</h2>
+            <p class="section-subtitle">{{ __('One platform. One price. Everything included. No hidden fees. 30-day money-back guarantee.') }}</p>
+        </div>
+
+        <div class="pricing-cards">
+            <x-plans.all calculate-saving-rates="true" show-default-product="1"/>
+            <x-products.all />
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: white; border: 3px solid var(--color-dark); border-radius: 20px; max-width: 800px; margin-left: auto; margin-right: auto;">
+            <p style="font-size: 16px; color: #666; margin-bottom: 15px;">
+                <strong style="color: var(--color-dark);">✓ 30-day money-back guarantee</strong> — Try risk-free<br>
+                <strong style="color: var(--color-dark);">✓ Cancel anytime</strong> — No questions asked<br>
+                <strong style="color: var(--color-dark);">✓ Join 500+ businesses</strong> already saving thousands
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 50px;">
+            <a href="{{ route('register') }}" class="btn-primary">
+                {{ __('Start Free Trial') }}
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    {{-- FAQ --}}
+    <section class="faq-section" id="faq">
+        <div class="faq-container">
+            <div class="section-header">
+                <span class="section-label">{{ __('FAQ') }}</span>
+                <h2 class="section-title">{{ __('Common Questions') }}</h2>
+                <p class="section-subtitle">{{ __('Everything you need to know about WhizzIQ') }}</p>
             </div>
 
             <x-accordion class="mt-4">
                 <x-accordion.item active="true" name="faqs">
                     <x-slot name="title">{{ __('What exactly is WhizzIQ?') }}</x-slot>
-                    <p>{{ __('WhizzIQ is a complete business operating system that replaces 10+ separate tools. You get CRM, sales pipeline, invoicing, appointment booking, task management, marketing automation, financial tracking, document storage, and AI-powered insights—all in one platform. Built specifically for solopreneurs and service businesses making $50K-$500K annually.') }}</p>
+                    <p>{{ __('WhizzIQ is an all-in-one business operating system that replaces 10+ expensive tools. You get CRM, sales pipeline, invoicing, appointment booking, task management, marketing automation, financial tracking, and more—all perfectly integrated in one platform.') }}</p>
                 </x-accordion.item>
 
                 <x-accordion.item active="false" name="faqs">
-                    <x-slot name="title">{{ __('How does WhizzIQ compare to HubSpot, QuickBooks, or other tools?') }}</x-slot>
-                    <p>{{ __('HubSpot costs $800+/month for CRM and marketing. QuickBooks is $50-200/month. Calendly is $15-50/month. Asana is $10-25/month. Add up your tools and you\'re easily spending $500-1,000/month. WhizIQ gives you all of this functionality for $29.99-49.99/month—a 90% cost savings with zero data silos.') }}</p>
+                    <x-slot name="title">{{ __('How much will I really save?') }}</x-slot>
+                    <p>{{ __('Most business owners pay $500-1,200/month for tools like HubSpot ($800+), QuickBooks ($50-200), Calendly ($15-50), Asana ($10-25), and Mailchimp ($20-300). WhizzIQ replaces all of them for $29.99-49.99/month—saving you $6,000-14,000 per year.') }}</p>
                 </x-accordion.item>
 
                 <x-accordion.item active="false" name="faqs">
-                    <x-slot name="title">{{ __('Is my data secure?') }}</x-slot>
-                    <p>{{ __('Yes. All data is encrypted with bank-level 256-bit SSL encryption. We never sell your data to third parties. You can export or delete your information anytime. WhizIQ is fully compliant with GDPR and data protection regulations.') }}</p>
+                    <x-slot name="title">{{ __('Can I import my data from other tools?') }}</x-slot>
+                    <p>{{ __('Yes! Import contacts from HubSpot, Salesforce, or any CSV file. Sync calendars from Google, Outlook, or Apple. Import financial data from QuickBooks. We have migration guides for each platform.') }}</p>
                 </x-accordion.item>
 
                 <x-accordion.item active="false" name="faqs">
                     <x-slot name="title">{{ __('How long does setup take?') }}</x-slot>
-                    <p>{{ __('Most users are up and running in 15-20 minutes. Import your contacts via CSV, connect your calendar (Google/Outlook), and link Stripe for payments. WhizIQ includes setup guides and onboarding checklists to help you get started quickly.') }}</p>
+                    <p>{{ __('Most users are fully set up in 15-20 minutes. Import contacts via CSV, connect your calendar (Google/Outlook/Apple), link Stripe for payments, and you\'re done. We provide step-by-step guides for everything.') }}</p>
                 </x-accordion.item>
 
                 <x-accordion.item active="false" name="faqs">
-                    <x-slot name="title">{{ __('Can I cancel anytime?') }}</x-slot>
-                    <p>{{ __('Yes. Cancel with one click—no phone calls or retention tactics required. Your data remains accessible for 90 days after cancellation so you can export everything. After 90 days, we permanently delete your data per our privacy policy.') }}</p>
+                    <x-slot name="title">{{ __('What if I don\'t like it?') }}</x-slot>
+                    <p>{{ __('Cancel anytime with one click. No phone calls, no retention tactics, no questions asked. Your data stays accessible for 90 days after cancellation so you can export everything. After 90 days, we permanently delete your data per GDPR.') }}</p>
                 </x-accordion.item>
 
                 <x-accordion.item active="false" name="faqs">
-                    <x-slot name="title">{{ __('What integrations does WhizIQ support?') }}</x-slot>
-                    <p>{{ __('WhizIQ integrates with: Google Calendar, Outlook, Apple Calendar, Zoom, Google Meet, Stripe, Paddle, Facebook, Instagram, LinkedIn, Twitter, QuickBooks (import), and more. We add new integrations monthly based on user requests.') }}</p>
+                    <x-slot name="title">{{ __('Is my data secure?') }}</x-slot>
+                    <p>{{ __('Absolutely. All data is encrypted with bank-level 256-bit SSL. We never sell your data to third parties. You can export or delete everything anytime. We\'re fully GDPR and SOC 2 compliant.') }}</p>
                 </x-accordion.item>
             </x-accordion>
         </div>
