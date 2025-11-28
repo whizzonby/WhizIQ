@@ -26,6 +26,10 @@
             line-height: 1.6;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         /* Hero Section */
         .hero-section {
             background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-beige) 100%);
@@ -155,9 +159,10 @@
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
-            font-size: 14px;
-            color: #666;
+            font-size: 15px;
+            color: var(--color-dark);
             margin-bottom: 50px;
+            font-weight: 600;
         }
 
         .trust-item {
@@ -166,60 +171,6 @@
             gap: 8px;
         }
 
-        /* Floating Elements */
-        .floating-element {
-            position: absolute;
-            background: white;
-            padding: 15px 25px;
-            border: 3px solid var(--color-dark);
-            border-radius: 100px;
-            font-weight: 700;
-            box-shadow: 5px 5px 0 var(--color-dark);
-            animation: float 6s ease-in-out infinite;
-            white-space: nowrap;
-            font-size: 14px;
-        }
-
-        .float-1 {
-            top: 15%;
-            left: 5%;
-            animation-delay: 0s;
-            background: #FFE5E5;
-            border-color: var(--color-accent);
-            box-shadow: 5px 5px 0 var(--color-accent);
-        }
-
-        .float-2 {
-            top: 25%;
-            right: 8%;
-            animation-delay: 1s;
-            background: #E5F4FF;
-            border-color: var(--color-blue);
-            box-shadow: 5px 5px 0 var(--color-blue);
-        }
-
-        .float-3 {
-            top: 50%;
-            left: 3%;
-            animation-delay: 2s;
-            background: #E5FFE5;
-            border-color: var(--color-green);
-            box-shadow: 5px 5px 0 var(--color-green);
-        }
-
-        .float-4 {
-            bottom: 20%;
-            right: 5%;
-            animation-delay: 3s;
-            background: #F3E5FF;
-            border-color: var(--color-purple);
-            box-shadow: 5px 5px 0 var(--color-purple);
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(-2deg); }
-            50% { transform: translateY(-20px) rotate(2deg); }
-        }
 
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-30px); }
@@ -236,84 +187,21 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Logo Bar */
-        .logo-bar {
-            background: white;
-            padding: 40px 20px;
-            border-top: 3px solid var(--color-dark);
-            border-bottom: 3px solid var(--color-dark);
-        }
-
-        .logo-bar-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .logo-bar-title {
-            font-size: 14px;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 25px;
-            font-weight: 600;
-        }
-
-        .logo-grid {
-            display: flex;
-            gap: 50px;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .logo-item {
-            padding: 12px 25px;
-            background: var(--color-beige);
-            border: 2px solid var(--color-dark);
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 16px;
-            color: var(--color-dark);
-        }
-
-        /* Stats Section */
-        .stats-section {
-            padding: 80px 20px;
-            background: var(--color-dark);
-            color: white;
-        }
-
-        .stats-grid {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 50px;
-            text-align: center;
-        }
-
-        .stat-item {
-            animation: fadeInUp 0.8s ease-out;
-        }
-
-        .stat-number {
-            font-size: 60px;
-            font-weight: 900;
-            color: var(--color-accent);
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            font-size: 18px;
-            color: #ccc;
-            font-weight: 600;
-        }
-
         /* Problem Section */
         .problem-section {
             padding: 100px 20px;
             background: white;
+            position: relative;
+        }
+
+        .problem-section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e5e5e5 20%, #e5e5e5 80%, transparent);
         }
 
         .problem-content {
@@ -335,6 +223,14 @@
             font-weight: 700;
             font-size: 14px;
             margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .section-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 3px 3px 0 var(--color-dark);
         }
 
         .section-title {
@@ -354,9 +250,12 @@
 
         .problem-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
             margin-bottom: 50px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .problem-card {
@@ -374,8 +273,22 @@
         }
 
         .problem-icon {
-            font-size: 50px;
-            margin-bottom: 20px;
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: 3px solid var(--color-accent);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            flex-shrink: 0;
+        }
+
+        .problem-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: var(--color-accent);
         }
 
         .problem-title {
@@ -394,6 +307,19 @@
         .features-section {
             padding: 100px 20px;
             background: var(--color-beige);
+            position: relative;
+        }
+
+        .features-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--color-green);
+            border-radius: 2px;
         }
 
         .features-grid {
@@ -475,7 +401,20 @@
         /* Comparison Table */
         .comparison-section {
             padding: 100px 20px;
-            background: white;
+            background: linear-gradient(180deg, white 0%, var(--color-cream) 100%);
+            position: relative;
+        }
+
+        .comparison-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--color-purple);
+            border-radius: 2px;
         }
 
         .comparison-container {
@@ -639,6 +578,19 @@
         .testimonials-section {
             padding: 100px 20px;
             background: var(--color-cream);
+            position: relative;
+        }
+
+        .testimonials-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--color-accent);
+            border-radius: 2px;
         }
 
         .testimonials-grid {
@@ -712,6 +664,19 @@
             padding: 100px 20px;
             background: var(--color-beige);
             color: var(--color-dark);
+            position: relative;
+        }
+
+        .pricing-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: var(--color-blue);
+            border-radius: 2px;
         }
 
         .pricing-cards {
@@ -766,7 +731,21 @@
         /* FAQ Section */
         .faq-section {
             padding: 100px 20px;
-            background: var(--color-beige);
+            background: white;
+            border-top: 3px solid var(--color-dark);
+            position: relative;
+        }
+
+        .faq-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--color-accent);
+            margin-top: -3px;
         }
 
         .faq-container {
@@ -776,10 +755,6 @@
 
         /* Mobile Responsive */
         @media (max-width: 768px) {
-            .floating-element {
-                display: none;
-            }
-
             .hero-title {
                 font-size: 40px;
             }
@@ -788,10 +763,11 @@
             .features-grid,
             .testimonials-grid {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
 
-            .stat-number {
-                font-size: 48px;
+            .problem-grid {
+                max-width: 100%;
             }
 
             .section-title {
@@ -841,11 +817,6 @@
 
     {{-- HERO SECTION --}}
     <section class="hero-section">
-        <div class="floating-element float-1">💰 Save $10,000/year</div>
-        <div class="floating-element float-2">⚡ Set up in 15 min</div>
-        <div class="floating-element float-3">🎯 Replace 10+ tools</div>
-        <div class="floating-element float-4">✨ 14-day free trial</div>
-
         <div class="hero-content">
             <div class="hero-badge">
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
@@ -894,21 +865,6 @@
         </div>
     </section>
 
-    {{-- LOGO BAR --}}
-    <section class="logo-bar">
-        <div class="logo-bar-content">
-            <div class="logo-bar-title">{{ __('Trusted by businesses replacing:') }}</div>
-            <div class="logo-grid">
-                <div class="logo-item">HubSpot</div>
-                <div class="logo-item">QuickBooks</div>
-                <div class="logo-item">Calendly</div>
-                <div class="logo-item">Asana</div>
-                <div class="logo-item">Mailchimp</div>
-                <div class="logo-item">FreshBooks</div>
-            </div>
-        </div>
-    </section>
-
     {{-- PROBLEM SECTION --}}
     <section class="problem-section">
         <div class="problem-content">
@@ -920,21 +876,23 @@
 
             <div class="problem-grid">
                 <div class="problem-card">
-                    <div class="problem-icon">💸</div>
-                    <h3 class="problem-title">{{ __('Paying $300–$1,200/mo on 5–10 tools?') }}</h3>
-                    <p class="problem-description">{{ __('HubSpot, QuickBooks, Calendly, Asana, Mailchimp... Each has its own subscription, login, and learning curve. The costs add up to $6,000-14,000 per year.') }}</p>
+                    <div class="problem-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="problem-title">{{ __('Paying $500–$1,200/mo on disconnected tools?') }}</h3>
+                    <p class="problem-description">{{ __('HubSpot, QuickBooks, Calendly, Asana, Mailchimp... Each has its own subscription, login, and learning curve. You\'re spending $6,000-14,000 per year and your tools don\'t even talk to each other.') }}</p>
                 </div>
 
                 <div class="problem-card">
-                    <div class="problem-icon">😫</div>
-                    <h3 class="problem-title">{{ __('Constantly switching between apps, copying data, missing deals or invoices?') }}</h3>
-                    <p class="problem-description">{{ __('Your tools don\'t talk to each other. You manually copy data, lose track of follow-ups, and waste hours toggling between platforms.') }}</p>
-                </div>
-
-                <div class="problem-card">
-                    <div class="problem-icon">⏰</div>
-                    <h3 class="problem-title">{{ __('Wasting hours on admin instead of doing billable work or growing your business?') }}</h3>
-                    <p class="problem-description">{{ __('3-10 hours every week managing your tool stack instead of serving clients, closing deals, or focusing on what you do best.') }}</p>
+                    <div class="problem-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="problem-title">{{ __('Wasting 5–10 hours/week on admin instead of billable work?') }}</h3>
+                    <p class="problem-description">{{ __('Switching between apps, copying data, chasing invoices, missing follow-ups. Hours wasted every week managing your tool stack instead of serving clients or growing your business.') }}</p>
                 </div>
             </div>
 
@@ -1138,28 +1096,6 @@
                         <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
                     </svg>
                 </a>
-            </div>
-        </div>
-    </section>
-
-    {{-- STATS SECTION --}}
-    <section class="stats-section">
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-number">$6,000-14,000</div>
-                <div class="stat-label">{{ __('Average Savings Per Year') }}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">10+</div>
-                <div class="stat-label">{{ __('Tools You Can Replace') }}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">15 min</div>
-                <div class="stat-label">{{ __('Average Setup Time') }}</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">500+</div>
-                <div class="stat-label">{{ __('Businesses Already Saving') }}</div>
             </div>
         </div>
     </section>
