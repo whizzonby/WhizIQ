@@ -251,6 +251,88 @@ class Appointment extends Model
     public function markAsCompleted(): void
     {
         $this->update(['status' => 'completed']);
+
+        // Schedule aftercare message if enabled for this appointment type
+        $this->scheduleAftercareMessage();
+    }
+
+    public function scheduleAftercareMessage(): void
+    {
+        // Load appointment type relationship if not already loaded
+        if (!$this->relationLoaded('appointmentType')) {
+            $this->load('appointmentType');
+        }
+
+        // Check if appointment has an appointment type
+        if (!$this->appointment_type_id) {
+            \Illuminate\Support\Facades\Log::debug('Aftercare skipped - no appointment type', [
+                'appointment_id' => $this->id,
+            ]);
+            return;
+        }
+
+        // Check if appointment type has aftercare enabled
+        if (!$this->appointmentType) {
+            \Illuminate\Support\Facades\Log::warning('Aftercare skipped - appointment type not found', [
+                'appointment_id' => $this->id,
+                'appointment_type_id' => $this->appointment_type_id,
+            ]);
+            return;
+        }
+
+        if (!$this->appointmentType->enable_aftercare) {
+            \Illuminate\Support\Facades\Log::debug('Aftercare skipped - not enabled for appointment type', [
+                'appointment_id' => $this->id,
+                'appointment_type_id' => $this->appointment_type_id,
+            ]);
+            return;
+        }
+
+        // Check if there's a template assigned
+        if (!$this->appointmentType->aftercare_template_id) {
+            \Illuminate\Support\Facades\Log::warning('Aftercare skipped - no template assigned', [
+                'appointment_id' => $this->id,
+                'appointment_type_id' => $this->appointment_type_id,
+            ]);
+            return;
+        }
+
+        $template = \App\Models\AftercareTemplate::find($this->appointmentType->aftercare_template_id);
+
+        if (!$template) {
+            \Illuminate\Support\Facades\Log::warning('Aftercare skipped - template not found', [
+                'appointment_id' => $this->id,
+                'template_id' => $this->appointmentType->aftercare_template_id,
+            ]);
+            return;
+        }
+
+        if (!$template->is_active) {
+            \Illuminate\Support\Facades\Log::debug('Aftercare skipped - template is inactive', [
+                'appointment_id' => $this->id,
+                'template_id' => $template->id,
+            ]);
+            return;
+        }
+
+        // Calculate when to send the message
+        $delayInMinutes = $template->getTotalDelayInMinutes();
+
+        if ($delayInMinutes === 0) {
+            // Send immediately
+            \App\Jobs\SendAftercareMessage::dispatch($this, $template);
+        } else {
+            // Schedule for later
+            \App\Jobs\SendAftercareMessage::dispatch($this, $template)
+                ->delay(now()->addMinutes($delayInMinutes));
+        }
+
+        \Illuminate\Support\Facades\Log::info('Aftercare message scheduled', [
+            'appointment_id' => $this->id,
+            'template_id' => $template->id,
+            'delay_minutes' => $delayInMinutes,
+            'send_at' => now()->addMinutes($delayInMinutes)->toDateTimeString(),
+        ]);
     }
 
     public function markAsNoShow(): void
@@ -319,6 +401,55 @@ class Appointment extends Model
         return $description;
     }
 
+    // Validation Methods
+    public function isClientBlocked(): bool
+    {
+        // Check if linked contact is blocked
+        if ($this->contact_id) {
+            $contact = Contact::find($this->contact_id);
+            if ($contact && $contact->is_blocked) {
+                return true;
+            }
+        }
+
+        // Check BlockedClient table for email/phone blocks
+        return BlockedClient::isBlocked(
+            $this->user_id,
+            $this->attendee_email,
+            $this->attendee_phone,
+            $this->contact_id
+        );
+    }
+
+    public function getBlockReason(): ?string
+    {
+        // Check contact first
+        if ($this->contact_id) {
+            $contact = Contact::find($this->contact_id);
+            if ($contact && $contact->is_blocked) {
+                return $contact->blocked_reason;
+            }
+        }
+
+        // Check BlockedClient table
+        $block = BlockedClient::where('user_id', $this->user_id)
+            ->active()
+            ->where(function($q) {
+                if ($this->contact_id) {
+                    $q->where('contact_id', $this->contact_id);
+                }
+                if ($this->attendee_email) {
+                    $q->orWhere('email', $this->attendee_email);
+                }
+                if ($this->attendee_phone) {
+                    $q->orWhere('phone', $this->attendee_phone);
+                }
+            })
+            ->first();
+
+        return $block ? $block->violation_details : null;
+    }
+
     // Generate unique confirmation token
     protected static function boot()
     {
@@ -327,6 +458,12 @@ class Appointment extends Model
         static::creating(function ($appointment) {
             if (empty($appointment->confirmation_token)) {
                 $appointment->confirmation_token = Str::random(64);
+            }
+
+            // Validate client is not blocked
+            if ($appointment->isClientBlocked()) {
+                $reason = $appointment->getBlockReason() ?? 'This client is blocked from booking appointments.';
+                throw new \Exception("Cannot create appointment: $reason");
             }
         });
     }

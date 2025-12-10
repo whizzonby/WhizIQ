@@ -28,6 +28,8 @@ class AppointmentType extends Model
         'default_venue_id',
         'requires_location',
         'allowed_venues',
+        'aftercare_template_id',
+        'enable_aftercare',
     ];
 
     protected $casts = [
@@ -38,6 +40,7 @@ class AppointmentType extends Model
         'requires_location' => 'boolean',
         'custom_questions' => 'array',
         'allowed_venues' => 'array',
+        'enable_aftercare' => 'boolean',
     ];
 
     // Relationships
@@ -54,6 +57,11 @@ class AppointmentType extends Model
     public function defaultVenue(): BelongsTo
     {
         return $this->belongsTo(Venue::class, 'default_venue_id');
+    }
+
+    public function aftercareTemplate(): BelongsTo
+    {
+        return $this->belongsTo(AftercareTemplate::class);
     }
 
     // Scopes

@@ -219,9 +219,53 @@ class ContactResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\IconColumn::make('is_blocked')
+                    ->label('Status')
+                    ->boolean()
+                    ->trueIcon('heroicon-s-shield-exclamation')
+                    ->falseIcon('heroicon-s-check-circle')
+                    ->trueColor('danger')
+                    ->falseColor('success')
+                    ->getStateUsing(function (Contact $record): bool {
+                        // Check both is_blocked field and active BlockedClient records
+                        $hasActiveBlocks = \App\Models\BlockedClient::where('contact_id', $record->id)
+                            ->active()
+                            ->exists();
+                        return $record->is_blocked || $hasActiveBlocks;
+                    })
+                    ->tooltip(function (Contact $record): string {
+                        $hasActiveBlocks = \App\Models\BlockedClient::where('contact_id', $record->id)
+                            ->active()
+                            ->exists();
+                        
+                        if ($record->is_blocked || $hasActiveBlocks) {
+                            $activeBlocksCount = \App\Models\BlockedClient::where('contact_id', $record->id)
+                                ->active()
+                                ->count();
+                            
+                            $tooltip = 'Blocked';
+                            if ($record->blocked_reason) {
+                                $tooltip .= ': ' . $record->blocked_reason;
+                            }
+                            if ($activeBlocksCount > 0) {
+                                $tooltip .= " ({$activeBlocksCount} active violation" . ($activeBlocksCount > 1 ? 's' : '') . ")";
+                            }
+                            return $tooltip;
+                        }
+                        return 'Active - Can book appointments';
+                    }),
+
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn (Contact $record): ?string =>
+                        $record->is_blocked 
+                            ? '⚠️ Blocked: ' . ($record->blocked_reason ?? 'No reason specified')
+                            : null
+                    )
+                    ->color(fn (Contact $record): ?string =>
+                        $record->is_blocked ? 'danger' : null
+                    ),
 
                 Tables\Columns\TextColumn::make('company')
                     ->searchable()
@@ -607,6 +651,154 @@ class ContactResource extends Resource
                             ]);
                         }
                     }),
+
+                Action::make('block_client')
+                    ->label('Block Client')
+                    ->icon('heroicon-o-shield-exclamation')
+                    ->color('danger')
+                    ->visible(function (Contact $record) {
+                        // Check if contact is blocked OR has active BlockedClient records
+                        $hasActiveBlocks = \App\Models\BlockedClient::where('contact_id', $record->id)
+                            ->active()
+                            ->exists();
+                        return !$record->is_blocked && !$hasActiveBlocks;
+                    })
+                    ->form([
+                        Forms\Components\Select::make('violation_type')
+                            ->label('Violation Type')
+                            ->options([
+                                'no_show' => 'No Show',
+                                'late_cancellation' => 'Late Cancellation',
+                                'repeated_reschedule' => 'Repeated Reschedule',
+                                'inappropriate_behavior' => 'Inappropriate Behavior',
+                                'payment_issue' => 'Payment Issue',
+                                'other' => 'Other',
+                            ])
+                            ->required()
+                            ->native(false),
+
+                        Forms\Components\Textarea::make('reason')
+                            ->label('Reason for Blocking')
+                            ->required()
+                            ->rows(3)
+                            ->helperText('Provide detailed reason for blocking this client'),
+
+                        Forms\Components\Toggle::make('auto_block')
+                            ->label('Block immediately')
+                            ->default(true)
+                            ->helperText('If checked, client will be blocked from booking appointments'),
+                    ])
+                    ->action(function (Contact $record, array $data) {
+                        $record->logViolation(
+                            $data['violation_type'],
+                            $data['reason'],
+                            $data['auto_block'] ?? true
+                        );
+
+                        // Refresh the record to get updated is_blocked status
+                        $record->refresh();
+
+                        Notification::make()
+                            ->title('Client Blocked')
+                            ->body("$record->name has been blocked from booking appointments.")
+                            ->warning()
+                            ->send();
+                    })
+                    ->successNotificationTitle('Client blocked successfully')
+                    ->after(function () {
+                        // Filament will automatically refresh, but we ensure it happens
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Block Client from Bookings')
+                    ->modalDescription('This will prevent the client from booking new appointments.')
+                    ->modalSubmitActionLabel('Block Client'),
+
+                Action::make('resolve_block')
+                    ->label('Resolve Block')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(function (Contact $record) {
+                        // Show if contact is blocked OR has active BlockedClient records
+                        $hasActiveBlocks = \App\Models\BlockedClient::where('contact_id', $record->id)
+                            ->active()
+                            ->exists();
+                        return $record->is_blocked || $hasActiveBlocks;
+                    })
+                    ->form([
+                        Forms\Components\Textarea::make('resolution_notes')
+                            ->label('Resolution Notes')
+                            ->required()
+                            ->rows(3)
+                            ->helperText('Explain how this issue was resolved. This will resolve all active blocks for this client.'),
+                    ])
+                    ->action(function (Contact $record, array $data) {
+                        // Resolve all active BlockedClient records for this contact
+                        $activeBlocks = \App\Models\BlockedClient::where('contact_id', $record->id)
+                            ->active()
+                            ->get();
+
+                        foreach ($activeBlocks as $block) {
+                            $block->resolve($data['resolution_notes']);
+                        }
+
+                        // Unblock the contact
+                        $record->unblock($data['resolution_notes']);
+
+                        // Refresh the record
+                        $record->refresh();
+
+                        $blockCount = $activeBlocks->count();
+                        Notification::make()
+                            ->title('Block Resolved')
+                            ->body($blockCount > 0 
+                                ? "Resolved {$blockCount} block(s) and unblocked {$record->name}. They can now book appointments."
+                                : "Unblocked {$record->name}. They can now book appointments.")
+                            ->success()
+                            ->send();
+                    })
+                    ->successNotificationTitle('Block resolved successfully')
+                    ->requiresConfirmation()
+                    ->modalHeading('Resolve Block')
+                    ->modalDescription('This will resolve all active blocks for this client and allow them to book appointments again.')
+                    ->modalSubmitActionLabel('Resolve Block'),
+
+                Action::make('unblock_client')
+                    ->label('Unblock Client')
+                    ->icon('heroicon-o-lock-open')
+                    ->color('gray')
+                    ->visible(function (Contact $record) {
+                        // Show if contact is blocked OR has active BlockedClient records
+                        $hasActiveBlocks = \App\Models\BlockedClient::where('contact_id', $record->id)
+                            ->active()
+                            ->exists();
+                        return $record->is_blocked || $hasActiveBlocks;
+                    })
+                    ->form([
+                        Forms\Components\Textarea::make('resolution_notes')
+                            ->label('Resolution Notes')
+                            ->rows(3)
+                            ->helperText('Document why this client is being unblocked (without resolving violation records)'),
+                    ])
+                    ->action(function (Contact $record, array $data) {
+                        $record->unblock($data['resolution_notes'] ?? null);
+
+                        // Refresh the record to get updated is_blocked status
+                        $record->refresh();
+
+                        Notification::make()
+                            ->title('Client Unblocked')
+                            ->body("$record->name can now book appointments. Note: Violation records remain active.")
+                            ->success()
+                            ->send();
+                    })
+                    ->successNotificationTitle('Client unblocked successfully')
+                    ->after(function () {
+                        // Filament will automatically refresh, but we ensure it happens
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Unblock Client')
+                    ->modalDescription('This will allow the client to book appointments again, but violation records will remain active.')
+                    ->modalSubmitActionLabel('Unblock Client'),
 
                 DeleteAction::make(),
             ])

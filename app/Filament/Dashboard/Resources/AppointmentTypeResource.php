@@ -172,6 +172,51 @@ class AppointmentTypeResource extends Resource
                     ])
                     ->columns(2)
                     ->collapsed(),
+
+                Section::make('Aftercare Automation')
+                    ->description('Automatically send aftercare instructions when appointments are completed')
+                    ->icon('heroicon-o-heart')
+                    ->schema([
+                        Forms\Components\Toggle::make('enable_aftercare')
+                            ->label('Enable Automatic Aftercare Messages')
+                            ->default(false)
+                            ->live()
+                            ->helperText('Send automated aftercare instructions after appointment completion'),
+
+                        Forms\Components\Select::make('aftercare_template_id')
+                            ->label('Aftercare Template')
+                            ->relationship('aftercareTemplate', 'name', fn ($query) =>
+                                $query->where('user_id', auth()->id())->active()
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required(fn ($get) => $get('enable_aftercare'))
+                            ->visible(fn ($get) => $get('enable_aftercare'))
+                            ->helperText('Select the aftercare template to use for this service')
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\Textarea::make('description')
+                                    ->rows(2),
+                            ])
+                            ->createOptionUsing(function ($data) {
+                                return \App\Models\AftercareTemplate::create([
+                                    'user_id' => auth()->id(),
+                                    'name' => $data['name'],
+                                    'description' => $data['description'] ?? null,
+                                    'send_via_email' => true,
+                                    'is_active' => true,
+                                ])->id;
+                            }),
+
+                        Forms\Components\Placeholder::make('aftercare_info')
+                            ->label('How it works')
+                            ->content('When an appointment of this type is marked as "completed", the selected aftercare template will automatically be scheduled and sent to the client according to the template\'s timing settings.')
+                            ->visible(fn ($get) => $get('enable_aftercare')),
+                    ])
+                    ->columns(1)
+                    ->collapsed(),
             ]);
     }
 

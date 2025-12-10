@@ -40,6 +40,22 @@ class AppointmentObserver
             $this->contactSyncService->syncAppointmentToContact($appointment);
         }
 
+        // Check if status changed to completed - trigger aftercare
+        if ($appointment->wasChanged('status') && $appointment->status === 'completed') {
+            $originalStatus = $appointment->getOriginal('status');
+            
+            // Only trigger if it wasn't already completed (avoid duplicate triggers)
+            if ($originalStatus !== 'completed') {
+                Log::info('Appointment marked as completed via direct update - triggering aftercare', [
+                    'appointment_id' => $appointment->id,
+                    'previous_status' => $originalStatus,
+                ]);
+                
+                // Schedule aftercare message
+                $appointment->scheduleAftercareMessage();
+            }
+        }
+
         // Sync to Google Calendar if relevant fields changed
         if ($appointment->wasChanged(['title', 'description', 'start_datetime', 'end_datetime', 'location', 'venue_id', 'room_name', 'meeting_url', 'status'])) {
             // If status changed to cancelled, delete from calendar

@@ -41,6 +41,11 @@ class Contact extends Model
         'tags',
         'notes',
         'source',
+        'is_blocked',
+        'blocked_reason',
+        'blocked_at',
+        'blocked_by_user_id',
+        'violation_count',
     ];
 
     protected $casts = [
@@ -53,6 +58,9 @@ class Contact extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'is_blocked' => 'boolean',
+        'blocked_at' => 'datetime',
+        'violation_count' => 'integer',
     ];
 
     // Relationships
@@ -97,6 +105,16 @@ class Contact extends Model
             ->whereHas('client', function($query) {
                 $query->where('contact_id', $this->id);
             });
+    }
+
+    public function blockedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'blocked_by_user_id');
+    }
+
+    public function blockHistory(): HasMany
+    {
+        return $this->hasMany(BlockedClient::class)->orderBy('created_at', 'desc');
     }
 
     // Scopes
@@ -146,6 +164,16 @@ class Contact extends Model
     public function scopeCold($query)
     {
         return $query->where('relationship_strength', 'cold');
+    }
+
+    public function scopeBlocked($query)
+    {
+        return $query->where('is_blocked', true);
+    }
+
+    public function scopeNotBlocked($query)
+    {
+        return $query->where('is_blocked', false);
     }
 
     // Accessors
@@ -321,6 +349,70 @@ class Contact extends Model
     {
         $this->type = 'client';
         $this->save();
+    }
+
+    // Blocking Methods
+    public function block(string $reason, ?int $userId = null): void
+    {
+        $this->update([
+            'is_blocked' => true,
+            'blocked_reason' => $reason,
+            'blocked_at' => now(),
+            'blocked_by_user_id' => $userId ?? auth()->id(),
+            'violation_count' => $this->violation_count + 1,
+        ]);
+
+        // Also update status to inactive
+        if ($this->status === 'active') {
+            $this->status = 'inactive';
+            $this->save();
+        }
+    }
+
+    public function unblock(?string $resolutionNotes = null): void
+    {
+        $this->update([
+            'is_blocked' => false,
+            'blocked_reason' => null,
+        ]);
+
+        // Reactivate if was inactive
+        if ($this->status === 'inactive') {
+            $this->status = 'active';
+            $this->save();
+        }
+    }
+
+    public function logViolation(
+        string $violationType,
+        string $details,
+        bool $autoBlock = false
+    ): void {
+        $this->violation_count++;
+        $this->save();
+
+        // Create violation record
+        BlockedClient::create([
+            'user_id' => $this->user_id,
+            'contact_id' => $this->id,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'name' => $this->name,
+            'violation_type' => $violationType,
+            'violation_details' => $details,
+            'violation_date' => now(),
+            'is_active' => $autoBlock,
+        ]);
+
+        // Auto-block if requested
+        if ($autoBlock) {
+            $this->block("Violation: $violationType - $details");
+        }
+    }
+
+    public function canBook(): bool
+    {
+        return !$this->is_blocked && $this->status === 'active';
     }
 
     // Boot method

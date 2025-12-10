@@ -183,6 +183,56 @@ class PublicBooking extends Component
             'notes' => 'nullable|string|max:1000',
         ]);
 
+        // Check if client is blocked BEFORE proceeding
+        $isBlocked = \App\Models\BlockedClient::isBlocked(
+            $this->bookingSetting->user_id,
+            $this->attendeeEmail,
+            $this->attendeePhone,
+            null // contact_id not available yet for new bookings
+        );
+
+        // Also check if there's a blocked contact with this email/phone
+        if (!$isBlocked) {
+            $blockedContact = \App\Models\Contact::where('user_id', $this->bookingSetting->user_id)
+                ->where('is_blocked', true)
+                ->where(function($q) {
+                    if ($this->attendeeEmail) {
+                        $q->where('email', $this->attendeeEmail);
+                    }
+                    if ($this->attendeePhone) {
+                        $q->orWhere('phone', $this->attendeePhone);
+                    }
+                })
+                ->first();
+            
+            if ($blockedContact) {
+                $isBlocked = true;
+            }
+        }
+
+        if ($isBlocked) {
+            // Get block details for error message
+            $block = \App\Models\BlockedClient::where('user_id', $this->bookingSetting->user_id)
+                ->active()
+                ->where(function($q) {
+                    if ($this->attendeeEmail) {
+                        $q->where('email', $this->attendeeEmail);
+                    }
+                    if ($this->attendeePhone) {
+                        $q->orWhere('phone', $this->attendeePhone);
+                    }
+                })
+                ->first();
+            
+            $reason = $block 
+                ? ($block->violation_details ?: 'You are blocked from booking appointments.')
+                : 'You are blocked from booking appointments.';
+            
+            session()->flash('error', "Sorry, you cannot book appointments at this time. Reason: $reason Please contact us if you believe this is an error.");
+            $this->currentStep = 3; // Return to contact info step
+            return;
+        }
+
         $startDateTime = Carbon::parse($this->selectedDate . ' ' . $this->selectedTime);
         $endDateTime = $startDateTime->copy()->addMinutes($this->selectedType->total_duration_minutes);
 
