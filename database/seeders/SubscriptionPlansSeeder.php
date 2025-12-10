@@ -78,7 +78,7 @@ class SubscriptionPlansSeeder extends Seeder
                     '100 Tasks',
                     '50 Monthly Invoices',
                     '50 Passwords',
-                    '50 Appointments/month',
+                    'Unlimited Appointments',
                     '5 Email Templates',
                     '1GB Document Storage',
                     '20 AI Requests/day',

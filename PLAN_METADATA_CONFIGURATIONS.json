@@ -22,7 +22,7 @@
     "tax_optimization_ai": "false",
     "tax_forecasting_ai": "false",
 
-    "appointments_limit": "50",
+    "appointments_limit": "unlimited",
     "appointments_types_limit": "5",
     "appointments_recurring": "false",
     "appointments_calendar_sync": "false",
