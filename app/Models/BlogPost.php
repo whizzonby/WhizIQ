@@ -25,6 +25,11 @@ class BlogPost extends Model implements HasMedia
         'published_at',
     ];
 
+    protected $casts = [
+        'is_published' => 'boolean',
+        'published_at' => 'datetime',
+    ];
+
     protected static function booted()
     {
         static::creating(function ($blogPost) {

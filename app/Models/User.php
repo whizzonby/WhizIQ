@@ -39,6 +39,9 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Two
         'phone_number',
         'phone_number_verified_at',
         'last_seen_at',
+        'stripe_connect_account_id',
+        'stripe_connect_enabled',
+        'stripe_connect_completed_at',
     ];
 
     /**
@@ -61,6 +64,8 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Two
         'phone_number_verified_at' => 'datetime',
         'password' => 'hashed',
         'last_seen_at' => 'datetime',
+        'stripe_connect_enabled' => 'boolean',
+        'stripe_connect_completed_at' => 'datetime',
     ];
 
     public function roadmapItems()

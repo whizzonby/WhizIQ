@@ -90,15 +90,6 @@ class BusinessMetricsOverviewWidget extends BaseWidget
                     'class' => 'cursor-pointer hover:shadow-lg transition-shadow',
                 ]),
 
-            Stat::make('Profit Margin', number_format($current['profit_margin'], 1) . '%')
-                ->description('$' . number_format($current['profit'], 0) . ' profit this month')
-                ->descriptionIcon('heroicon-m-chart-bar')
-                ->chart($trends['profit'])
-                ->color($this->getProfitMarginColor($current['profit_margin']))
-                ->extraAttributes([
-                    'class' => 'cursor-pointer hover:shadow-lg transition-shadow',
-                ]),
-
             Stat::make('Monthly Expenses', '$' . number_format($current['expenses'], 0))
                 ->description($this->getChangeDescription($changes['expenses_change']))
                 ->descriptionIcon($this->getChangeIcon($changes['expenses_change']))
@@ -113,6 +104,15 @@ class BusinessMetricsOverviewWidget extends BaseWidget
                 ->descriptionIcon($this->getChangeIcon($customerGrowthPercentage))
                 ->chart($this->getCustomerGrowthTrend($user))
                 ->color($this->getChangeColor($customerGrowthPercentage))
+                ->extraAttributes([
+                    'class' => 'cursor-pointer hover:shadow-lg transition-shadow',
+                ]),
+
+            Stat::make('Profit Margin', number_format($current['profit_margin'], 1) . '%')
+                ->description('$' . number_format($current['profit'], 0) . ' profit this month')
+                ->descriptionIcon('heroicon-m-chart-bar')
+                ->chart($trends['profit'])
+                ->color($this->getProfitMarginColor($current['profit_margin']))
                 ->extraAttributes([
                     'class' => 'cursor-pointer hover:shadow-lg transition-shadow',
                 ]),

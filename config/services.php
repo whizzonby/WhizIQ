@@ -78,10 +78,11 @@ return [
     ],
 
     'stripe' => [
+        'secret' => env('STRIPE_SECRET_KEY'),
         'secret_key' => env('STRIPE_SECRET_KEY'),
         'publishable_key' => env('STRIPE_PUBLISHABLE_KEY'),
         'webhook_signing_secret' => env('STRIPE_WEBHOOK_SIGNING_SECRET'),
-        'connect_client_id' => env('STRIPE_CONNECT_CLIENT_ID'), // For OAuth Connect
+        'connect_client_id' => env('STRIPE_CONNECT_CLIENT_ID'),
     ],
 
     'paddle' => [
@@ -104,6 +105,15 @@ return [
         'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_TOKEN'),
         'from' => env('TWILIO_FROM'),
+    ],
+
+    'whatsapp' => [
+        'business_account_id' => env('WHATSAPP_BUSINESS_ACCOUNT_ID'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'access_token' => env('WHATSAPP_ACCESS_TOKEN'),
+        'verify_token' => env('WHATSAPP_VERIFY_TOKEN'),
+        'app_secret' => env('WHATSAPP_APP_SECRET'),
+        'api_version' => env('WHATSAPP_API_VERSION', 'v21.0'),
     ],
 
     'zoom' => [

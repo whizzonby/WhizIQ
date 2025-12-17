@@ -19,7 +19,7 @@
         }
     </style>
 
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         {{-- Header --}}
         <div class="text-center mb-6">
             @if($bookingSetting->logo_url)
@@ -31,15 +31,35 @@
             @if($bookingSetting->welcome_message)
                 <p class="mt-2 text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">{{ $bookingSetting->welcome_message }}</p>
             @endif
+
+            {{-- Location Display --}}
+            @if($bookingSetting->business_address || $bookingSetting->business_city || $bookingSetting->business_country)
+                <div class="mt-3 flex items-center justify-center gap-2 text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span class="text-sm">
+                        @if($bookingSetting->business_address){{ $bookingSetting->business_address }}@endif
+                        @if($bookingSetting->business_address && ($bookingSetting->business_city || $bookingSetting->business_country)), @endif
+                        @if($bookingSetting->business_city){{ $bookingSetting->business_city }}@endif
+                        @if($bookingSetting->business_city && $bookingSetting->business_country), @endif
+                        @if($bookingSetting->business_country){{ $bookingSetting->business_country }}@endif
+                    </span>
+                </div>
+            @endif
         </div>
 
-        {{-- Progress Steps --}}
-        @if(!$confirmed)
+        {{-- Progress Steps (only show after step 1) --}}
+        @if(!$confirmed && $currentStep > 1)
             <div class="mb-6">
                 <div class="bg-white rounded-xl shadow-sm p-4">
                     <div class="flex items-center justify-between max-w-2xl mx-auto">
-                        @foreach(['Select Service', 'Choose Time', 'Your Info'] as $index => $label)
-                            <div class="flex items-center {{ $index < 2 ? 'flex-1' : '' }}">
+                        @php
+                            $steps = ['Select Service', 'Choose Time', 'Your Info'];
+                        @endphp
+                        @foreach($steps as $index => $label)
+                            <div class="flex items-center {{ $index < count($steps) - 1 ? 'flex-1' : '' }}">
                                 <div class="flex items-center">
                                     <div class="
                                         flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm transition-all
@@ -55,7 +75,7 @@
                                         {{ $label }}
                                     </span>
                                 </div>
-                                @if($index < 2)
+                                @if($index < count($steps) - 1)
                                     <div class="flex-1 h-0.5 mx-2 sm:mx-4 transition-all {{ $currentStep > ($index + 1) ? 'bg-green-500' : 'bg-gray-200' }}"></div>
                                 @endif
                             </div>
@@ -269,54 +289,115 @@
 
                 @elseif($currentStep === 1)
                     {{-- Step 1: Select Appointment Type --}}
-                    <h2 class="text-xl font-semibold text-gray-900 mb-6">Select a Service</h2>
 
-                    <div class="space-y-3">
+                    {{-- Hero Section --}}
+                    <div class="text-center mb-10 pb-8 border-b border-gray-200">
+                        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Choose Your Service</h2>
+                        <p class="text-gray-600 text-lg mb-6 max-w-2xl mx-auto">Select from our range of professional services tailored to meet your needs</p>
+
+                        {{-- Trust Elements --}}
+                        <div class="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500 mt-6">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium text-gray-700">Instant Confirmation</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium text-gray-700">Secure Booking</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium text-gray-700">Email Reminders</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Services Grid --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
                         @forelse($appointmentTypes as $type)
-                            <button
-                                wire:click="selectType({{ $type->id }})"
-                                wire:loading.attr="disabled"
-                                wire:target="selectType"
-                                class="w-full text-left p-5 border-2 rounded-xl hover:shadow-md transition-all duration-200 {{ $selectedTypeId === $type->id ? 'ring-2' : 'border-gray-200' }} disabled:opacity-50 disabled:cursor-wait"
-                                style="{{ $selectedTypeId === $type->id ? 'border-color: ' . ($bookingSetting->brand_color ?? '#3B82F6') . '; box-shadow: 0 0 0 1px ' . ($bookingSetting->brand_color ?? '#3B82F6') : '' }}"
+                            <a
+                                href="{{ route('booking.service.detail', ['slug' => $bookingSetting->booking_slug, 'serviceId' => $type->id]) }}"
+                                class="group relative block text-left rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-102 bg-white border border-gray-200"
                             >
-                                <div class="flex items-start justify-between">
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-3 mb-2">
-                                            <div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {{ $type->color }}"></div>
-                                            <h3 class="text-lg font-semibold text-gray-900">{{ $type->name }}</h3>
+                                {{-- Service Image --}}
+                                <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                                    @if($type->image_url)
+                                        <img src="{{ Storage::url($type->image_url) }}" alt="{{ $type->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center" style="background: linear-gradient(135deg, {{ $type->color }}15 0%, {{ $type->color }}30 100%)">
+                                            <svg class="w-16 h-16 opacity-30" style="color: {{ $type->color }}" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                            </svg>
                                         </div>
+                                    @endif
 
-                                        @if($type->description)
-                                            <p class="text-gray-600 mb-3 text-sm">{{ $type->description }}</p>
-                                        @endif
-
-                                        <div class="flex items-center gap-4 text-sm text-gray-500">
-                                            <span class="flex items-center gap-1">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                                {{ $type->duration_minutes }} min
-                                            </span>
-                                            @if($type->price > 0)
-                                                <span class="flex items-center gap-1">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                                    </svg>
-                                                    ${{ number_format($type->price, 2) }}
-                                                </span>
-                                            @endif
+                                    {{-- Price Tag --}}
+                                    @if($type->price > 0)
+                                        <div class="absolute bottom-3 right-3 bg-white px-3 py-1.5 rounded-full shadow-md">
+                                            <span class="text-sm font-bold" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}">${{ number_format($type->price, 2) }}</span>
                                         </div>
+                                    @else
+                                        <div class="absolute bottom-3 right-3 bg-green-500 px-3 py-1.5 rounded-full shadow-md">
+                                            <span class="text-sm font-bold text-white">Free</span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Service Details --}}
+                                <div class="p-5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $type->color }}"></div>
+                                        <h3 class="text-lg font-bold text-gray-900 line-clamp-1">{{ $type->name }}</h3>
                                     </div>
 
-                                    <svg class="w-6 h-6 text-gray-400 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
+                                    @if($type->description)
+                                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $type->description }}</p>
+                                    @endif
+
+                                    <div class="flex items-center gap-4 text-sm text-gray-500 pt-3 border-t border-gray-100">
+                                        <span class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span class="font-medium">{{ $type->duration_minutes }} min</span>
+                                        </span>
+
+                                        @if($type->appointment_format)
+                                            <span class="flex items-center gap-1.5">
+                                                @if($type->appointment_format === 'online')
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                    <span class="font-medium">Online</span>
+                                                @elseif($type->appointment_format === 'in_person')
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    </svg>
+                                                    <span class="font-medium">In-Person</span>
+                                                @elseif($type->appointment_format === 'hybrid')
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                                                    </svg>
+                                                    <span class="font-medium">Hybrid</span>
+                                                @endif
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
-                            </button>
+                            </a>
                         @empty
-                            <div class="text-center py-12 text-gray-500">
-                                <p>No services available for booking at this time.</p>
+                            <div class="col-span-full text-center py-16 text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                </svg>
+                                <p class="text-lg font-medium">No services available for booking at this time.</p>
                             </div>
                         @endforelse
                     </div>

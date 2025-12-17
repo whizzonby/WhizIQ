@@ -289,11 +289,20 @@ class ClientInvoice extends Model
     }
 
     // Static Methods
-    public static function generateInvoiceNumber(?string $prefix = 'INV'): string
+    public static function generateInvoiceNumber(?string $prefix = 'INV', ?int $userId = null): string
     {
-        return \DB::transaction(function () use ($prefix) {
+        return \DB::transaction(function () use ($prefix, $userId) {
+            // Use authenticated user if userId not provided
+            $userId = $userId ?? auth()->id();
+            
+            if (!$userId) {
+                throw new \Exception('User ID is required to generate invoice number.');
+            }
+            
             // Use a database lock to prevent race conditions
-            $lastInvoice = static::where('invoice_number', 'like', $prefix . '-%')
+            // Scope by user_id to ensure per-user uniqueness
+            $lastInvoice = static::where('user_id', $userId)
+                ->where('invoice_number', 'like', $prefix . '-%')
                 ->lockForUpdate()
                 ->orderByRaw('CAST(SUBSTRING(invoice_number, ' . (strlen($prefix) + 2) . ') AS UNSIGNED) DESC')
                 ->first();
@@ -301,11 +310,11 @@ class ClientInvoice extends Model
             $number = $lastInvoice ? (intval(substr($lastInvoice->invoice_number, strlen($prefix) + 1)) + 1) : 1;
             $invoiceNumber = $prefix . '-' . str_pad($number, 5, '0', STR_PAD_LEFT);
             
-            // Double-check that the number doesn't exist (extra safety)
+            // Double-check that the number doesn't exist for this user (extra safety)
             $maxAttempts = 10;
             $attempt = 0;
             
-            while (static::where('invoice_number', $invoiceNumber)->exists() && $attempt < $maxAttempts) {
+            while (static::where('user_id', $userId)->where('invoice_number', $invoiceNumber)->exists() && $attempt < $maxAttempts) {
                 $attempt++;
                 $number++;
                 $invoiceNumber = $prefix . '-' . str_pad($number, 5, '0', STR_PAD_LEFT);

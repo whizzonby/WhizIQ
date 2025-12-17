@@ -62,10 +62,10 @@
     </div>
 
     <div class="py-4">
-        <ul class="flex flex-col items-center gap-4">
+        <ul class="flex flex-col items-start gap-4 w-full">
             @if($plan->product->features)
                 @foreach($plan->product->features as $feature)
-                    <x-features.li-item>{{ is_array($feature) ? $feature['feature'] : $feature }}</x-features.li-item>
+                    <x-features.li-item class="w-full">{{ is_array($feature) ? $feature['feature'] : $feature }}</x-features.li-item>
                 @endforeach
             @endif
         </ul>

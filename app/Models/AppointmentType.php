@@ -17,6 +17,8 @@ class AppointmentType extends Model
         'price',
         'is_active',
         'color',
+        'image_url',
+        'gallery_images',
         'buffer_before_minutes',
         'buffer_after_minutes',
         'max_per_day',
@@ -41,6 +43,7 @@ class AppointmentType extends Model
         'custom_questions' => 'array',
         'allowed_venues' => 'array',
         'enable_aftercare' => 'boolean',
+        'gallery_images' => 'array',
     ];
 
     // Relationships

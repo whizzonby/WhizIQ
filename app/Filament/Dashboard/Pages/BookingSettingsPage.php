@@ -59,6 +59,9 @@ class BookingSettingsPage extends Page implements HasForms
             'booking_slug' => $this->settings->booking_slug,
             'display_name' => $this->settings->display_name,
             'welcome_message' => $this->settings->welcome_message,
+            'business_address' => $this->settings->business_address,
+            'business_city' => $this->settings->business_city,
+            'business_country' => $this->settings->business_country,
             'brand_color' => $this->settings->brand_color,
             'timezone' => $this->settings->timezone,
             'min_booking_notice_hours' => $this->settings->min_booking_notice_hours,
@@ -107,6 +110,19 @@ class BookingSettingsPage extends Page implements HasForms
                             ->rows(3)
                             ->maxLength(1000)
                             ->helperText('A friendly message shown on your booking page'),
+
+                        Forms\Components\TextInput::make('business_address')
+                            ->label('Business Address')
+                            ->maxLength(255)
+                            ->helperText('Street address for your business'),
+
+                        Forms\Components\TextInput::make('business_city')
+                            ->label('City')
+                            ->maxLength(255),
+
+                        Forms\Components\TextInput::make('business_country')
+                            ->label('Country')
+                            ->maxLength(255),
 
                         Forms\Components\ColorPicker::make('brand_color')
                             ->label('Brand Color')

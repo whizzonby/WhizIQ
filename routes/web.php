@@ -133,6 +133,10 @@ Route::controller(BlogController::class)
         Route::get('/{slug}', 'view')->name('blog.view');
     });
 
+// Newsletter subscription
+Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::post('/newsletter/unsubscribe', [App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+
 // Dynamic page routes (Policy pages, etc.)
 // Old static routes kept as comments for reference:
 // Route::get('/terms-of-service', function () { return view('pages.terms-of-service'); });
@@ -191,7 +195,12 @@ Route::controller(InvoiceController::class)
 
 // Public Booking Page
 
+// Service Detail Page (must come before general booking route)
+Route::get('/book/{slug}/service/{serviceId}', \App\Livewire\ServiceDetail::class)->name('booking.service.detail');
+
 Route::get('/book/{slug}', \App\Livewire\PublicBooking::class)->name('booking.public');
+Route::get('/book/{slug}', \App\Livewire\PublicBooking::class)->name('booking.show');
+
 
 // Appointment Calendar Download
 

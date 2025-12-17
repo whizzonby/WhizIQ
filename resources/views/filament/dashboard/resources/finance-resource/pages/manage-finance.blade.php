@@ -2,13 +2,15 @@
     @php
         $platforms = [
             // ✅ ACTIVE INTEGRATIONS - Currently Available
-            'quickbooks' => [
-                'name' => 'QuickBooks',
-                'description' => 'Accounting & Financial Management',
-                'icon' => 'heroicon-o-calculator',
-                'color' => 'success',
-                'type' => 'oauth',
-            ],
+
+            // 'quickbooks' => [
+            //     'name' => 'QuickBooks',
+            //     'description' => 'Accounting & Financial Management',
+            //     'icon' => 'heroicon-o-calculator',
+            //     'color' => 'success',
+            //     'type' => 'oauth',
+            // ],
+
             'excel' => [
                 'name' => 'Excel / CSV',
                 'description' => 'Upload Spreadsheet Files',
@@ -71,7 +73,8 @@
     </div>
 
     {{-- Platform Cards Grid --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <div class="flex justify-center mb-8">
+        <div class="w-full max-w-xl">
         @foreach($platforms as $platformKey => $platform)
             @php
                 $connection = $connections->get($platformKey);
@@ -82,8 +85,8 @@
                 {{-- Connected Badge --}}
                 @if($isConnected)
                     <div class="absolute -top-2 -right-2 z-10">
-                        <span class="flex items-center gap-1 px-3 py-1 rounded-full bg-green-500 text-white text-xs font-semibold shadow-lg">
-                            <x-filament::icon icon="heroicon-m-check-circle" class="h-3 w-3" />
+                        <span class="flex items-center gap-1 px-4 py-2 rounded-full bg-green-500 text-white text-sm font-semibold shadow-lg">
+                            <x-filament::icon icon="heroicon-m-check-circle" class="h-4 w-4" />
                             Connected
                         </span>
                     </div>
@@ -92,30 +95,30 @@
                 {{-- Enterprise Badge --}}
                 @if($platform['type'] === 'enterprise')
                     <div class="absolute -top-2 -right-2 z-10">
-                        <span class="px-3 py-1 rounded-full bg-purple-500 text-white text-xs font-semibold shadow-lg">
+                        <span class="px-4 py-2 rounded-full bg-purple-500 text-white text-sm font-semibold shadow-lg">
                             Enterprise
                         </span>
                     </div>
                 @endif
 
                 {{-- Card --}}
-                <div class="border-2 rounded-xl p-6 bg-white dark:bg-gray-800 hover:shadow-xl transition-all duration-200 {{ $isConnected ? 'border-green-400 dark:border-green-600' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }} h-full flex flex-col">
+                <div class="border-2 rounded-xl p-8 bg-white dark:bg-gray-800 hover:shadow-xl transition-all duration-200 {{ $isConnected ? 'border-green-400 dark:border-green-600' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }} h-full flex flex-col">
 
                     {{-- Platform Icon & Name --}}
-                    <div class="flex items-start gap-4 mb-4">
+                    <div class="flex items-start gap-6 mb-6">
                         <div class="flex-shrink-0">
-                            <div class="w-16 h-16 rounded-xl bg-gradient-to-br {{ $isConnected ? 'from-green-400 to-green-600' : 'from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800' }} flex items-center justify-center shadow-md">
+                            <div class="w-24 h-24 rounded-xl bg-gradient-to-br {{ $isConnected ? 'from-green-400 to-green-600' : 'from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800' }} flex items-center justify-center shadow-md">
                                 <x-filament::icon
                                     :icon="$platform['icon']"
-                                    class="h-8 w-8 {{ $isConnected ? 'text-white' : 'text-gray-600 dark:text-gray-300' }}"
+                                    class="h-12 w-12 {{ $isConnected ? 'text-white' : 'text-gray-600 dark:text-gray-300' }}"
                                 />
                             </div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="text-xl font-semibold text-gray-900 dark:text-white truncate">
+                            <h4 class="text-2xl font-semibold text-gray-900 dark:text-white truncate">
                                 {{ $platform['name'] }}
                             </h4>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            <p class="text-base text-gray-500 dark:text-gray-400 mt-2">
                                 {{ $platform['description'] }}
                             </p>
                         </div>
@@ -123,16 +126,16 @@
 
                     {{-- Connection Status --}}
                     @if($isConnected && $connection->last_synced_at)
-                        <div class="mb-4 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                            <div class="flex items-center gap-2 text-xs">
-                                <x-filament::icon icon="heroicon-m-clock" class="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                        <div class="mb-6 px-4 py-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                            <div class="flex items-center gap-2 text-sm">
+                                <x-filament::icon icon="heroicon-m-clock" class="h-4 w-4 text-green-600 dark:text-green-400" />
                                 <span class="text-green-700 dark:text-green-300">
                                     Last synced {{ $connection->last_synced_at->diffForHumans() }}
                                 </span>
                             </div>
                             @if($connection->account_name)
-                                <div class="flex items-center gap-2 text-xs mt-1">
-                                    <x-filament::icon icon="heroicon-m-building-office" class="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                <div class="flex items-center gap-2 text-sm mt-1">
+                                    <x-filament::icon icon="heroicon-m-building-office" class="h-4 w-4 text-green-600 dark:text-green-400" />
                                     <span class="text-green-700 dark:text-green-300 truncate">
                                         {{ $connection->account_name }}
                                     </span>
@@ -142,16 +145,16 @@
                     @endif
 
                     {{-- Action Buttons --}}
-                    <div class="mt-auto space-y-2">
+                    <div class="mt-auto space-y-3">
                         @if($isConnected)
                             {{-- Import Button --}}
                             <x-filament::button
                                 wire:click="importFromPlatform('{{ $platformKey }}')"
                                 :color="$platform['color']"
-                                class="w-full justify-center"
-                                size="lg"
+                                class="w-full justify-center text-base"
+                                size="xl"
                             >
-                                <x-filament::icon icon="heroicon-m-arrow-down-tray" class="h-5 w-5 mr-2" />
+                                <x-filament::icon icon="heroicon-m-arrow-down-tray" class="h-6 w-6 mr-2" />
                                 Import Data Now
                             </x-filament::button>
 
@@ -160,10 +163,10 @@
                                 wire:click="disconnectPlatform('{{ $platformKey }}')"
                                 color="gray"
                                 class="w-full justify-center"
-                                size="sm"
+                                size="md"
                                 outlined
                             >
-                                <x-filament::icon icon="heroicon-m-x-circle" class="h-4 w-4 mr-1" />
+                                <x-filament::icon icon="heroicon-m-x-circle" class="h-5 w-5 mr-1" />
                                 Disconnect
                             </x-filament::button>
                         @else
@@ -180,10 +183,10 @@
                                 <x-filament::button
                                     wire:click="{{ $connectMethods[$platformKey] ?? 'showComingSoon' }}"
                                     :color="$platform['color']"
-                                    class="w-full justify-center"
-                                    size="lg"
+                                    class="w-full justify-center text-base"
+                                    size="xl"
                                 >
-                                    <x-filament::icon icon="heroicon-m-link" class="h-5 w-5 mr-2" />
+                                    <x-filament::icon icon="heroicon-m-link" class="h-6 w-6 mr-2" />
                                     Connect {{ $platform['name'] }}
                                 </x-filament::button>
 
@@ -191,11 +194,11 @@
                                 <x-filament::button
                                     href="#"
                                     :color="$platform['color']"
-                                    class="w-full justify-center"
-                                    size="lg"
+                                    class="w-full justify-center text-base"
+                                    size="xl"
                                     x-on:click.prevent="$dispatch('open-modal', { id: 'upload-excel-modal' })"
                                 >
-                                    <x-filament::icon icon="heroicon-m-arrow-up-tray" class="h-5 w-5 mr-2" />
+                                    <x-filament::icon icon="heroicon-m-arrow-up-tray" class="h-6 w-6 mr-2" />
                                     Upload File
                                 </x-filament::button>
 
@@ -203,16 +206,16 @@
                                 <x-filament::button
                                     wire:click="showEnterprise('{{ $platform['name'] }}')"
                                     :color="$platform['color']"
-                                    class="w-full justify-center"
-                                    size="lg"
+                                    class="w-full justify-center text-base"
+                                    size="xl"
                                     outlined
                                 >
-                                    <x-filament::icon icon="heroicon-m-envelope" class="h-5 w-5 mr-2" />
+                                    <x-filament::icon icon="heroicon-m-envelope" class="h-6 w-6 mr-2" />
                                     Contact for {{ $platform['name'] }}
                                 </x-filament::button>
                             @endif
 
-                            <p class="text-xs text-center text-gray-500 dark:text-gray-400 px-2">
+                            <p class="text-sm text-center text-gray-500 dark:text-gray-400 px-2">
                                 @if($platform['type'] === 'enterprise')
                                     Enterprise integration available
                                 @else
@@ -224,6 +227,7 @@
                 </div>
             </div>
         @endforeach
+        </div>
     </div>
 
     {{-- Information Banner --}}

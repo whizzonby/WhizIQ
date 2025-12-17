@@ -5,10 +5,8 @@ namespace App\Livewire\Announcement;
 use App\Constants\AnnouncementPlacement;
 use App\Constants\SessionConstants;
 use App\Services\AnnouncementService;
-use Livewire\Attributes\Lazy;
 use Livewire\Component;
 
-#[Lazy]
 class View extends Component
 {
     public ?string $placement;
@@ -38,9 +36,14 @@ class View extends Component
     public function render(AnnouncementService $announcementService)
     {
         $placement = AnnouncementPlacement::tryFrom($this->placement) ?? AnnouncementPlacement::FRONTEND;
+        
+        // Use Bootstrap view for home page, Tailwind view for other pages
+        $view = request()->routeIs('home') 
+            ? 'livewire.announcement.bootstrap-view' 
+            : 'livewire.announcement.view';
 
         return view(
-            'livewire.announcement.view', [
+            $view, [
                 'announcement' => $announcementService->getAnnouncement($placement),
             ]
         );

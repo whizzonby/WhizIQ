@@ -29,13 +29,40 @@
                 {{ __('Subscribe to our newsletter') }}
             </x-heading.h2>
 
-            <x-input.field labelClass="text-primary-50" inputClass="bg-transparent placeholder-primary-100 text-primary-50" placeholder="{{ __('Your email address') }}" class="mx-auto mt-6" />
+            @if(session('success'))
+                <div class="mx-auto mt-6 max-w-md bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-            <div class="mt-10">
-                <x-button-link.secondary href="{{route('blog')}}">
-                    {{ __('Subscribe') }}
-                </x-button-link.secondary>
-            </div>
+            @if(session('error'))
+                <div class="mx-auto mt-6 max-w-md bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if(session('info'))
+                <div class="mx-auto mt-6 max-w-md bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+                    {{ session('info') }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('newsletter.subscribe') }}" class="mx-auto mt-6 max-w-md">
+                @csrf
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="{{ __('Your email address') }}"
+                    class="w-full px-4 py-3 rounded-lg bg-transparent border-2 border-primary-100 placeholder-primary-100 text-primary-50 focus:outline-none focus:border-primary-200"
+                    required
+                />
+
+                <div class="mt-6">
+                    <button type="submit" class="inline-flex items-center justify-center px-6 py-3 bg-secondary-500 hover:bg-secondary-600 text-white font-semibold rounded-lg transition">
+                        {{ __('Subscribe') }}
+                    </button>
+                </div>
+            </form>
         </x-section.outro>
     </div>
 
