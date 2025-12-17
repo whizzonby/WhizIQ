@@ -45,7 +45,7 @@
     </x-section.hero>
 
     {{-- PROBLEM SECTION --}}
-    <div class="max-w-none md:max-w-4xl mx-auto text-center px-4 py-20">
+    <div class="max-w-none md:max-w-4xl mx-auto text-center px-4 py-32 my-16">
         <x-heading.h6 class="text-primary-500">{{ __('The Problem') }}</x-heading.h6>
         <x-heading.h2 class="text-primary-900">{{ __('Too Many Tools. Too Much Chaos.') }}</x-heading.h2>
         <p class="mt-4 text-lg text-neutral-600">
