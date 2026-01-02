@@ -332,7 +332,7 @@ class AvailabilityService
             ->get();
 
         if ($venues->isEmpty()) {
-            return collect([]);
+            return Venue::whereRaw('1 = 0')->get();
         }
 
         // Get all appointments that could conflict with this time slot in one query
@@ -352,7 +352,7 @@ class AvailabilityService
         $appointmentsByVenue = $appointments->groupBy('venue_id');
 
         // Filter venues based on cached appointment data
-        return $venues->filter(function ($venue) use ($start, $end, $appointmentsByVenue) {
+        $filteredVenueIds = $venues->filter(function ($venue) use ($start, $end, $appointmentsByVenue) {
             $venueAppointments = $appointmentsByVenue->get($venue->id, collect([]));
 
             // Check for overlaps
@@ -374,7 +374,10 @@ class AvailabilityService
             }
 
             return true;
-        })->values();
+        })->pluck('id');
+
+        // Return Eloquent Collection by querying the filtered venue IDs
+        return Venue::whereIn('id', $filteredVenueIds)->get();
     }
 
     /**
