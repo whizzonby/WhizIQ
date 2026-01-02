@@ -352,7 +352,7 @@ class AvailabilityService
         $appointmentsByVenue = $appointments->groupBy('venue_id');
 
         // Filter venues based on cached appointment data
-        $filteredVenueIds = $venues->filter(function ($venue) use ($start, $end, $appointmentsByVenue) {
+        $filteredVenues = $venues->filter(function ($venue) use ($start, $end, $appointmentsByVenue) {
             $venueAppointments = $appointmentsByVenue->get($venue->id, collect([]));
 
             // Check for overlaps
@@ -374,10 +374,11 @@ class AvailabilityService
             }
 
             return true;
-        })->pluck('id');
+        });
 
-        // Return Eloquent Collection by querying the filtered venue IDs
-        return Venue::whereIn('id', $filteredVenueIds)->get();
+        // Convert Support Collection back to Eloquent Collection
+        // by creating a new Eloquent Collection from the filtered models
+        return new Collection($filteredVenues->all());
     }
 
     /**
