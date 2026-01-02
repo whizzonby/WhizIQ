@@ -266,6 +266,26 @@ class PublicBooking extends Component
             ->orderBy('sort_order')
             ->get();
 
+        // Recalculate available venues on render if we're on step 2.5
+        // This fixes Livewire serialization issues with Eloquent Collections
+        if ($this->currentStep == 2.5 && $this->selectedDate && $this->selectedTime && $this->selectedType) {
+            $startDateTime = Carbon::parse($this->selectedDate . ' ' . $this->selectedTime);
+            $endDateTime = $startDateTime->copy()->addMinutes($this->selectedType->total_duration_minutes);
+
+            $this->availableVenues = $this->availabilityService->getAvailableVenues(
+                $this->bookingSetting->user_id,
+                $startDateTime,
+                $endDateTime
+            );
+
+            // Filter by allowed venues if specified
+            if ($this->selectedType->allowed_venues && count($this->selectedType->allowed_venues) > 0) {
+                $this->availableVenues = $this->availableVenues->filter(function ($venue) {
+                    return in_array($venue->id, $this->selectedType->allowed_venues);
+                })->values();
+            }
+        }
+
         return view('livewire.public-booking', [
             'appointmentTypes' => $appointmentTypes,
         ])->layout('components.layouts.app');
