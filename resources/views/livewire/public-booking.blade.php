@@ -164,31 +164,41 @@
                                     </dd>
                                 </div>
 
-                                @if($createdAppointment && $createdAppointment->venue)
-                                    @php
-                                        $venue = $createdAppointment->venue;
-                                    @endphp
+                                @if($createdAppointment && ($createdAppointment->venue || $createdAppointment->location))
                                     <div class="h-px bg-gray-300"></div>
                                     <div class="flex items-start gap-4">
                                         <dt class="text-gray-500 font-medium min-w-[100px]">Location</dt>
                                         <dd class="text-gray-900 flex-1">
-                                            <div class="font-semibold mb-1">{{ $venue->name }}</div>
-                                            @if($venue->full_address)
-                                                <div class="text-sm text-gray-600 mb-2">{{ $venue->full_address }}</div>
-                                            @endif
-                                            @if($createdAppointment->room_name)
-                                                <div class="text-sm text-gray-600 mb-2">
-                                                    <span class="font-medium">Room:</span> {{ $createdAppointment->room_name }}
-                                                </div>
-                                            @endif
-                                            @if($venue->google_maps_url)
-                                                <a href="{{ $venue->google_maps_url }}" target="_blank"
-                                                   class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium mt-1">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                            @if($createdAppointment->venue)
+                                                @php
+                                                    $venue = $createdAppointment->venue;
+                                                @endphp
+                                                <div class="font-semibold mb-1">{{ $venue->name }}</div>
+                                                @if($venue->full_address)
+                                                    <div class="text-sm text-gray-600 mb-2">{{ $venue->full_address }}</div>
+                                                @endif
+                                                @if($createdAppointment->room_name)
+                                                    <div class="text-sm text-gray-600 mb-2">
+                                                        <span class="font-medium">Room:</span> {{ $createdAppointment->room_name }}
+                                                    </div>
+                                                @endif
+                                                @if($venue->google_maps_url)
+                                                    <a href="{{ $venue->google_maps_url }}" target="_blank"
+                                                       class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium mt-1">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                        </svg>
+                                                        View on Map
+                                                    </a>
+                                                @endif
+                                            @elseif($createdAppointment->location)
+                                                <div class="flex items-start gap-2">
+                                                    <svg class="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                                     </svg>
-                                                    View on Map
-                                                </a>
+                                                    <div class="font-semibold">{{ $createdAppointment->location }}</div>
+                                                </div>
                                             @endif
                                         </dd>
                                     </div>
@@ -733,6 +743,31 @@
                                     required
                                 >
                                 @error('attendeeCompany') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
+                            </div>
+                        @endif
+
+                        @if(in_array($selectedType->appointment_format ?? 'online', ['in_person', 'hybrid']))
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Location <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    wire:model="location"
+                                    wire:loading.attr="disabled"
+                                    wire:target="submitBooking"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                    placeholder="Enter your address (e.g., 123 Main St, City, State, ZIP)"
+                                    required
+                                >
+                                <p class="text-sm text-gray-500 mt-1">
+                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Where should this appointment take place?
+                                </p>
+                                @error('location') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
                         @endif
 

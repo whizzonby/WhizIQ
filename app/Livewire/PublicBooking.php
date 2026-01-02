@@ -37,6 +37,7 @@ class PublicBooking extends Component
     public $attendeeEmail;
     public $attendeePhone;
     public $attendeeCompany;
+    public $location; // For in-person appointments
     public $notes;
 
     // Confirmation
@@ -104,41 +105,9 @@ class PublicBooking extends Component
     {
         $this->selectedTime = $time;
 
-        // Check if venue selection is needed
-        $format = $this->selectedType->appointment_format ?? 'online';
-        // Show venue selection for in-person/hybrid appointments (venue selection may be optional)
-        $showVenueSelection = in_array($format, ['in_person', 'hybrid']);
-
-        if ($showVenueSelection) {
-            // Load available venues for this time slot
-            $startDateTime = Carbon::parse($this->selectedDate . ' ' . $time);
-            $endDateTime = $startDateTime->copy()->addMinutes($this->selectedType->total_duration_minutes);
-
-            $this->availableVenues = $this->availabilityService->getAvailableVenues(
-                $this->bookingSetting->user_id,
-                $startDateTime,
-                $endDateTime
-            );
-
-            // Filter by allowed venues if specified
-            if ($this->selectedType->allowed_venues && count($this->selectedType->allowed_venues) > 0) {
-                $this->availableVenues = $this->availableVenues->filter(function ($venue) {
-                    return in_array($venue->id, $this->selectedType->allowed_venues);
-                })->values();
-            }
-
-            // If there's a default venue and it's available, pre-select it
-            if ($this->selectedType->default_venue_id) {
-                $defaultVenue = $this->availableVenues->firstWhere('id', $this->selectedType->default_venue_id);
-                if ($defaultVenue) {
-                    $this->selectedVenueId = $this->selectedType->default_venue_id;
-                }
-            }
-
-            $this->currentStep = 2.5; // Venue selection step
-        } else {
-            $this->currentStep = 3; // Skip to contact info
-        }
+        // NEW: Skip venue selection - go directly to contact info
+        // Venues are now optional, attendees can enter custom location
+        $this->currentStep = 3;
     }
 
     public function selectVenue($venueId)
@@ -151,61 +120,39 @@ class PublicBooking extends Component
     {
         if ($this->currentStep > 1) {
             if ($this->currentStep == 3) {
-                // Check if we need to go back to venue selection or time selection
-                $format = $this->selectedType->appointment_format ?? 'online';
-                $showVenueSelection = in_array($format, ['in_person', 'hybrid']);
-                
-                if ($showVenueSelection) {
-                    $this->currentStep = 2.5;
-                } else {
-                    $this->currentStep = 2;
-                    $this->selectedTime = null;
-                }
-            } elseif ($this->currentStep == 2.5) {
+                // Go back to time selection
                 $this->currentStep = 2;
                 $this->selectedTime = null;
-                $this->selectedVenueId = null;
-                $this->availableVenues = [];
             } elseif ($this->currentStep === 2) {
                 $this->selectedTime = null;
                 $this->availableSlots = [];
             } elseif ($this->currentStep === 1) {
                 $this->selectedDate = null;
                 $this->selectedTime = null;
-                $this->selectedVenueId = null;
                 $this->availableSlots = [];
-                $this->availableVenues = [];
             }
         }
     }
 
     public function submitBooking()
     {
+        $format = $this->selectedType->appointment_format ?? 'online';
+        $isInPersonOrHybrid = in_array($format, ['in_person', 'hybrid']);
+
         $this->validate([
             'attendeeName' => 'required|string|max:255',
             'attendeeEmail' => 'required|email|max:255',
             'attendeePhone' => $this->selectedType->require_phone ? 'required|string|max:20' : 'nullable|string|max:20',
             'attendeeCompany' => $this->selectedType->require_company ? 'required|string|max:255' : 'nullable|string|max:255',
+            'location' => $isInPersonOrHybrid ? 'required|string|max:500' : 'nullable|string|max:500',
             'notes' => 'nullable|string|max:1000',
         ]);
 
         $startDateTime = Carbon::parse($this->selectedDate . ' ' . $this->selectedTime);
         $endDateTime = $startDateTime->copy()->addMinutes($this->selectedType->total_duration_minutes);
 
-        // Validate venue selection if required
-        $format = $this->selectedType->appointment_format ?? 'online';
-        $requiresVenue = in_array($format, ['in_person', 'hybrid']) &&
-                        ($this->selectedType->requires_location || $this->selectedType->requiresVenue());
-
-        // Only validate if venue is actually required (not just shown as optional)
-        if ($requiresVenue && !$this->selectedVenueId) {
-            session()->flash('error', 'Please select a venue for this appointment.');
-            $this->currentStep = 2.5;
-            return;
-        }
-
-        // Check if slot is still available (including venue if specified)
-        if ($this->availabilityService->isSlotBooked($this->bookingSetting->user_id, $startDateTime, $endDateTime, $this->selectedVenueId)) {
+        // Check if slot is still available
+        if ($this->availabilityService->isSlotBooked($this->bookingSetting->user_id, $startDateTime, $endDateTime, null)) {
             session()->flash('error', 'This time slot is no longer available. Please select another time.');
             $this->currentStep = 2;
             $this->selectDate($this->selectedDate);
@@ -229,6 +176,7 @@ class PublicBooking extends Component
             'appointment_type_id' => $this->selectedTypeId,
             'venue_id' => $this->selectedVenueId,
             'appointment_format' => $format,
+            'location' => $this->location, // Custom location for in-person appointments
             'title' => $this->selectedType->name . ' with ' . $this->attendeeName,
             'description' => $this->selectedType->description,
             'start_datetime' => $startDateTime,
@@ -265,26 +213,6 @@ class PublicBooking extends Component
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
-
-        // Recalculate available venues on render if we're on step 2.5
-        // This fixes Livewire serialization issues with Eloquent Collections
-        if ($this->currentStep == 2.5 && $this->selectedDate && $this->selectedTime && $this->selectedType) {
-            $startDateTime = Carbon::parse($this->selectedDate . ' ' . $this->selectedTime);
-            $endDateTime = $startDateTime->copy()->addMinutes($this->selectedType->total_duration_minutes);
-
-            $this->availableVenues = $this->availabilityService->getAvailableVenues(
-                $this->bookingSetting->user_id,
-                $startDateTime,
-                $endDateTime
-            );
-
-            // Filter by allowed venues if specified
-            if ($this->selectedType->allowed_venues && count($this->selectedType->allowed_venues) > 0) {
-                $this->availableVenues = $this->availableVenues->filter(function ($venue) {
-                    return in_array($venue->id, $this->selectedType->allowed_venues);
-                })->values();
-            }
-        }
 
         return view('livewire.public-booking', [
             'appointmentTypes' => $appointmentTypes,
