@@ -56,6 +56,23 @@ class AppointmentConfirmedNotification extends Notification implements ShouldQue
                 $m->line('Location: ' . $this->appointment->location)
             );
 
+        // Add payment information if enabled in booking settings
+        if ($bookingSetting && $bookingSetting->show_payment_in_email) {
+            $mail->line('');
+
+            if ($bookingSetting->payment_instructions || $bookingSetting->payment_link) {
+                $mail->line('**Payment Information:**');
+
+                if ($bookingSetting->payment_instructions) {
+                    $mail->line($bookingSetting->payment_instructions);
+                }
+
+                if ($bookingSetting->payment_link) {
+                    $mail->action('Make Payment', $bookingSetting->payment_link);
+                }
+            }
+        }
+
         // Add venue details for in-person appointments
         if ($this->appointment->venue) {
             $venue = $this->appointment->venue;
