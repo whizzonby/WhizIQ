@@ -70,6 +70,9 @@ class BookingSettingsPage extends Page implements HasForms
             'meeting_platform' => $this->settings->meeting_platform ?? 'none',
             'meeting_link' => $this->settings->meeting_link,
             'meeting_instructions' => $this->settings->meeting_instructions,
+            'payment_instructions' => $this->settings->payment_instructions,
+            'payment_link' => $this->settings->payment_link,
+            'show_payment_in_email' => $this->settings->show_payment_in_email ?? false,
             'google_meet_enabled' => $this->settings->google_meet_enabled ?? false,
         ]);
     }
@@ -205,6 +208,39 @@ class BookingSettingsPage extends Page implements HasForms
                             ->label('')
                             ->content('This meeting link will be included in all appointment confirmation emails and reminders.')
                             ->visible(fn ($get) => $get('meeting_platform') === 'custom'),
+                    ])
+                    ->columns(1),
+
+                Section::make('Payment Information')
+                    ->description('Add payment instructions and links to confirmation emails')
+                    ->schema([
+                        Forms\Components\Toggle::make('show_payment_in_email')
+                            ->label('Include Payment Info in Confirmation Emails')
+                            ->helperText('When enabled, payment details will be included in appointment confirmation emails')
+                            ->default(false)
+                            ->live()
+                            ->columnSpanFull(),
+
+                        Forms\Components\Textarea::make('payment_instructions')
+                            ->label('Payment Instructions')
+                            ->rows(3)
+                            ->placeholder('e.g., Payment is due before your appointment. We accept Venmo, PayPal, Zelle, or credit card.')
+                            ->helperText('Instructions shown to clients about how to pay (accepted methods, due date, etc.)')
+                            ->visible(fn ($get) => $get('show_payment_in_email'))
+                            ->columnSpanFull(),
+
+                        Forms\Components\TextInput::make('payment_link')
+                            ->label('Payment Link (Optional)')
+                            ->url()
+                            ->placeholder('https://venmo.com/YourUsername or https://paypal.me/YourUsername')
+                            ->helperText('Link to your payment page (Venmo, PayPal, Stripe, Square, etc.). Clients can click this to pay.')
+                            ->visible(fn ($get) => $get('show_payment_in_email'))
+                            ->columnSpanFull(),
+
+                        Forms\Components\Placeholder::make('payment_info')
+                            ->label('')
+                            ->content('💡 Tip: You can use Venmo (venmo.com/username), PayPal (paypal.me/username), Cash App (cash.app/$username), or any payment platform link.')
+                            ->visible(fn ($get) => $get('show_payment_in_email')),
                     ])
                     ->columns(1),
 
