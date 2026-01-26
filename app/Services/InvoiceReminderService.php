@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\OverdueInvoiceNotification;
 use App\Notifications\PaymentReminderNotification;
 use Carbon\Carbon;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -109,6 +110,8 @@ class InvoiceReminderService
             if ($invoice->client->email) {
                 // Create a notifiable for the client (since they might not be a User)
                 $clientNotifiable = new class($invoice->client->email, $invoice->client->name) {
+                    use Notifiable;
+
                     public function __construct(
                         public string $email,
                         public string $name
