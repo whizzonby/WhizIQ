@@ -288,7 +288,6 @@ class InvoiceBuilderPage extends Page implements HasForms
                                                     ->label('Unit Price ($)')
                                                     ->numeric()
                                                     ->prefix('$')
-                                                    ->required()
                                                     ->live(onBlur: true)
                                                     ->afterStateUpdated(function ($state, callable $set, Get $get) {
                                                         $set('amount', $state * ($get('quantity') ?? 1));
@@ -875,7 +874,7 @@ class InvoiceBuilderPage extends Page implements HasForms
                 );
             }
 
-            if (empty($item['unit_price']) || $item['unit_price'] < 0) {
+            if (!isset($item['unit_price']) || $item['unit_price'] < 0) {
                 throw new \Illuminate\Validation\ValidationException(
                     validator([], []),
                     ["items.{$index}.unit_price" => ['Unit price must be 0 or greater.']]
