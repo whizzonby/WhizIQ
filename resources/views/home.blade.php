@@ -3,497 +3,370 @@
         {{ __('WhizzIQ - The All-in-One Business Operating System for Entrepreneurs') }}
     </x-slot>
 
-    {{-- HERO SECTION --}}
-    <x-section.hero class="w-full mb-8 md:mb-72">
-        <div class="mx-auto text-center h-160 md:h-180 px-4">
-            <x-pill class="text-primary-500 bg-primary-50">{{ __('Stop Juggling 10+ Tools') }}</x-pill>
-            <x-heading.h1 class="mt-4 text-primary-50 font-bold">
-                {{ __('Run Your Entire Business') }}
-                <br class="hidden sm:block">
-                {{ __('From One Intelligent Platform') }}
-            </x-heading.h1>
-
-            <p class="text-primary-50 m-3 text-lg">{{ __('Manage clients, finances, appointments, tasks, documents, and more—all powered by AI. WhizzIQ replaces your entire software stack.') }}</p>
-
-            <div class="flex flex-wrap gap-4 justify-center flex-col md:flex-row mt-6">
-                <x-effect.glow></x-effect.glow>
-
-                <x-button-link.secondary href="#pricing" class="self-center !py-3" elementType="a">
-                    {{ __('Start Free Trial') }}
-                </x-button-link.secondary>
-                <x-button-link.primary-outline href="{{ route('register') }}" class="bg-transparent self-center !py-3 text-white border-white">
-                    {{ __('See It In Action') }}
-                </x-button-link.primary-outline>
-            </div>
-
-            <x-user-ratings link="#testimonials" class="items-center justify-center mt-6 relative z-40">
-                <x-slot name="avatars">
-                    <x-user-ratings.avatar src="https://unsplash.com/photos/rDEOVtE7vOs/download?ixid=M3wxMjA3fDB8MXxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fHx8MTcxMzY4NDI1MHww&force=true&w=640" alt="testimonial 1"/>
-                    <x-user-ratings.avatar src="https://unsplash.com/photos/c_GmwfHBDzk/download?ixid=M3wxMjA3fDB8MXxzZWFyY2h8M3x8cGVyc29ufGVufDB8fHx8MTcxMzY4NDI1MHww&force=true&w=640" alt="testimonial 2"/>
-                    <x-user-ratings.avatar src="https://unsplash.com/photos/QXevDflbl8A/download?ixid=M3wxMjA3fDB8MXxzZWFyY2h8NHx8cGVyc29ufGVufDB8fHx8MTcxMzY4NDI1MHww&force=true&w=640" alt="testimonial 3"/>
-                    <x-user-ratings.avatar src="https://unsplash.com/photos/mjRwhvqEC0U/download?ixid=M3wxMjA3fDB8MXxzZWFyY2h8Nnx8cGVyc29ufGVufDB8fHx8MTcxMzY4NDI1MHww&force=true&w=640" alt="testimonial 4"/>
-                    <x-user-ratings.avatar src="https://unsplash.com/photos/C8Ta0gwPbQg/download?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MTl8fHBlcnNvbnxlbnwwfHx8fDE3MTM2ODQyNTB8MA&force=true&w=640" alt="testimonial 5"/>
-                </x-slot>
-
-                {{ __('Trusted by thousands of entrepreneurs and small businesses worldwide') }}
-            </x-user-ratings>
-
-            <div class="mx-auto md:max-w-3xl lg:max-w-5xl">
-                <img class="drop-shadow-2xl mt-8 transition hover:scale-101 rounded-2xl" src="{{URL::asset('/images/features/hero-image.png')}}" alt="WhizzIQ Dashboard" />
+    {{-- 1. HERO SECTION (Above the Fold) --}}
+    <section class="relative overflow-hidden bg-gradient-to-br from-neutral-50 via-white to-primary-50/30 min-h-[90vh] flex items-center">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <div class="text-left">
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-primary-900 leading-[1.1] tracking-tight">
+                        {{ __('Run Your Entire Business From One Intelligent Command Center') }}
+                    </h1>
+                    <p class="mt-6 text-lg md:text-xl text-neutral-600 leading-relaxed max-w-xl">
+                        {{ __('Replace CRM, invoicing, scheduling, tasks, and scattered tools with one AI-powered platform built for entrepreneurs.') }}
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-xl bg-primary-500 text-white font-semibold px-8 py-4 text-base hover:bg-primary-600 focus:ring-4 focus:ring-primary-200 transition shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30">
+                            {{ __('Start Free Trial — No Credit Card Required') }}
+                        </a>
+                        <a href="#watch-demo" class="inline-flex items-center justify-center rounded-xl border-2 border-neutral-300 text-neutral-700 font-semibold px-8 py-4 text-base hover:bg-neutral-50 hover:border-neutral-400 transition">
+                            {{ __('Watch 2-Min Demo') }}
+                        </a>
+                    </div>
+                    <p class="mt-4 text-sm text-neutral-500">
+                        {{ __('Cancel anytime. Setup in minutes.') }}
+                    </p>
+                </div>
+                <div class="relative order-first lg:order-last">
+                    <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-neutral-200/50">
+                        <img class="w-full h-auto transition duration-300 hover:scale-[1.02]" src="{{ asset('images/features/hero-image.png') }}" alt="WhizzIQ Dashboard" />
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-primary-100/40 to-primary-50/20 rounded-3xl transform translate-x-4 translate-y-4 -z-10 blur-xl"></div>
+                </div>
             </div>
         </div>
-    </x-section.hero>
+    </section>
 
-    {{-- PROBLEM SECTION --}}
-    <div class="max-w-none md:max-w-4xl mx-auto text-center px-4 py-32 my-16">
-        <x-heading.h6 class="text-primary-500">{{ __('The Problem') }}</x-heading.h6>
-        <x-heading.h2 class="text-primary-900">{{ __('Too Many Tools. Too Much Chaos.') }}</x-heading.h2>
-        <p class="mt-4 text-lg text-neutral-600">
-            {{ __('Most businesses juggle 10+ disconnected tools—CRM, accounting, scheduling, documents, passwords, email marketing. The result? Data silos, wasted hours, and bills that add up to hundreds monthly.') }}
-        </p>
-    </div>
+    {{-- 2. SOCIAL PROOF STRIP --}}
+    <section class="border-y border-neutral-100 bg-white/80 py-8">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm font-medium text-neutral-500 mb-6">{{ __('Trusted by growing businesses worldwide') }}</p>
+            <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-60 grayscale">
+                <div class="h-8 w-24 bg-neutral-200 rounded-lg flex items-center justify-center text-neutral-500 text-xs font-semibold">Logo</div>
+                <div class="h-8 w-24 bg-neutral-200 rounded-lg flex items-center justify-center text-neutral-500 text-xs font-semibold">Logo</div>
+                <div class="h-8 w-24 bg-neutral-200 rounded-lg flex items-center justify-center text-neutral-500 text-xs font-semibold">Logo</div>
+                <div class="h-8 w-24 bg-neutral-200 rounded-lg flex items-center justify-center text-neutral-500 text-xs font-semibold">Logo</div>
+                <div class="flex items-center gap-2 text-neutral-600">
+                    <span class="text-sm font-semibold">4.8/5</span>
+                    <div class="flex text-amber-400">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    {{-- SOLUTION SECTION --}}
-    <x-section.columns class="max-w-none md:max-w-6xl pt-16 bg-primary-50 rounded-3xl p-8" id="features">
-        <x-section.column>
-            <div x-intersect="$el.classList.add('slide-in-top')">
-                <x-heading.h6 class="text-primary-500">{{ __('The Solution') }}</x-heading.h6>
-                <x-heading.h2 class="text-primary-900">
-                    {{ __('Everything Your Business Needs, One Platform') }}
-                </x-heading.h2>
+    {{-- 3. PROBLEM SECTION --}}
+    <section class="py-20 md:py-28 bg-white opacity-0 transition-all duration-700 ease-out" x-data x-intersect.once="$el.classList.add('opacity-100')">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary-900 text-center mb-16 md:mb-20">
+                {{ __('Running a Business Shouldn\'t Feel This Complicated') }}
+            </h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                <div class="space-y-5">
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                        </div>
+                        <p class="text-neutral-700 font-medium">{{ __('Switching between 6+ tools daily') }}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="text-neutral-700 font-medium">{{ __('Manually chasing invoices') }}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <p class="text-neutral-700 font-medium">{{ __('Losing track of leads') }}</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <p class="text-neutral-700 font-medium">{{ __('Scattered documents & tasks') }}</p>
+                    </div>
+                </div>
+                <div class="rounded-2xl bg-neutral-50 p-8 md:p-10 border border-neutral-100">
+                    <p class="text-lg text-neutral-700 leading-relaxed">
+                        {{ __('Most entrepreneurs waste hours every week managing disconnected tools. WhizzIQ brings everything into one unified system.') }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- 4. SOLUTION – 3 PILLARS --}}
+    <section class="py-20 md:py-28 bg-gradient-to-br from-primary-50/50 to-white opacity-0 transition-all duration-700 ease-out" id="features" x-data x-intersect.once="$el.classList.add('opacity-100')">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary-900 text-center mb-16">
+                {{ __('Everything You Need. Nothing You Don\'t.') }}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+                <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md border border-neutral-100 transition-shadow">
+                    <div class="w-14 h-14 rounded-xl bg-primary-100 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-primary-900 mb-3">{{ __('Manage Clients & Sales') }}</h3>
+                    <p class="text-neutral-600 text-[15px] leading-relaxed">{{ __('Track leads, automate follow-ups, close deals faster.') }}</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md border border-neutral-100 transition-shadow">
+                    <div class="w-14 h-14 rounded-xl bg-primary-100 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-primary-900 mb-3">{{ __('Handle Finances With Confidence') }}</h3>
+                    <p class="text-neutral-600 text-[15px] leading-relaxed">{{ __('Send invoices, track payments, monitor cash flow in one place.') }}</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md border border-neutral-100 transition-shadow">
+                    <div class="w-14 h-14 rounded-xl bg-primary-100 flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-primary-900 mb-3">{{ __('Automate & Optimize With AI') }}</h3>
+                    <p class="text-neutral-600 text-[15px] leading-relaxed">{{ __('Let AI handle repetitive work and give you smart business insights.') }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- 5. PRODUCT SHOWCASE --}}
+    <section class="py-20 md:py-28 bg-white opacity-0 transition-all duration-700 ease-out" x-data x-intersect.once="$el.classList.add('opacity-100')">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            {{-- Block 1 --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24 md:mb-28">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary-900 mb-4">
+                        {{ __('Your Business, Visualized in One Dashboard') }}
+                    </h2>
+                    <p class="text-lg text-neutral-600 leading-relaxed">
+                        {{ __('See everything that matters at a glance—metrics, tasks, pipeline, and financial health in one place.') }}
+                    </p>
+                </div>
+                <div class="rounded-2xl bg-neutral-100 border border-neutral-200 aspect-video flex items-center justify-center text-neutral-400 text-sm">
+                    {{ __('Dashboard image placeholder') }}
+                </div>
             </div>
 
-            <p class="mt-4 text-lg">
-                {{ __('WhizzIQ is the first true all-in-one business operating system. We didn\'t just bundle features—we built an intelligent platform where everything connects seamlessly.') }}
+            {{-- Block 2 --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24 md:mb-28">
+                <div class="order-2 lg:order-1 rounded-2xl bg-neutral-100 border border-neutral-200 aspect-video flex items-center justify-center text-neutral-400 text-sm">
+                    {{ __('Connected features image placeholder') }}
+                </div>
+                <div class="order-1 lg:order-2">
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary-900 mb-4">
+                        {{ __('Invoices, Calendar, Tasks — Fully Connected') }}
+                    </h2>
+                    <p class="text-lg text-neutral-600 leading-relaxed">
+                        {{ __('When everything talks to each other, you save time and never drop a follow-up again.') }}
+                    </p>
+                </div>
+            </div>
+
+            {{-- Block 3 --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary-900 mb-4">
+                        {{ __('Meet Your AI Business Co-Pilot') }}
+                    </h2>
+                    <p class="text-lg text-neutral-600 leading-relaxed">
+                        {{ __('Get instant insights, automate repetitive tasks, and make smarter decisions with AI that understands your business.') }}
+                    </p>
+                </div>
+                <div class="rounded-2xl bg-neutral-100 border border-neutral-200 aspect-video flex items-center justify-center text-neutral-400 text-sm">
+                    {{ __('AI Co-Pilot image placeholder') }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- 6. HOW IT WORKS --}}
+    <section class="py-20 md:py-28 bg-gradient-to-br from-white to-primary-50/30 opacity-0 transition-all duration-700 ease-out" x-data x-intersect.once="$el.classList.add('opacity-100')">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary-900 text-center mb-16">
+                {{ __('Get Started in Minutes') }}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12">
+                <div class="text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-primary-500 text-white flex items-center justify-center text-xl font-bold mx-auto mb-5">1</div>
+                    <h3 class="text-lg font-bold text-primary-900 mb-2">{{ __('Sign up & create your workspace') }}</h3>
+                    <p class="text-neutral-600 text-sm">{{ __('No credit card. Ready in under 5 minutes.') }}</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-primary-500 text-white flex items-center justify-center text-xl font-bold mx-auto mb-5">2</div>
+                    <h3 class="text-lg font-bold text-primary-900 mb-2">{{ __('Import clients & connect workflows') }}</h3>
+                    <p class="text-neutral-600 text-sm">{{ __('Bring in your data. Sync calendars and tools.') }}</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-primary-500 text-white flex items-center justify-center text-xl font-bold mx-auto mb-5">3</div>
+                    <h3 class="text-lg font-bold text-primary-900 mb-2">{{ __('Run everything from one dashboard') }}</h3>
+                    <p class="text-neutral-600 text-sm">{{ __('Manage clients, finances, and AI—all in one place.') }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- 7. TESTIMONIALS --}}
+    <section class="py-20 md:py-28 bg-white opacity-0 transition-all duration-700 ease-out" id="testimonials" x-data x-intersect.once="$el.classList.add('opacity-100')">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary-900 text-center mb-16">
+                {{ __('Loved by Entrepreneurs Worldwide') }}
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-neutral-50 rounded-2xl p-8 border border-neutral-100">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-semibold text-sm">SJ</div>
+                        <div>
+                            <p class="font-semibold text-primary-900">Sarah Johnson</p>
+                            <p class="text-sm text-neutral-500">Freelance Consultant</p>
+                        </div>
+                    </div>
+                    <p class="text-neutral-700 leading-relaxed text-[15px]">
+                        {{ __('"WhizzIQ saved me 10+ hours per week. I went from juggling 7 tools to one place. Game changer."') }}
+                    </p>
+                </div>
+                <div class="bg-neutral-50 rounded-2xl p-8 border border-neutral-100">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-semibold text-sm">MC</div>
+                        <div>
+                            <p class="font-semibold text-primary-900">Michael Chen</p>
+                            <p class="text-sm text-neutral-500">Small Business Owner</p>
+                        </div>
+                    </div>
+                    <p class="text-neutral-700 leading-relaxed text-[15px]">
+                        {{ __('"Cut my software costs by 60% and finally have visibility into my finances. The AI features are incredible."') }}
+                    </p>
+                </div>
+                <div class="bg-neutral-50 rounded-2xl p-8 border border-neutral-100">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 font-semibold text-sm">ER</div>
+                        <div>
+                            <p class="font-semibold text-primary-900">Emma Rodriguez</p>
+                            <p class="text-sm text-neutral-500">Marketing Agency Founder</p>
+                        </div>
+                    </div>
+                    <p class="text-neutral-700 leading-relaxed text-[15px]">
+                        {{ __('"Automated follow-ups helped me close 30% more deals. This platform pays for itself many times over."') }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- 8. PRICING --}}
+    <section class="py-20 md:py-28 bg-gradient-to-br from-primary-50/50 to-white opacity-0 transition-all duration-700 ease-out" id="pricing" x-data x-intersect.once="$el.classList.add('opacity-100')">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary-900 text-center mb-4">
+                {{ __('Choose Your Plan') }}
+            </h2>
+            <p class="text-center text-neutral-600 max-w-xl mx-auto mb-12">
+                {{ __('Start with what you need. Upgrade as you grow.') }}
             </p>
-            <p class="mt-4">
-                {{ __('From your first client contact to your year-end tax filing, WhizzIQ handles it all. No more jumping between apps. No more data entry twice. No more wondering where that important file went.') }}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
+                {{-- Starter --}}
+                <div class="bg-white rounded-2xl p-8 border-2 border-neutral-200 shadow-sm flex flex-col">
+                    <h3 class="text-lg font-bold text-primary-900">{{ __('Starter') }}</h3>
+                    <p class="text-sm text-neutral-500 mt-1 mb-4">{{ __('For solopreneurs getting started') }}</p>
+                    <div class="text-3xl font-bold text-primary-900">$29<span class="text-base font-normal text-neutral-500">/mo</span></div>
+                    <ul class="mt-6 space-y-3 flex-1">
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 500 contacts</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Unlimited appointments</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 50 invoices/month</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 1 GB storage</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 20 AI requests/day</li>
+                    </ul>
+                    <a href="{{ route('register') }}" class="mt-8 w-full inline-flex items-center justify-center rounded-xl border-2 border-primary-500 text-primary-600 font-semibold px-6 py-3.5 text-sm hover:bg-primary-50 transition">
+                        {{ __('Start Free Trial') }}
+                    </a>
+                </div>
+
+                {{-- Pro (Most Popular) --}}
+                <div class="bg-white rounded-2xl p-8 border-2 border-primary-500 shadow-lg shadow-primary-500/10 relative flex flex-col md:-my-2 md:scale-[1.02] z-10">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                        {{ __('Most Popular') }}
+                    </div>
+                    <h3 class="text-lg font-bold text-primary-900">{{ __('Pro') }}</h3>
+                    <p class="text-sm text-neutral-500 mt-1 mb-4">{{ __('For growing teams and serious pros') }}</p>
+                    <div class="text-3xl font-bold text-primary-900">$79<span class="text-base font-normal text-neutral-500">/mo</span></div>
+                    <ul class="mt-6 space-y-3 flex-1">
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Unlimited contacts</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Unlimited appointments & invoices</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 5 GB storage</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 75 AI requests/day</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Calendar & basic tax</li>
+                    </ul>
+                    <a href="{{ route('register') }}" class="mt-8 w-full inline-flex items-center justify-center rounded-xl bg-primary-500 text-white font-semibold px-6 py-3.5 text-sm hover:bg-primary-600 shadow-lg shadow-primary-500/25 transition">
+                        {{ __('Start Free Trial') }}
+                    </a>
+                </div>
+
+                {{-- Premium --}}
+                <div class="bg-white rounded-2xl p-8 border-2 border-neutral-200 shadow-sm flex flex-col">
+                    <h3 class="text-lg font-bold text-primary-900">{{ __('Premium') }}</h3>
+                    <p class="text-sm text-neutral-500 mt-1 mb-4">{{ __('For scale and AI-powered everything') }}</p>
+                    <div class="text-3xl font-bold text-primary-900">$149<span class="text-base font-normal text-neutral-500">/mo</span></div>
+                    <ul class="mt-6 space-y-3 flex-1">
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Everything in Pro</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Unlimited storage</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> 200 AI requests/day</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> AI-powered tax & docs</li>
+                        <li class="flex items-center gap-2 text-neutral-700 text-sm"><svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg> Priority support</li>
+                    </ul>
+                    <a href="{{ route('register') }}" class="mt-8 w-full inline-flex items-center justify-center rounded-xl border-2 border-primary-500 text-primary-600 font-semibold px-6 py-3.5 text-sm hover:bg-primary-50 transition">
+                        {{ __('Start Free Trial') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{-- 9. FAQ --}}
+    <section class="py-20 md:py-28 bg-white opacity-0 transition-all duration-700 ease-out" id="faq" x-data x-intersect.once="$el.classList.add('opacity-100')">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary-900 text-center mb-12">
+                {{ __('Frequently Asked Questions') }}
+            </h2>
+            <x-accordion class="join join-vertical w-full rounded-2xl overflow-hidden border border-neutral-200">
+                <x-accordion.item active="true" name="faq-landing">
+                    <x-slot name="title">{{ __('Is there a free trial?') }}</x-slot>
+                    {{ __('Yes. Every plan includes a 14-day free trial with full access. No credit card required.') }}
+                </x-accordion.item>
+                <x-accordion.item active="false" name="faq-landing">
+                    <x-slot name="title">{{ __('Can I cancel anytime?') }}</x-slot>
+                    {{ __('Yes. All plans are month-to-month. Cancel from your dashboard anytime; you keep access until the end of the billing period.') }}
+                </x-accordion.item>
+                <x-accordion.item active="false" name="faq-landing">
+                    <x-slot name="title">{{ __('Is my data secure?') }}</x-slot>
+                    {{ __('Yes. We use encryption, two-factor authentication, and comply with industry standards. Your data is never sold or shared.') }}
+                </x-accordion.item>
+                <x-accordion.item active="false" name="faq-landing">
+                    <x-slot name="title">{{ __('Do I need technical knowledge?') }}</x-slot>
+                    {{ __('No. WhizzIQ is built for entrepreneurs. Setup takes minutes, and our interface is designed to be intuitive.') }}
+                </x-accordion.item>
+                <x-accordion.item active="false" name="faq-landing">
+                    <x-slot name="title">{{ __('What makes WhizzIQ different?') }}</x-slot>
+                    {{ __('WhizzIQ replaces 6–8 disconnected tools with one platform. Everything—CRM, invoicing, scheduling, tasks, finances, and AI—connects in a single dashboard.') }}
+                </x-accordion.item>
+            </x-accordion>
+        </div>
+    </section>
+
+    {{-- 10. FINAL CTA --}}
+    <section class="py-20 md:py-28 bg-primary-600">
+        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                {{ __('Stop Juggling Tools. Start Running Your Business.') }}
+            </h2>
+            <p class="text-lg md:text-xl text-primary-100 mb-8">
+                {{ __('No credit card required. Setup takes less than 5 minutes.') }}
             </p>
-            <p class="mt-4 font-semibold text-primary-700">
-                {{ __('One login. One dashboard. Complete control.') }}
-            </p>
-        </x-section.column>
-
-        <x-section.column>
-            <img src="{{URL::asset('/images/features/payments.png')}}" alt="All-in-One Platform" class="rounded-2xl shadow-lg"></img>
-        </x-section.column>
-    </x-section.columns>
-
-    {{-- KEY FEATURES GRID --}}
-    <div class="text-center mt-20 mx-4">
-        <x-heading.h6 class="text-primary-500">{{ __('Complete Business Management') }}</x-heading.h6>
-        <x-heading.h2 class="text-primary-900">{{ __('Every Tool You Need to Grow') }}</x-heading.h2>
-        <p class="mt-4 text-neutral-600 max-w-3xl mx-auto">{{ __('Replace your entire software stack with one intelligent platform designed specifically for entrepreneurs and small businesses.') }}</p>
-    </div>
-
-    <x-section.columns class="max-w-none md:max-w-6xl mt-12 gap-6">
-        <x-section.column class="flex flex-col items-start text-left p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition">
-            <div class="p-3 bg-primary-100 rounded-lg mb-4">
-                <x-icon.fancy name="users" class="w-12 h-12 text-primary-600" />
-            </div>
-            <x-heading.h3 class="pt-2 text-primary-900">{{ __('CRM & Sales Pipeline') }}</x-heading.h3>
-            <p class="mt-2 text-neutral-600">{{ __('Manage unlimited contacts, track deals through your pipeline, score relationships, and never miss a follow-up. AI helps identify your hottest leads.') }}</p>
-        </x-section.column>
-
-        <x-section.column class="flex flex-col items-start text-left p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition">
-            <div class="p-3 bg-primary-100 rounded-lg mb-4">
-                <svg class="w-12 h-12 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-            </div>
-            <x-heading.h3 class="pt-2 text-primary-900">{{ __('Financial Management') }}</x-heading.h3>
-            <p class="mt-2 text-neutral-600">{{ __('Create professional invoices, track expenses, manage cash flow, and get real-time profit/loss insights. AI auto-categorizes expenses and optimizes taxes.') }}</p>
-        </x-section.column>
-
-        <x-section.column class="flex flex-col items-start text-left p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition">
-            <div class="p-3 bg-primary-100 rounded-lg mb-4">
-                <svg class="w-12 h-12 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            </div>
-            <x-heading.h3 class="pt-2 text-primary-900">{{ __('Smart Scheduling') }}</x-heading.h3>
-            <p class="mt-2 text-neutral-600">{{ __('Automated booking with calendar sync (Google, Outlook, iCloud), Zoom integration, recurring appointments, and aftercare workflows. Let clients book 24/7.') }}</p>
-        </x-section.column>
-    </x-section.columns>
-
-    <x-section.columns class="max-w-none md:max-w-6xl mt-6 gap-6">
-        <x-section.column class="flex flex-col items-start text-left p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition">
-            <div class="p-3 bg-primary-100 rounded-lg mb-4">
-                <svg class="w-12 h-12 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-            </div>
-            <x-heading.h3 class="pt-2 text-primary-900">{{ __('Document Vault') }}</x-heading.h3>
-            <p class="mt-2 text-neutral-600">{{ __('Secure storage for contracts, receipts, and files with AI analysis, OCR text extraction, version control, and smart search. Never lose an important document again.') }}</p>
-        </x-section.column>
-
-        <x-section.column class="flex flex-col items-start text-left p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition">
-            <div class="p-3 bg-primary-100 rounded-lg mb-4">
-                <svg class="w-12 h-12 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-            </div>
-            <x-heading.h3 class="pt-2 text-primary-900">{{ __('Task & Goal Management') }}</x-heading.h3>
-            <p class="mt-2 text-neutral-600">{{ __('AI-powered task prioritization, goal tracking with OKRs, kanban boards, and automatic task extraction from documents and emails. Stay focused on what matters.') }}</p>
-        </x-section.column>
-
-        <x-section.column class="flex flex-col items-start text-left p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition">
-            <div class="p-3 bg-primary-100 rounded-lg mb-4">
-                <svg class="w-12 h-12 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-            </div>
-            <x-heading.h3 class="pt-2 text-primary-900">{{ __('Secure Password Vault') }}</x-heading.h3>
-            <p class="mt-2 text-neutral-600">{{ __('Military-grade encrypted storage for all your business passwords. Password health monitoring, breach detection, and automatic update reminders keep you secure.') }}</p>
-        </x-section.column>
-    </x-section.columns>
-
-    {{-- AI FEATURES HIGHLIGHT --}}
-    <x-section.columns class="max-w-none md:max-w-6xl mt-20 bg-gradient-to-br from-primary-50 to-primary-100 rounded-3xl p-8 flex-wrap-reverse">
-        <x-section.column>
-            <img src="{{URL::asset('/images/features/colors.png')}}" alt="AI-Powered Features" class="rounded-2xl shadow-lg" />
-        </x-section.column>
-
-        <x-section.column>
-            <div x-intersect="$el.classList.add('slide-in-top')">
-                <x-heading.h6 class="text-primary-500">{{ __('Powered by Artificial Intelligence') }}</x-heading.h6>
-                <x-heading.h2 class="text-primary-900">
-                    {{ __('Your AI Business Co-Pilot') }}
-                </x-heading.h2>
-            </div>
-
-            <p class="mt-4 text-lg">
-                {{ __('WhizzIQ doesn\'t just store your data—it understands it and helps you make smarter decisions.') }}
-            </p>
-
-            <ul class="mt-6 space-y-3">
-                <li class="flex gap-3">
-                    <span class="flex-shrink-0 p-1 bg-primary-500 rounded-full h-6 w-6 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </span>
-                    <span><strong>Auto-categorize expenses</strong> and identify tax deductions</span>
-                </li>
-                <li class="flex gap-3">
-                    <span class="flex-shrink-0 p-1 bg-primary-500 rounded-full h-6 w-6 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </span>
-                    <span><strong>Extract tasks</strong> automatically from documents and emails</span>
-                </li>
-                <li class="flex gap-3">
-                    <span class="flex-shrink-0 p-1 bg-primary-500 rounded-full h-6 w-6 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </span>
-                    <span><strong>Generate SWOT analyses</strong> and risk assessments</span>
-                </li>
-                <li class="flex gap-3">
-                    <span class="flex-shrink-0 p-1 bg-primary-500 rounded-full h-6 w-6 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </span>
-                    <span><strong>Forecast revenue</strong> and detect financial anomalies</span>
-                </li>
-                <li class="flex gap-3">
-                    <span class="flex-shrink-0 p-1 bg-primary-500 rounded-full h-6 w-6 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </span>
-                    <span><strong>Optimize your taxes</strong> with intelligent deduction tracking</span>
-                </li>
-                <li class="flex gap-3">
-                    <span class="flex-shrink-0 p-1 bg-primary-500 rounded-full h-6 w-6 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </span>
-                    <span><strong>Prioritize tasks</strong> based on impact and urgency</span>
-                </li>
-            </ul>
-        </x-section.column>
-    </x-section.columns>
-
-    {{-- TAX MANAGEMENT FEATURE --}}
-    <x-section.columns class="max-w-none md:max-w-6xl mt-20">
-        <x-section.column>
-            <div x-intersect="$el.classList.add('slide-in-top')">
-                <x-heading.h6 class="text-primary-500">{{ __('Never Stress About Taxes Again') }}</x-heading.h6>
-                <x-heading.h2 class="text-primary-900">
-                    {{ __('Built-In Tax Optimization') }}
-                </x-heading.h2>
-            </div>
-
-            <p class="mt-4 text-lg">
-                {{ __('Most businesses overpay on taxes because they don\'t track deductions properly. WhizzIQ automatically identifies every tax-deductible expense and organizes your documents for filing.') }}
-            </p>
-            <p class="mt-4">
-                {{ __('With AI-powered tax optimization, OCR document scanning, and automated forecasting, you\'ll maximize deductions and be ready for tax season in minutes, not weeks.') }}
-            </p>
-
-            <div class="mt-6 p-4 bg-primary-50 rounded-lg border-l-4 border-primary-500">
-                <p class="font-semibold text-primary-900">💡 Pro & Premium plans only</p>
-                <p class="mt-1 text-sm text-neutral-600">{{ __('Full tax features including AI optimization, OCR scanning, and unlimited document storage.') }}</p>
-            </div>
-        </x-section.column>
-
-        <x-section.column>
-            <img src="{{URL::asset('/images/features/plans.png')}}" alt="Tax Management" class="rounded-2xl shadow-lg"/>
-        </x-section.column>
-    </x-section.columns>
-
-    {{-- INTEGRATIONS --}}
-    <div class="text-center mt-20 mx-4">
-        <x-heading.h6 class="text-primary-500">{{ __('Connects With Your Existing Tools') }}</x-heading.h6>
-        <x-heading.h2 class="text-primary-900">{{ __('Seamless Integrations') }}</x-heading.h2>
-        <p class="mt-4 text-neutral-600 max-w-3xl mx-auto">{{ __('WhizzIQ works with the tools you already use, making migration painless.') }}</p>
-    </div>
-
-    <div class="flex flex-wrap items-center justify-center gap-8 mt-12 px-4 max-w-4xl mx-auto">
-        <div class="flex flex-col items-center text-center">
-            <svg class="w-16 h-16 text-neutral-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <p class="mt-2 font-medium">Google Calendar</p>
+            <a href="{{ route('register') }}" class="inline-flex items-center justify-center rounded-xl bg-white text-primary-600 font-semibold px-10 py-4 text-lg hover:bg-primary-50 shadow-xl transition">
+                {{ __('Start Your Free Trial Today') }}
+            </a>
         </div>
-        <div class="flex flex-col items-center text-center">
-            <svg class="w-16 h-16 text-neutral-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <p class="mt-2 font-medium">Zoom</p>
-        </div>
-        <div class="flex flex-col items-center text-center">
-            <svg class="w-16 h-16 text-neutral-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <p class="mt-2 font-medium">Outlook</p>
-        </div>
-        <div class="flex flex-col items-center text-center">
-            <svg class="w-16 h-16 text-neutral-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <p class="mt-2 font-medium">Stripe</p>
-        </div>
-        <div class="flex flex-col items-center text-center">
-            <svg class="w-16 h-16 text-neutral-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <p class="mt-2 font-medium">WhatsApp</p>
-        </div>
-        <div class="flex flex-col items-center text-center">
-            <svg class="w-16 h-16 text-neutral-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <p class="mt-2 font-medium">Mailgun</p>
-        </div>
-    </div>
-
-    {{-- PRICING SECTION --}}
-    <div class="mx-4 mt-24">
-        <x-heading.h6 class="text-center text-primary-500" id="pricing">
-            {{ __('Simple, Transparent Pricing') }}
-        </x-heading.h6>
-        <x-heading.h2 class="text-primary-900 text-center">
-            {{ __('Choose Your Plan') }}
-        </x-heading.h2>
-        <p class="text-center mt-4 text-neutral-600 max-w-2xl mx-auto">
-            {{ __('Start with what you need today. Upgrade as you grow. All plans include core features—higher tiers unlock AI superpowers and unlimited resources.') }}
-        </p>
-    </div>
-
-    <div class="pricing mt-8">
-        <x-plans.all calculate-saving-rates="true" show-default-product="1"/>
-    </div>
-
-    {{-- COMPARISON TABLE --}}
-    <div class="max-w-none md:max-w-6xl mx-auto mt-16 px-4">
-        <div class="text-center mb-8">
-            <x-heading.h3 class="text-primary-900">{{ __('Compare Plans') }}</x-heading.h3>
-            <p class="mt-2 text-neutral-600">{{ __('See exactly what\'s included in each plan') }}</p>
-        </div>
-
-        <div class="overflow-x-auto">
-            <table class="w-full border-collapse bg-white rounded-xl shadow-sm">
-                <thead>
-                    <tr class="border-b border-neutral-200">
-                        <th class="text-left p-4 font-semibold text-primary-900">Feature</th>
-                        <th class="text-center p-4 font-semibold text-primary-900">Starter</th>
-                        <th class="text-center p-4 font-semibold text-primary-900 bg-primary-50">Pro</th>
-                        <th class="text-center p-4 font-semibold text-primary-900">Premium</th>
-                    </tr>
-                </thead>
-                <tbody class="text-sm">
-                    <tr class="border-b border-neutral-100">
-                        <td class="p-4 text-neutral-700">Contacts</td>
-                        <td class="p-4 text-center">500</td>
-                        <td class="p-4 text-center bg-primary-50">Unlimited</td>
-                        <td class="p-4 text-center">Unlimited</td>
-                    </tr>
-                    <tr class="border-b border-neutral-100">
-                        <td class="p-4 text-neutral-700">Appointments</td>
-                        <td class="p-4 text-center">Unlimited</td>
-                        <td class="p-4 text-center bg-primary-50">Unlimited</td>
-                        <td class="p-4 text-center">Unlimited</td>
-                    </tr>
-                    <tr class="border-b border-neutral-100">
-                        <td class="p-4 text-neutral-700">Invoices</td>
-                        <td class="p-4 text-center">50/month</td>
-                        <td class="p-4 text-center bg-primary-50">Unlimited</td>
-                        <td class="p-4 text-center">Unlimited</td>
-                    </tr>
-                    <tr class="border-b border-neutral-100">
-                        <td class="p-4 text-neutral-700">Document Storage</td>
-                        <td class="p-4 text-center">1 GB</td>
-                        <td class="p-4 text-center bg-primary-50">5 GB</td>
-                        <td class="p-4 text-center">Unlimited</td>
-                    </tr>
-                    <tr class="border-b border-neutral-100">
-                        <td class="p-4 text-neutral-700">AI Requests/Day</td>
-                        <td class="p-4 text-center">20</td>
-                        <td class="p-4 text-center bg-primary-50">75</td>
-                        <td class="p-4 text-center">200</td>
-                    </tr>
-                    <tr class="border-b border-neutral-100">
-                        <td class="p-4 text-neutral-700">Tax Features</td>
-                        <td class="p-4 text-center text-neutral-400">—</td>
-                        <td class="p-4 text-center bg-primary-50">✓ Basic</td>
-                        <td class="p-4 text-center">✓ AI-Powered</td>
-                    </tr>
-                    <tr class="border-b border-neutral-100">
-                        <td class="p-4 text-neutral-700">Calendar Integration</td>
-                        <td class="p-4 text-center text-neutral-400">—</td>
-                        <td class="p-4 text-center bg-primary-50">✓</td>
-                        <td class="p-4 text-center">✓</td>
-                    </tr>
-                    <tr>
-                        <td class="p-4 text-neutral-700">AI Document Analysis</td>
-                        <td class="p-4 text-center text-neutral-400">—</td>
-                        <td class="p-4 text-center bg-primary-50 text-neutral-400">—</td>
-                        <td class="p-4 text-center">✓</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    {{-- FAQ SECTION --}}
-    <div class="text-center mt-24 mx-4" id="faq">
-        <x-heading.h6 class="text-primary-500">{{ __('FAQ') }}</x-heading.h6>
-        <x-heading.h2 class="text-primary-900">{{ __('Frequently Asked Questions') }}</x-heading.h2>
-        <p class="mt-4 text-neutral-600">{{ __('Everything you need to know about WhizzIQ') }}</p>
-    </div>
-
-    <div class="max-w-none md:max-w-4xl mx-auto">
-        <x-accordion class="mt-8 p-4">
-            <x-accordion.item active="true" name="faqs">
-                <x-slot name="title">{{ __('What exactly is WhizzIQ?') }}</x-slot>
-                <p>
-                    {{ __('WhizzIQ is an all-in-one business operating system designed specifically for entrepreneurs, freelancers, and small businesses. Instead of juggling 10+ different tools (CRM, accounting software, scheduling apps, document storage, password managers, etc.), WhizzIQ combines everything into one intelligent platform.') }}
-                </p>
-                <p class="mt-3">
-                    {{ __('Think of it as your complete business command center—from managing client relationships and creating invoices to scheduling appointments and filing taxes, all powered by AI to help you work smarter, not harder.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('How is WhizzIQ different from other business software?') }}</x-slot>
-                <p>
-                    {{ __('Most business software forces you to piece together multiple disconnected tools: Salesforce for CRM, QuickBooks for accounting, Calendly for scheduling, Dropbox for files, LastPass for passwords, etc. This creates data silos, duplicate entry, and subscription fatigue.') }}
-                </p>
-                <p class="mt-3">
-                    {{ __('WhizzIQ is the first true all-in-one platform where everything connects seamlessly. When you create an invoice, it links to the client, tracks revenue, updates your financial metrics, and sets a follow-up reminder—all automatically. Plus, our AI layer understands your data and helps you make better decisions.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('Do I really need all these features?') }}</x-slot>
-                <p>
-                    {{ __('You might not use every feature on day one, but as your business grows, you will. That\'s the beauty of WhizzIQ—you start with what you need today (maybe just invoicing and appointments), and unlock more capabilities as you scale.') }}
-                </p>
-                <p class="mt-3">
-                    {{ __('Even if you only use 50% of the platform, you\'re still replacing 5+ separate subscriptions at a fraction of the cost. And everything is already integrated, so there\'s no painful migration when you\'re ready to add CRM, document management, or tax optimization.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('What makes the AI features special?') }}</x-slot>
-                <p>
-                    {{ __('Our AI doesn\'t just add a chatbot—it deeply integrates into your workflows to save you hours of manual work:') }}
-                </p>
-                <ul class="mt-3 list-disc list-inside space-y-2">
-                    <li>{{ __('Automatically categorizes expenses and identifies tax deductions') }}</li>
-                    <li>{{ __('Extracts action items from documents and meeting notes') }}</li>
-                    <li>{{ __('Generates SWOT analyses and business insights from your data') }}</li>
-                    <li>{{ __('Forecasts revenue trends and detects financial anomalies') }}</li>
-                    <li>{{ __('Optimizes tax strategies based on your spending patterns') }}</li>
-                    <li>{{ __('Scores leads and prioritizes tasks by impact') }}</li>
-                </ul>
-                <p class="mt-3">
-                    {{ __('It\'s like having a smart business consultant working 24/7 in the background.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('Can WhizzIQ really replace my accountant?') }}</x-slot>
-                <p>
-                    {{ __('WhizzIQ doesn\'t replace your accountant—it makes them more efficient (and cheaper). The platform automatically tracks every expense, categorizes transactions, identifies deductions, and organizes all your tax documents.') }}
-                </p>
-                <p class="mt-3">
-                    {{ __('When tax season comes, you can hand your accountant a complete, organized package instead of a shoebox full of receipts. This reduces their billable hours significantly. For simple businesses, our Premium plan even includes tools to file basic taxes yourself, though we always recommend consulting a professional for complex situations.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('Is my data secure?') }}</x-slot>
-                <p>
-                    {{ __('Absolutely. We take security seriously:') }}
-                </p>
-                <ul class="mt-3 list-disc list-inside space-y-2">
-                    <li>{{ __('Military-grade encryption for sensitive data (passwords, financial info)') }}</li>
-                    <li>{{ __('Two-factor authentication (2FA) for all accounts') }}</li>
-                    <li>{{ __('Regular security audits and penetration testing') }}</li>
-                    <li>{{ __('Compliant with GDPR, SOC 2, and industry standards') }}</li>
-                    <li>{{ __('Daily encrypted backups') }}</li>
-                    <li>{{ __('Role-based access controls for teams') }}</li>
-                </ul>
-                <p class="mt-3">
-                    {{ __('Your business data is yours alone. We never sell or share it with third parties.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('What if I\'m already using QuickBooks/Salesforce/etc.?') }}</x-slot>
-                <p>
-                    {{ __('We make migration painless with CSV/Excel import tools for contacts, invoices, and other core data. You can also run WhizzIQ alongside your existing tools initially and gradually transition features over time.') }}
-                </p>
-                <p class="mt-3">
-                    {{ __('Many customers start by using WhizzIQ for just scheduling and client management, then migrate their financial data over a few months once they\'re comfortable. There\'s no rush—use the integration approach that works for your business.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('Do you offer a free trial?') }}</x-slot>
-                <p>
-                    {{ __('Yes! Every plan includes a 14-day free trial with full access to all features. No credit card required to start. Test drive the entire platform, import your data, and make sure WhizzIQ is the right fit before committing.') }}
-                </p>
-                <p class="mt-3">
-                    {{ __('If you need more time to evaluate, just reach out to our support team. We want you to be confident in your decision.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('What kind of support do you provide?') }}</x-slot>
-                <p>
-                    {{ __('All plans include:') }}
-                </p>
-                <ul class="mt-3 list-disc list-inside space-y-2">
-                    <li><strong>Starter:</strong> {{ __('Email support with 24-48 hour response time + comprehensive documentation') }}</li>
-                    <li><strong>Pro:</strong> {{ __('Priority email support with 12-hour response time + video tutorials') }}</li>
-                    <li><strong>Premium:</strong> {{ __('Premium support with 4-hour response time + dedicated account manager + onboarding call') }}</li>
-                </ul>
-                <p class="mt-3">
-                    {{ __('Plus, our Help Center includes step-by-step guides, video tutorials, and FAQs to help you get the most out of WhizzIQ.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('Can I cancel anytime?') }}</x-slot>
-                <p>
-                    {{ __('Yes, absolutely. All plans are month-to-month with no long-term contracts. You can cancel anytime from your dashboard. If you cancel, you\'ll have access until the end of your current billing period, and you can export all your data before leaving.') }}
-                </p>
-                <p class="mt-3">
-                    {{ __('We also offer annual plans with significant discounts (save up to 20%) if you want to commit for a year.') }}
-                </p>
-            </x-accordion.item>
-
-            <x-accordion.item active="false" name="faqs">
-                <x-slot name="title">{{ __('Who is WhizzIQ best for?') }}</x-slot>
-                <p>
-                    {{ __('WhizzIQ is designed for:') }}
-                </p>
-                <ul class="mt-3 list-disc list-inside space-y-2">
-                    <li>{{ __('Freelancers and solopreneurs managing clients and projects') }}</li>
-                    <li>{{ __('Small business owners (1-50 employees) needing complete business management') }}</li>
-                    <li>{{ __('Service-based professionals (consultants, coaches, agencies)') }}</li>
-                    <li>{{ __('Entrepreneurs who want data-driven insights to grow faster') }}</li>
-                    <li>{{ __('Anyone tired of juggling multiple subscriptions and tools') }}</li>
-                </ul>
-                <p class="mt-3">
-                    {{ __('If you\'re currently using 5+ different business tools, WhizzIQ can probably replace most of them while saving you time and money.') }}
-                </p>
-            </x-accordion.item>
-        </x-accordion>
-    </div>
+    </section>
 
 </x-layouts.app>

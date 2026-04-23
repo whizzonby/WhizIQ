@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @include('components.layouts.partials.head')
 </head>
-<body class="text-primary-900 flex flex-col min-h-screen" x-data>
+<body class="text-primary-900 flex flex-col min-h-screen font-sans antialiased" x-data>
     <div id="app" class="flex flex-col grow">
         <x-layouts.app.header class="shrink-0"/>
 
