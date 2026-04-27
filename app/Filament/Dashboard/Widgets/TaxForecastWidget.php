@@ -10,6 +10,8 @@ class TaxForecastWidget extends BaseWidget
 {
     protected static ?int $sort = 11;
 
+    protected static bool $isLazy = true;
+
 
     public function getHeading(): string
     {

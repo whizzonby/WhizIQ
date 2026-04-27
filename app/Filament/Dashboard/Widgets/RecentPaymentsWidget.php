@@ -12,6 +12,8 @@ class RecentPaymentsWidget extends BaseWidget
 {
     protected static ?int $sort = 4;
 
+    protected static bool $isLazy = true;
+
     /**
      * Check if user can view the widget
      * Subscription-First: Requires active subscription or trial

@@ -14,6 +14,8 @@ class FinanceMetricsSummaryWidget extends BaseWidget
 {
     protected static ?int $sort = 2;
 
+    protected static bool $isLazy = true;
+
     protected function getStats(): array
     {
         $user = auth()->user();

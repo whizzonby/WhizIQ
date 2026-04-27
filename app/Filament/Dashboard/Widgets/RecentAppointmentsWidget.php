@@ -13,6 +13,8 @@ class RecentAppointmentsWidget extends BaseWidget
     
     protected static ?int $sort = 27;
 
+    protected static bool $isLazy = true;
+
     protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table

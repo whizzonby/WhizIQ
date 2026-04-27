@@ -9,6 +9,8 @@ class GoalProgressChartWidget extends ChartWidget
 {
     protected static ?int $sort = 21;
 
+    protected static bool $isLazy = true;
+
 
     protected ?string $heading = '📈 Goals Progress Overview';
 

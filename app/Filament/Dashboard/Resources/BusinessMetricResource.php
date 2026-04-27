@@ -26,7 +26,7 @@ class BusinessMetricResource extends Resource
 
     protected static ?string $navigationLabel = 'Business Metrics';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Analytics Data';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
 
     protected static ?int $navigationSort = 1;
 

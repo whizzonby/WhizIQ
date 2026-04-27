@@ -31,6 +31,7 @@ class AppointmentType extends Model
         'requires_location',
         'allowed_venues',
         'aftercare_template_id',
+        'aftercare_sequence_id',
         'enable_aftercare',
     ];
 
@@ -65,6 +66,11 @@ class AppointmentType extends Model
     public function aftercareTemplate(): BelongsTo
     {
         return $this->belongsTo(AftercareTemplate::class);
+    }
+
+    public function aftercareSequence(): BelongsTo
+    {
+        return $this->belongsTo(AftercareSequence::class);
     }
 
     // Scopes

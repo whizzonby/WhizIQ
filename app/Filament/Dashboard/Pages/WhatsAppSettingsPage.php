@@ -26,6 +26,8 @@ class WhatsAppSettingsPage extends Page implements HasForms
 
     protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?int $navigationSort = 10;
 
     protected string $view = 'filament.dashboard.pages.whatsapp-settings-page';

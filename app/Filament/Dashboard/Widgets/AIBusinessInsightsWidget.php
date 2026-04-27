@@ -20,6 +20,8 @@ class AIBusinessInsightsWidget extends Widget
 
     protected static ?int $sort = 14;
 
+    protected static bool $isLazy = true;
+
     protected string $view = 'filament.dashboard.widgets.ai-business-insights-widget';
 
     protected int | string | array $columnSpan = 'full';

@@ -16,6 +16,8 @@ class UpcomingFilingDeadlinesWidget extends BaseWidget
 
     protected static ?int $sort = 12;
 
+    protected static bool $isLazy = true;
+
 
     protected int | string | array $columnSpan = 'full';
 

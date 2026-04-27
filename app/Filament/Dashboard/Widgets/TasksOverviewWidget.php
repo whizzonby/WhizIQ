@@ -10,6 +10,8 @@ class TasksOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 23;
 
+    protected static bool $isLazy = true;
+
 
     public function getHeading(): string
     {

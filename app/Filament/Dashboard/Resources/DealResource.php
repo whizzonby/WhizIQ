@@ -29,7 +29,7 @@ class DealResource extends Resource
 
     protected static ?string $navigationLabel = 'Deals';
 
-    protected static UnitEnum|string|null $navigationGroup = 'CRM';
+    protected static UnitEnum|string|null $navigationGroup = 'Clients';
 
     protected static ?int $navigationSort = 2;
 

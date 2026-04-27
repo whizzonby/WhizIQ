@@ -37,7 +37,7 @@ class InvoiceBuilderPage extends Page implements HasForms
         return $this->invoiceId ? 'Edit Invoice' : 'Beautiful Invoice Builder';
     }
 
-    protected static UnitEnum|string|null $navigationGroup = 'Finance';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
 
     protected static ?int $navigationSort = 0;
 

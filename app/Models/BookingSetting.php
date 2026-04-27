@@ -20,6 +20,7 @@ class BookingSetting extends Model
         'logo_url',
         'brand_color',
         'timezone',
+        'currency',
         'require_approval',
         'min_booking_notice_hours',
         'max_booking_days_ahead',

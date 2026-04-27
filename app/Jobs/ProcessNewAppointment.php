@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\BookingSetting;
 use App\Models\User;
 use App\Services\MeetingPlatform\MeetingPlatformService;
+use App\Services\ReceiptService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Notification;
@@ -38,11 +39,18 @@ class ProcessNewAppointment implements ShouldQueue
                 $this->bookingSetting
             );
 
-            // Create invoice if payment type is invoice
-            if ($this->appointment->payment_required &&
-                $this->appointment->appointmentType &&
-                $this->appointment->appointmentType->payment_type === 'invoice') {
+            $paymentType = $this->appointment->appointmentType?->payment_type ?? 'none';
+
+            // Invoice type: create invoice (book now, pay later — no receipt yet)
+            if ($this->appointment->payment_required && $paymentType === 'invoice') {
                 $this->createInvoiceForAppointment();
+            }
+
+            // Upfront / deposit type: payment already collected — issue receipt immediately
+            if ($this->appointment->payment_required
+                && in_array($paymentType, ['upfront', 'deposit'])
+                && $this->appointment->attendee_email) {
+                ReceiptService::createFromAppointment($this->appointment);
             }
 
             // Send confirmation email to attendee (slow operation)
@@ -128,7 +136,7 @@ class ProcessNewAppointment implements ShouldQueue
                 'total_amount' => $appointmentType->price,
                 'amount_paid' => 0,
                 'balance_due' => $appointmentType->price,
-                'currency' => 'USD',
+                'currency' => \App\Models\BookingSetting::where('user_id', $this->appointment->user_id)->value('currency') ?? 'USD',
                 'notes' => 'Invoice for appointment: ' . $appointmentType->name,
             ]);
 

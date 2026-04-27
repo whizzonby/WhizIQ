@@ -25,7 +25,8 @@ class TaxPeriodResource extends Resource
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-calendar-days';
 
     protected static ?string $navigationLabel = 'Tax Periods';
-    protected static UnitEnum|string|null $navigationGroup = 'Tax & Compliance';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?int $navigationSort = 7;
 

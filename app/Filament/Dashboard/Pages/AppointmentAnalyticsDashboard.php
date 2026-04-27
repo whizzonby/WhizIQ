@@ -17,7 +17,7 @@ class AppointmentAnalyticsDashboard extends Page
 
     protected static ?string $title = 'Appointment Analytics & Insights';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Booking';
+    protected static UnitEnum|string|null $navigationGroup = 'Clients';
 
     //protected static ?int $navigationSort = 4;
 

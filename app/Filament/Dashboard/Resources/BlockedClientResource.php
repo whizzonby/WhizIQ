@@ -27,7 +27,9 @@ class BlockedClientResource extends Resource
 
     protected static ?string $navigationLabel = 'Blocked Clients';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Booking';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?int $navigationSort = 4;
 

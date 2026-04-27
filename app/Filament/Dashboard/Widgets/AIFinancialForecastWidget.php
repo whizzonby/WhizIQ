@@ -16,6 +16,8 @@ class AIFinancialForecastWidget extends ChartWidget
 
     protected static ?int $sort = 4;
 
+    protected static bool $isLazy = true;
+
 
     protected int | string | array $columnSpan = 'full';
 

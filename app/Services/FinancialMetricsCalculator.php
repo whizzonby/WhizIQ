@@ -8,6 +8,7 @@ use App\Models\RevenueSource;
 use App\Models\ClientPayment;
 use App\Models\ClientInvoice;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class FinancialMetricsCalculator
@@ -235,25 +236,29 @@ class FinancialMetricsCalculator
      */
     public function getMetricsWithComparisons(User $user): array
     {
-        $current = $this->getCurrentMonthMetrics($user);
-        $previous = $this->getLastMonthMetrics($user);
+        $cacheKey = "financial_metrics_{$user->id}_" . now()->format('Y-m-d-H');
 
-        return [
-            'current' => $current,
-            'previous' => $previous,
-            'changes' => [
-                'revenue_change' => $this->calculatePercentageChange($current['revenue'], $previous['revenue']),
-                'expenses_change' => $this->calculatePercentageChange($current['expenses'], $previous['expenses']),
-                'profit_change' => $this->calculatePercentageChange($current['profit'], $previous['profit']),
-                'cash_flow_change' => $this->calculatePercentageChange($current['cash_flow'], $previous['cash_flow']),
-            ],
-            'trends' => [
-                'revenue' => $this->getMonthlyTrend($user, 'revenue'),
-                'expenses' => $this->getMonthlyTrend($user, 'expenses'),
-                'profit' => $this->getMonthlyTrend($user, 'profit'),
-                'cash_flow' => $this->getMonthlyTrend($user, 'cash_flow'),
-            ],
-        ];
+        return Cache::remember($cacheKey, 1800, function () use ($user) {
+            $current = $this->getCurrentMonthMetrics($user);
+            $previous = $this->getLastMonthMetrics($user);
+
+            return [
+                'current' => $current,
+                'previous' => $previous,
+                'changes' => [
+                    'revenue_change' => $this->calculatePercentageChange($current['revenue'], $previous['revenue']),
+                    'expenses_change' => $this->calculatePercentageChange($current['expenses'], $previous['expenses']),
+                    'profit_change' => $this->calculatePercentageChange($current['profit'], $previous['profit']),
+                    'cash_flow_change' => $this->calculatePercentageChange($current['cash_flow'], $previous['cash_flow']),
+                ],
+                'trends' => [
+                    'revenue' => $this->getMonthlyTrend($user, 'revenue'),
+                    'expenses' => $this->getMonthlyTrend($user, 'expenses'),
+                    'profit' => $this->getMonthlyTrend($user, 'profit'),
+                    'cash_flow' => $this->getMonthlyTrend($user, 'cash_flow'),
+                ],
+            ];
+        });
     }
 
     /**

@@ -27,3 +27,10 @@ Route::post('/payments-providers/lemon-squeezy/webhook', [
     App\Http\Controllers\PaymentProviders\LemonSqueezyController::class,
     'handleWebhook',
 ])->name('payments-providers.lemon-squeezy.webhook');
+
+// WhatsApp Business API webhook
+Route::get('/webhooks/whatsapp', [App\Http\Controllers\WhatsAppWebhookController::class, 'verify'])
+    ->name('webhooks.whatsapp.verify');
+
+Route::post('/webhooks/whatsapp', [App\Http\Controllers\WhatsAppWebhookController::class, 'handle'])
+    ->name('webhooks.whatsapp');

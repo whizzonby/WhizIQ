@@ -15,7 +15,8 @@ class GoalsDashboard extends Page
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-flag';
 
     protected static ?string $navigationLabel = 'Goals Dashboard';
-    protected static UnitEnum|string|null $navigationGroup = 'Productivity';
+    protected static UnitEnum|string|null $navigationGroup = 'Work';
+    protected static bool $shouldRegisterNavigation = false;
     protected static ?string $title = 'Goals Dashboard';
 
     protected static ?int $navigationSort = 1;

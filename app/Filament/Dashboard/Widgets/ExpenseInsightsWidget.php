@@ -12,6 +12,8 @@ class ExpenseInsightsWidget extends BaseWidget
 {
     protected static ?int $sort = 5;
 
+    protected static bool $isLazy = true;
+
 
     public function getHeading(): string
     {

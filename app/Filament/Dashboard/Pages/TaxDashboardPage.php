@@ -13,8 +13,8 @@ class TaxDashboardPage extends Page
 {
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-calculator';
 
-    protected static ?string $navigationLabel = 'Tax & Compliance';
-    protected static UnitEnum|string|null $navigationGroup = 'Tax & Compliance';
+    protected static ?string $navigationLabel = 'Tax Dashboard';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
 
     protected static ?string $title = 'T&C Dashboard';
 

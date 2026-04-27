@@ -27,7 +27,7 @@ class AppointmentTypeResource extends Resource
 
     protected static ?string $navigationLabel = 'Appointment Types';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Booking';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 2;
 
@@ -298,6 +298,17 @@ class AppointmentTypeResource extends Resource
                             ->live()
                             ->helperText('Send automated aftercare instructions after appointment completion'),
 
+                        Forms\Components\Radio::make('aftercare_mode')
+                            ->label('Aftercare type')
+                            ->options([
+                                'template' => 'Single message (template)',
+                                'sequence' => 'Multi-step sequence',
+                            ])
+                            ->default('template')
+                            ->live()
+                            ->visible(fn ($get) => $get('enable_aftercare'))
+                            ->helperText('Use a sequence to send multiple follow-ups at different intervals.'),
+
                         Forms\Components\Select::make('aftercare_template_id')
                             ->label('Aftercare Template')
                             ->relationship('aftercareTemplate', 'name', fn ($query) =>
@@ -305,8 +316,8 @@ class AppointmentTypeResource extends Resource
                             )
                             ->searchable()
                             ->preload()
-                            ->required(fn ($get) => $get('enable_aftercare'))
-                            ->visible(fn ($get) => $get('enable_aftercare'))
+                            ->required(fn ($get) => $get('enable_aftercare') && $get('aftercare_mode') === 'template')
+                            ->visible(fn ($get) => $get('enable_aftercare') && $get('aftercare_mode') !== 'sequence')
                             ->helperText('Select the aftercare template to use for this service')
                             ->createOptionForm([
                                 Forms\Components\TextInput::make('name')
@@ -325,9 +336,32 @@ class AppointmentTypeResource extends Resource
                                 ])->id;
                             }),
 
+                        Forms\Components\Select::make('aftercare_sequence_id')
+                            ->label('Follow-up Sequence')
+                            ->relationship('aftercareSequence', 'name', fn ($query) =>
+                                $query->where('user_id', auth()->id())->where('is_active', true)
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required(fn ($get) => $get('enable_aftercare') && $get('aftercare_mode') === 'sequence')
+                            ->visible(fn ($get) => $get('enable_aftercare') && $get('aftercare_mode') === 'sequence')
+                            ->helperText('All active steps in the sequence will be scheduled for each completed appointment.')
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255),
+                            ])
+                            ->createOptionUsing(function ($data) {
+                                return \App\Models\AftercareSequence::create([
+                                    'user_id'   => auth()->id(),
+                                    'name'      => $data['name'],
+                                    'is_active' => true,
+                                ])->id;
+                            }),
+
                         Forms\Components\Placeholder::make('aftercare_info')
                             ->label('How it works')
-                            ->content('When an appointment of this type is marked as "completed", the selected aftercare template will automatically be scheduled and sent to the client according to the template\'s timing settings.')
+                            ->content('When an appointment is marked as "completed", the selected template or sequence is automatically scheduled for the client.')
                             ->visible(fn ($get) => $get('enable_aftercare')),
                     ])
                     ->columns(1)

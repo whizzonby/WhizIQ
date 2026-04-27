@@ -10,6 +10,8 @@ class AppointmentStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 25;
 
+    protected static bool $isLazy = true;
+
 
     public function getHeading(): string
     {

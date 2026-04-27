@@ -8,10 +8,13 @@ use App\Models\FollowUpReminder;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ContactsOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 19;
+
+    protected static bool $isLazy = true;
 
 
     public function getHeading(): string
@@ -22,32 +25,31 @@ class ContactsOverviewWidget extends BaseWidget
     protected function getStats(): array
     {
         $userId = Auth::id();
+        $cacheKey = "contacts_overview_{$userId}_" . now()->format('Y-m-d-H');
 
-        // Total contacts
-        $totalContacts = Contact::where('user_id', $userId)->where('status', 'active')->count();
+        $data = Cache::remember($cacheKey, 1800, function () use ($userId) {
+            return [
+                'totalContacts'  => Contact::where('user_id', $userId)->where('status', 'active')->count(),
+                'clientsCount'   => Contact::where('user_id', $userId)->where('type', 'client')->count(),
+                'leadsCount'     => Contact::where('user_id', $userId)->where('type', 'lead')->count(),
+                'vipCount'       => Contact::where('user_id', $userId)->where('priority', 'vip')->count(),
+                'followUpsNeeded'=> Contact::where('user_id', $userId)->needsFollowUp()->count(),
+                'coldContacts'   => Contact::where('user_id', $userId)
+                    ->where('status', 'active')
+                    ->where(function ($query) {
+                        $query->where('last_contact_date', '<', now()->subDays(30))
+                            ->orWhereNull('last_contact_date');
+                    })
+                    ->count(),
+            ];
+        });
 
-        // Clients
-        $clientsCount = Contact::where('user_id', $userId)->where('type', 'client')->count();
-
-        // Leads
-        $leadsCount = Contact::where('user_id', $userId)->where('type', 'lead')->count();
-
-        // VIP contacts
-        $vipCount = Contact::where('user_id', $userId)->where('priority', 'vip')->count();
-
-        // Follow-ups needed
-        $followUpsNeeded = Contact::where('user_id', $userId)
-            ->needsFollowUp()
-            ->count();
-
-        // Cold contacts (>30 days no contact)
-        $coldContacts = Contact::where('user_id', $userId)
-            ->where('status', 'active')
-            ->where(function ($query) {
-                $query->where('last_contact_date', '<', now()->subDays(30))
-                    ->orWhereNull('last_contact_date');
-            })
-            ->count();
+        $totalContacts   = $data['totalContacts'];
+        $clientsCount    = $data['clientsCount'];
+        $leadsCount      = $data['leadsCount'];
+        $vipCount        = $data['vipCount'];
+        $followUpsNeeded = $data['followUpsNeeded'];
+        $coldContacts    = $data['coldContacts'];
 
         return [
             Stat::make('Total Contacts', $totalContacts)

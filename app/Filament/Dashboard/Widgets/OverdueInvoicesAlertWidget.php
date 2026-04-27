@@ -16,6 +16,8 @@ class OverdueInvoicesAlertWidget extends BaseWidget
 
     protected static ?int $sort = 30;
 
+    protected static bool $isLazy = true;
+
     /**
      * Check if user can view the widget
      * Subscription-First: Requires active subscription or trial

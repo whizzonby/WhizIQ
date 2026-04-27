@@ -109,10 +109,11 @@ class WhatsAppAdminConfigResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('webhook_url')
                             ->label('Webhook URL')
-                            ->url()
-                            ->default(fn () => route('webhooks.whatsapp'))
+                            ->formatStateUsing(fn () => route('webhooks.whatsapp'))
                             ->helperText('Copy this URL and paste it in Meta for Developers > WhatsApp > Configuration > Webhook > Callback URL')
-                            ->disabled()
+                            ->readOnly()
+                            ->dehydrated(false)
+                            ->extraInputAttributes(['onclick' => 'this.select()'])
                             ->columnSpanFull(),
 
                         Forms\Components\Placeholder::make('webhook_info')

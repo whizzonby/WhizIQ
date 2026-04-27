@@ -36,9 +36,13 @@ class EmailComposerPage extends Page implements HasForms
 
     protected string $view = 'filament.dashboard.pages.email-composer-page';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Email Communication';
+    protected static ?string $navigationLabel = 'Send Email';
 
-    protected static ?int $navigationSort = 10;
+    protected static UnitEnum|string|null $navigationGroup = 'Marketing';
+
+    protected static bool $shouldRegisterNavigation = false;
+
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $title = 'Compose Email';
 

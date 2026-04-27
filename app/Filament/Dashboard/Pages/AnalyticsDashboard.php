@@ -11,10 +11,9 @@ use App\Filament\Dashboard\Widgets\ExpenseInsightsWidget;
 use App\Filament\Dashboard\Widgets\ProfitabilityRatiosWidget;
 use App\Filament\Dashboard\Widgets\RevenueSourcesWidget;
 use App\Filament\Dashboard\Widgets\RevenueVsExpenseChartWidget;
-use App\Filament\Dashboard\Widgets\RiskAssessmentWidget;
-use App\Filament\Dashboard\Widgets\SwotAnalysisDashboardWidget;
 use Filament\Pages\Page;
 use BackedEnum;
+use UnitEnum;
 
 class AnalyticsDashboard extends Page
 {
@@ -24,8 +23,10 @@ class AnalyticsDashboard extends Page
 
     protected static ?string $title = 'Business Analytics Dashboard';
 
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
+
     protected static ?int $navigationSort = 1;
-    
+
     protected static bool $shouldRegisterNavigation = true;
 
     protected string $view = 'filament.dashboard.pages.analytics-dashboard';
@@ -54,9 +55,6 @@ class AnalyticsDashboard extends Page
             AIFinancialForecastWidget::class,
             AnomalyDetectionWidget::class,
 
-            // Business Risk & Intelligence
-            RiskAssessmentWidget::class,
-            SwotAnalysisDashboardWidget::class,
         ];
     }
 

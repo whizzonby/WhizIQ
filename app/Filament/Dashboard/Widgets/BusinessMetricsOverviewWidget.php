@@ -12,6 +12,8 @@ class BusinessMetricsOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
 
+    protected static bool $isLazy = true;
+
 
     public function getHeading(): string
     {

@@ -28,7 +28,9 @@ class AftercareTemplateResource extends Resource
 
     protected static ?string $navigationLabel = 'Aftercare Templates';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Booking';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?int $navigationSort = 3;
 
@@ -113,19 +115,17 @@ class AftercareTemplateResource extends Resource
                     ]),
 
                 Section::make('Email Content')
-                    ->description('Compose your email message with rich formatting')
                     ->icon('heroicon-o-envelope')
                     ->schema([
                         Forms\Components\TextInput::make('email_subject')
-                            ->label('Email Subject')
+                            ->label('Subject')
                             ->maxLength(255)
-                            ->placeholder('Aftercare Instructions for Your {{appointment_type}}')
+                            ->placeholder('e.g. Your aftercare instructions from {{business_name}}')
                             ->required(fn ($get) => $get('send_via_email'))
-                            ->helperText('Use variables like {{client_first_name}} or {{appointment_type}}')
                             ->columnSpanFull(),
 
                         Forms\Components\RichEditor::make('email_body')
-                            ->label('Email Body')
+                            ->label('Body')
                             ->required(fn ($get) => $get('send_via_email'))
                             ->toolbarButtons([
                                 'bold',
@@ -137,25 +137,34 @@ class AftercareTemplateResource extends Resource
                                 'h2',
                                 'h3',
                             ])
-                            ->placeholder('Hi {{client_first_name}},
-
-Thank you for your {{appointment_type}} appointment on {{appointment_date}}!
-
-Here are important aftercare instructions:
-• Avoid water for 24 hours
-• Do not use oil-based products
-• Be gentle when cleansing
-
-We look forward to seeing you again!')
-                            ->helperText('You can use HTML formatting and variables. The rebooking link will be added automatically if enabled below.')
+                            ->extraAttributes([
+                                'x-data' => '{}',
+                                'x-init' => '
+                                    $el.addEventListener("trix-initialize", function(e) {
+                                        e.target.style.minHeight = "220px";
+                                        e.target.style.resize    = "vertical";
+                                        e.target.style.overflow  = "auto";
+                                    });
+                                ',
+                            ])
                             ->columnSpanFull(),
+
+                        Forms\Components\Toggle::make('include_rebooking_link')
+                            ->label('Append rebooking button')
+                            ->default(true)
+                            ->live()
+                            ->inline(false),
+
+                        Forms\Components\TextInput::make('rebooking_cta_text')
+                            ->label('Button text')
+                            ->default('Book Your Next Appointment')
+                            ->maxLength(100)
+                            ->visible(fn ($get) => $get('include_rebooking_link'))
+                            ->placeholder('Book Your Next Appointment'),
                     ])
-                    ->visible(fn ($get) => $get('send_via_email'))
-                    ->collapsible()
-                    ->collapsed(fn ($get) => !$get('send_via_email')),
+                    ->visible(fn ($get) => $get('send_via_email')),
 
                 Section::make('SMS Content')
-                    ->description('Compose a concise SMS message (keep it under 160 characters)')
                     ->icon('heroicon-o-chat-bubble-left')
                     ->schema([
                         Forms\Components\Textarea::make('sms_message')
@@ -172,12 +181,9 @@ We look forward to seeing you again!')
                             ->live()
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn ($get) => $get('send_via_sms'))
-                    ->collapsible()
-                    ->collapsed(fn ($get) => !$get('send_via_sms')),
+                    ->visible(fn ($get) => $get('send_via_sms')),
 
                 Section::make('WhatsApp Content')
-                    ->description('Compose your WhatsApp message (supports emojis and formatting)')
                     ->icon('heroicon-o-device-phone-mobile')
                     ->schema([
                         Forms\Components\Textarea::make('whatsapp_message')
@@ -194,12 +200,9 @@ Here are your aftercare instructions:
 • Be gentle when cleansing ✨
 
 Book your next appointment: {{rebooking_link}}')
-                            ->helperText('WhatsApp messages support emojis and basic formatting. Keep messages clear and friendly.')
                             ->columnSpanFull(),
                     ])
-                    ->visible(fn ($get) => $get('send_via_whatsapp'))
-                    ->collapsible()
-                    ->collapsed(fn ($get) => !$get('send_via_whatsapp')),
+                    ->visible(fn ($get) => $get('send_via_whatsapp')),
 
                 Section::make('Delivery Timing')
                     ->description('Configure when the aftercare message should be sent after appointment completion')
@@ -286,62 +289,67 @@ Book your next appointment: {{rebooking_link}}')
                     ])
                     ->collapsible(),
 
-                Section::make('Rebooking Link')
-                    ->description('Add a call-to-action button to encourage clients to book their next appointment')
-                    ->icon('heroicon-o-link')
-                    ->schema([
-                        Forms\Components\Toggle::make('include_rebooking_link')
-                            ->label('Include Rebooking Link')
-                            ->default(true)
-                            ->live()
-                            ->helperText('Add a clickable button/link in emails for clients to book their next appointment')
-                            ->inline(false),
 
-                        Forms\Components\TextInput::make('rebooking_cta_text')
-                            ->label('Button Text')
-                            ->default('Book Your Next Appointment')
-                            ->maxLength(100)
-                            ->visible(fn ($get) => $get('include_rebooking_link'))
-                            ->placeholder('Book Your Next Appointment')
-                            ->helperText('The text displayed on the rebooking button (emails only)')
-                            ->columnSpanFull(),
-                    ])
-                    ->collapsible()
-                    ->collapsed(),
-
-                Section::make('Available Variables')
-                    ->description('Use these placeholders in your messages - they will be automatically replaced with actual client and appointment data')
-                    ->icon('heroicon-o-variable')
+                Section::make('Tips & Variables')
+                    ->icon('heroicon-o-light-bulb')
                     ->schema([
-                        Forms\Components\Placeholder::make('variables_list')
+                        Forms\Components\Placeholder::make('tips_and_vars')
                             ->label('')
                             ->content(function () {
-                                $template = new AftercareTemplate();
-                                $variables = $template->getAvailableVariablesList();
+                                $variables = (new AftercareTemplate())->getAvailableVariablesList();
 
-                                $html = '<div class="space-y-2">';
-                                $html .= '<p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Copy and paste these variables into your message templates:</p>';
-                                $html .= '<div class="grid grid-cols-1 md:grid-cols-2 gap-2">';
-                                
-                                foreach ($variables as $var => $description) {
-                                    $html .= '<div class="p-2 bg-gray-50 dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition">';
-                                    $html .= '<div class="flex items-start gap-2">';
-                                    $html .= '<code class="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded text-sm font-mono cursor-pointer hover:bg-primary-200 dark:hover:bg-primary-800" onclick="navigator.clipboard.writeText(\'{{' . $var . '}}\')" title="Click to copy">{{' . $var . '}}</code>';
-                                    $html .= '<span class="text-sm text-gray-600 dark:text-gray-400 flex-1">' . $description . '</span>';
-                                    $html .= '</div>';
-                                    $html .= '</div>';
+                                // --- variables grid ---
+                                $varHtml = '';
+                                foreach ($variables as $var => $desc) {
+                                    $varHtml .= '
+                                        <div class="flex items-start gap-2 p-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                                            <code
+                                                class="shrink-0 px-2 py-0.5 rounded bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-mono cursor-pointer hover:bg-violet-200 dark:hover:bg-violet-800/60 transition"
+                                                onclick="navigator.clipboard.writeText(\'{{' . $var . '}}\'); this.textContent=\'Copied!\'; setTimeout(()=>this.textContent=\'{{' . $var . '}}\',1200)"
+                                                title="Click to copy"
+                                            >{{' . $var . '}}</code>
+                                            <span class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed pt-0.5">' . $desc . '</span>
+                                        </div>';
                                 }
-                                
-                                $html .= '</div>';
-                                $html .= '<p class="text-xs text-gray-500 dark:text-gray-500 mt-3">💡 Tip: Click on any variable code to copy it to your clipboard</p>';
-                                $html .= '</div>';
+
+                                $html = '
+                                <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 overflow-hidden">
+
+                                    <!-- Variables -->
+                                    <div class="px-4 pt-4 pb-3">
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">Available variables — click any to copy</p>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">' . $varHtml . '</div>
+                                    </div>
+
+                                    <!-- Divider -->
+                                    <div class="border-t border-gray-200 dark:border-gray-700"></div>
+
+                                    <!-- Tips -->
+                                    <div class="px-4 py-3 space-y-2">
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-1">Tips</p>
+
+                                        <div class="flex gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                            <span class="shrink-0 text-amber-500">✦</span>
+                                            <span><strong>SMS:</strong> Keep messages under 160 characters to avoid being split into multiple SMS credits.</span>
+                                        </div>
+
+                                        <div class="flex gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                            <span class="shrink-0 text-amber-500">✦</span>
+                                            <span><strong>WhatsApp:</strong> Supports emojis 🎉. Paste <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">{{rebooking_link}}</code> anywhere in the message to add the booking URL inline.</span>
+                                        </div>
+
+                                        <div class="flex gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                            <span class="shrink-0 text-amber-500">✦</span>
+                                            <span><strong>Email:</strong> The rebooking button is appended automatically when the toggle above is on — no need to add the link manually.</span>
+                                        </div>
+                                    </div>
+
+                                </div>';
 
                                 return new \Illuminate\Support\HtmlString($html);
                             })
                             ->columnSpanFull(),
-                    ])
-                    ->collapsible()
-                    ->collapsed(),
+                    ]),
             ]);
     }
 

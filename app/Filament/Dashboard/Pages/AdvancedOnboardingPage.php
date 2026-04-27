@@ -4,7 +4,9 @@ namespace App\Filament\Dashboard\Pages;
 
 use App\Models\BusinessProfile;
 use App\Services\CountriesService;
+use App\Services\DemoDataService;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
@@ -28,6 +30,9 @@ class AdvancedOnboardingPage extends OnboardingPage
     public float $rev_monthly_avg = 0;
     public string $prefs_insight_freq = 'weekly';
     public string $prefs_detail_level = 'basic';
+
+    // Startup mode
+    public string $startup_mode = 'demo';
 
     protected function getFormSchema(): array
     {
@@ -151,6 +156,28 @@ class AdvancedOnboardingPage extends OnboardingPage
                                     ->collapsed(false),
                             ]),
                     ]),
+
+                // Step 3: Demo Data
+                Step::make('Get Started')
+                    ->icon('heroicon-o-rocket-launch')
+                    ->schema([
+                        Section::make('How would you like to start?')
+                            ->description('Choose how you want your dashboard to look on day one.')
+                            ->schema([
+                                Radio::make('startup_mode')
+                                    ->label('')
+                                    ->options([
+                                        'demo'    => 'Load sample data — show me a working dashboard with example clients, invoices, and tasks so I can explore everything right away.',
+                                        'scratch' => 'Start fresh — I\'ll add my own data. My dashboard will be empty until I do.',
+                                    ])
+                                    ->default('demo')
+                                    ->required()
+                                    ->descriptions([
+                                        'demo'    => 'You can remove the sample data at any time from the dashboard.',
+                                        'scratch' => 'Great if you already have clients and want to import your own information.',
+                                    ]),
+                            ]),
+                    ]),
             ])
                 ->submitAction(view('filament.components.wizard-submit-action'))
                 ->columnSpanFull(),
@@ -235,6 +262,14 @@ class AdvancedOnboardingPage extends OnboardingPage
 
         // Calculate initial metrics
         $businessProfile->calculateMetrics();
+
+        // Optionally seed demo data
+        if ($this->startup_mode === 'demo') {
+            $user = auth()->user();
+            if ($user && ! $user->has_demo_data) {
+                app(DemoDataService::class)->loadForUser($user);
+            }
+        }
 
         // Mark as onboarded and redirect based on subscription status
         $this->onboarded();

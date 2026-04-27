@@ -13,7 +13,7 @@ class FinanceResource extends Resource
 
     protected static ?string $navigationLabel = 'Finance';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Analytics Data';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
 
     protected static ?int $navigationSort = 2;
 

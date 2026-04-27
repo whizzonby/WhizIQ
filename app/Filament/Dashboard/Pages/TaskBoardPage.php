@@ -18,7 +18,9 @@ class TaskBoardPage extends Page
 
     protected static ?string $navigationLabel = 'Task Board';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Productivity';
+    protected static UnitEnum|string|null $navigationGroup = 'Work';
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?int $navigationSort = 3;
 

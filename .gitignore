@@ -1,4 +1,9 @@
 /.phpunit.cache
+/.claude
+/Survey Report
+*.backup-*
+*.backup
+public-booking-backup-*.blade.php
 /node_modules
 /public/build
 /public/hot

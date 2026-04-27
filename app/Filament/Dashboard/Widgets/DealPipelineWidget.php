@@ -6,10 +6,13 @@ use App\Models\Deal;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class DealPipelineWidget extends BaseWidget
 {
     protected static ?int $sort = 32;
+
+    protected static bool $isLazy = true;
 
 
     public function getHeading(): string
@@ -20,31 +23,40 @@ class DealPipelineWidget extends BaseWidget
     protected function getStats(): array
     {
         $userId = Auth::id();
+        $cacheKey = "deal_pipeline_{$userId}_" . now()->format('Y-m-d-H');
 
-        // Pipeline stages
-        $leadCount = Deal::where('user_id', $userId)->where('stage', 'lead')->count();
-        $leadValue = Deal::where('user_id', $userId)->where('stage', 'lead')->sum('value');
+        $d = Cache::remember($cacheKey, 1800, function () use ($userId) {
+            $stages = ['lead', 'qualified', 'proposal', 'negotiation'];
+            $result = [];
 
-        $qualifiedCount = Deal::where('user_id', $userId)->where('stage', 'qualified')->count();
-        $qualifiedValue = Deal::where('user_id', $userId)->where('stage', 'qualified')->sum('value');
+            foreach ($stages as $stage) {
+                $result["{$stage}_count"] = Deal::where('user_id', $userId)->where('stage', $stage)->count();
+                $result["{$stage}_value"] = Deal::where('user_id', $userId)->where('stage', $stage)->sum('value');
+            }
 
-        $proposalCount = Deal::where('user_id', $userId)->where('stage', 'proposal')->count();
-        $proposalValue = Deal::where('user_id', $userId)->where('stage', 'proposal')->sum('value');
+            $result['totalWeightedValue'] = Deal::where('user_id', $userId)
+                ->whereIn('stage', $stages)
+                ->get()
+                ->sum('weighted_value');
 
-        $negotiationCount = Deal::where('user_id', $userId)->where('stage', 'negotiation')->count();
-        $negotiationValue = Deal::where('user_id', $userId)->where('stage', 'negotiation')->sum('value');
+            $result['wonThisMonth'] = Deal::where('user_id', $userId)
+                ->where('stage', 'won')
+                ->whereBetween('actual_close_date', [now()->startOfMonth(), now()->endOfMonth()])
+                ->sum('value');
 
-        // Total pipeline value (weighted)
-        $totalWeightedValue = Deal::where('user_id', $userId)
-            ->whereIn('stage', ['lead', 'qualified', 'proposal', 'negotiation'])
-            ->get()
-            ->sum('weighted_value');
+            return $result;
+        });
 
-        // Won deals this month
-        $wonThisMonth = Deal::where('user_id', $userId)
-            ->where('stage', 'won')
-            ->whereBetween('actual_close_date', [now()->startOfMonth(), now()->endOfMonth()])
-            ->sum('value');
+        $leadCount        = $d['lead_count'];
+        $leadValue        = $d['lead_value'];
+        $qualifiedCount   = $d['qualified_count'];
+        $qualifiedValue   = $d['qualified_value'];
+        $proposalCount    = $d['proposal_count'];
+        $proposalValue    = $d['proposal_value'];
+        $negotiationCount = $d['negotiation_count'];
+        $negotiationValue = $d['negotiation_value'];
+        $totalWeightedValue = $d['totalWeightedValue'];
+        $wonThisMonth       = $d['wonThisMonth'];
 
         return [
             Stat::make('Pipeline Value', '$' . number_format($totalWeightedValue, 0))

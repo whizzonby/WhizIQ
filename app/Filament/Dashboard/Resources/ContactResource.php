@@ -3,6 +3,7 @@
 namespace App\Filament\Dashboard\Resources;
 
 use App\Filament\Dashboard\Resources\ContactResource\Pages;
+use App\Filament\Dashboard\Resources\ContactResource\RelationManagers\FollowUpRulesRelationManager;
 use App\Models\Contact;
 use App\Services\CountriesService;
 use Carbon\Carbon;
@@ -32,7 +33,7 @@ class ContactResource extends Resource
 
     protected static ?string $navigationLabel = 'Contacts';
 
-    protected static UnitEnum|string|null $navigationGroup = 'CRM';
+    protected static UnitEnum|string|null $navigationGroup = 'Clients';
 
     protected static ?int $navigationSort = 1;
 
@@ -61,11 +62,8 @@ class ContactResource extends Resource
                                 Forms\Components\Select::make('type')
                                     ->options([
                                         'client' => 'Client',
-                                        'lead' => 'Lead',
-                                        'partner' => 'Partner',
-                                        'investor' => 'Investor',
-                                        'vendor' => 'Vendor',
-                                        'other' => 'Other',
+                                        'lead'   => 'Lead',
+                                        'other'  => 'Other',
                                     ])
                                     ->default('lead')
                                     ->native(false),
@@ -279,11 +277,9 @@ class ContactResource extends Resource
 
                 Tables\Columns\BadgeColumn::make('type')
                     ->colors([
-                        'success' => 'client',
-                        'primary' => 'lead',
-                        'warning' => 'partner',
-                        'info' => 'investor',
-                        'secondary' => 'vendor',
+                        'success'   => 'client',
+                        'primary'   => 'lead',
+                        'secondary' => 'other',
                     ]),
 
                 Tables\Columns\BadgeColumn::make('priority')
@@ -348,11 +344,8 @@ class ContactResource extends Resource
                 Tables\Filters\SelectFilter::make('type')
                     ->options([
                         'client' => 'Client',
-                        'lead' => 'Lead',
-                        'partner' => 'Partner',
-                        'investor' => 'Investor',
-                        'vendor' => 'Vendor',
-                        'other' => 'Other',
+                        'lead'   => 'Lead',
+                        'other'  => 'Other',
                     ])
                     ->multiple(),
 
@@ -809,12 +802,19 @@ class ContactResource extends Resource
             ]);
     }
 
+    public static function getRelationManagers(): array
+    {
+        return [
+            FollowUpRulesRelationManager::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListContacts::route('/'),
+            'index'  => Pages\ListContacts::route('/'),
             'create' => Pages\CreateContact::route('/create'),
-            'edit' => Pages\EditContact::route('/{record}/edit'),
+            'edit'   => Pages\EditContact::route('/{record}/edit'),
         ];
     }
 

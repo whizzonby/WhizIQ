@@ -37,7 +37,9 @@ class DocumentVaultResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Document Vault';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Security';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?int $navigationSort = 6;
 

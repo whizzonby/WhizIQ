@@ -12,6 +12,8 @@ class RevenueSourceBreakdownWidget extends ChartWidget
 
     protected static ?int $sort = 1;
 
+    protected static bool $isLazy = true;
+
     public ?string $filter = 'month';
 
     protected function getData(): array

@@ -16,6 +16,8 @@ class HighPriorityTasksWidget extends BaseWidget
     
     protected static ?int $sort = 24;
 
+    protected static bool $isLazy = true;
+
 
     protected int | string | array $columnSpan = 'full';
 

@@ -26,7 +26,7 @@ class RevenueSourceResource extends Resource
 
     protected static ?string $navigationLabel = 'Revenue Sources';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Analytics Data';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
 
     protected static ?int $navigationSort = 5;
 

@@ -33,6 +33,12 @@ Schedule::command('emails:send-scheduled')
     ->name('send-scheduled-emails')
     ->withoutOverlapping();
 
+// Mark past-due invoices overdue at midnight, before reminders run
+Schedule::command('invoices:mark-overdue')
+    ->dailyAt('00:30')
+    ->name('mark-invoices-overdue')
+    ->withoutOverlapping();
+
 // Send invoice reminders daily at 9 AM
 Schedule::command('invoices:send-reminders')
     ->dailyAt('09:00')
@@ -117,4 +123,18 @@ Schedule::command('app:refresh-business-metrics')
 Schedule::command('marketing:sync')
     ->dailyAt('02:00')
     ->name('sync-marketing-data')
+    ->withoutOverlapping();
+
+// ── WhizIQ Automated SMS/WhatsApp Notifications ───────────────────────────────
+
+// Daily business digest — runs every 5 minutes so each user's digest_time is hit
+Schedule::command('whiziq:daily-digest')
+    ->everyFiveMinutes()
+    ->name('whiziq-daily-digest')
+    ->withoutOverlapping();
+
+// Stale deal alerts — run once daily at 9 AM
+Schedule::command('whiziq:stale-deal-alerts')
+    ->dailyAt('09:00')
+    ->name('whiziq-stale-deal-alerts')
     ->withoutOverlapping();

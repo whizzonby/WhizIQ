@@ -3,7 +3,6 @@
 namespace App\Providers\Filament;
 
 use App\Constants\AnnouncementPlacement;
-use App\Filament\Dashboard\Pages\AdvancedOnboardingPage;
 use App\Filament\Dashboard\Pages\Dashboard;
 use App\Filament\Dashboard\Pages\TwoFactorAuth\ConfirmTwoFactorAuth;
 use App\Filament\Dashboard\Pages\TwoFactorAuth\EnableTwoFactorAuth;
@@ -29,7 +28,6 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
-use Saasykit\FilamentOnboarding\FilamentOnboardingPlugin;
 
 class DashboardPanelProvider extends PanelProvider
 {
@@ -96,11 +94,6 @@ class DashboardPanelProvider extends PanelProvider
                 EnsureEmailIsVerifiedUnlessAdmin::class,
             ])
             ->plugins([
-                FilamentOnboardingPlugin::make()
-                    ->onboardingPage(AdvancedOnboardingPage::class)
-                    ->skippable(false)
-                    ->mandatoryOnboarding(true)
-                    ->enabledUsing(fn () => ! auth()->user()?->is_admin),
                 BreezyCore::make()
                     ->myProfile(
                         shouldRegisterUserMenu: true, // Sets the 'account' link in the panel User Menu (default = true)

@@ -16,6 +16,8 @@ class OffTrackGoalsWidget extends BaseWidget
     
     protected static ?int $sort = 22;
 
+    protected static bool $isLazy = true;
+
 
     protected int | string | array $columnSpan = 'full';
 

@@ -93,9 +93,6 @@ class AIUsageAnalyticsPage extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        // Only show if user has made at least one AI request
-        return \DB::table('ai_usage_logs')
-            ->where('user_id', auth()->id())
-            ->exists();
+        return false;
     }
 }

@@ -11,6 +11,8 @@ class AppointmentsChartWidget extends ChartWidget
     protected ?string $heading = '📊 Appointments Over Time';
     protected static ?int $sort = 26;
 
+    protected static bool $isLazy = true;
+
 
     protected int | string | array $columnSpan = 'full';
 

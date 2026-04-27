@@ -5,10 +5,12 @@ namespace App\Filament\Dashboard\Pages;
 use App\Services\RevenueForecastService;
 use BackedEnum;
 use Filament\Pages\Page;
+use UnitEnum;
 
 class RevenueForecastPage extends Page
 {
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar-square';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
 
     protected string $view = 'filament.dashboard.pages.revenue-forecast-page';
 

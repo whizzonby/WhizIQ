@@ -33,6 +33,7 @@ class Contact extends Model
         'linkedin_url',
         'twitter_handle',
         'last_contact_date',
+        'last_appointment_at',
         'next_follow_up_date',
         'relationship_strength',
         'lifetime_value',
@@ -49,8 +50,9 @@ class Contact extends Model
     ];
 
     protected $casts = [
-        'last_contact_date' => 'date',
-        'next_follow_up_date' => 'date',
+        'last_contact_date'    => 'date',
+        'last_appointment_at'  => 'datetime',
+        'next_follow_up_date'  => 'date',
         'lifetime_value' => 'decimal:2',
         'deals_count' => 'integer',
         'interactions_count' => 'integer',
@@ -115,6 +117,11 @@ class Contact extends Model
     public function blockHistory(): HasMany
     {
         return $this->hasMany(BlockedClient::class)->orderBy('created_at', 'desc');
+    }
+
+    public function followUpRules(): HasMany
+    {
+        return $this->hasMany(ContactFollowUpRule::class);
     }
 
     // Scopes
@@ -251,13 +258,14 @@ class Contact extends Model
     public function getTypeLabelAttribute(): string
     {
         return match($this->type) {
-            'client' => 'Client',
-            'lead' => 'Lead',
-            'partner' => 'Partner',
+            'client'   => 'Client',
+            'lead'     => 'Lead',
+            'other'    => 'Other',
+            // legacy types retained for existing data
+            'partner'  => 'Partner',
             'investor' => 'Investor',
-            'vendor' => 'Vendor',
-            'other' => 'Other',
-            default => ucfirst($this->type),
+            'vendor'   => 'Vendor',
+            default    => ucfirst($this->type),
         };
     }
 

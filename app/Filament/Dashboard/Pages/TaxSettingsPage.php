@@ -25,7 +25,7 @@ class TaxSettingsPage extends Page implements HasForms
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static ?string $navigationLabel = 'Tax Settings';
-    protected static UnitEnum|string|null $navigationGroup = 'Tax & Compliance';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static ?string $title = 'Tax Settings';
 

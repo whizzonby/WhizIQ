@@ -6,6 +6,7 @@ use App\Models\Contact;
 use App\Models\FollowUpReminder;
 use App\Models\User;
 use App\Notifications\FollowUpReminderNotification;
+use App\Services\MessagingService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -22,9 +23,19 @@ class ContactReminderService
             ->due()
             ->get();
 
+        $messaging = app(MessagingService::class);
+
         foreach ($reminders as $reminder) {
             try {
                 $reminder->user->notify(new FollowUpReminderNotification($reminder));
+
+                // SMS alert to owner
+                $messaging->sendFollowUpAlert(
+                    $reminder->user,
+                    $reminder->contact->name ?? 'Contact',
+                    $reminder->title
+                );
+
                 $reminder->markAsSent();
                 $sent++;
 
@@ -48,9 +59,18 @@ class ContactReminderService
             ->dueToday()
             ->get();
 
+        $messaging = app(MessagingService::class);
+
         foreach ($reminders as $reminder) {
             try {
                 $reminder->user->notify(new FollowUpReminderNotification($reminder));
+
+                $messaging->sendFollowUpAlert(
+                    $reminder->user,
+                    $reminder->contact->name ?? 'Contact',
+                    $reminder->title
+                );
+
                 $reminder->markAsSent();
                 $sent++;
 

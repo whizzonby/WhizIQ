@@ -26,10 +26,7 @@ class AvailabilityExceptionResource extends Resource
 
     protected static ?string $navigationLabel = 'Time Off / Exceptions';
 
-    public static function getNavigationGroup(): ?string
-    {
-        return 'Booking';
-    }
+    protected static bool $shouldRegisterNavigation = false;
 
     //protected static ?int $navigationSort = 3;
 

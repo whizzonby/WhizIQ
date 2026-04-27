@@ -138,6 +138,12 @@ class ListContacts extends ListRecords
                     ]);
                 }),
 
+            Action::make('blocked_clients')
+                ->label('Blocked Clients')
+                ->icon('heroicon-o-shield-exclamation')
+                ->color('danger')
+                ->url(fn () => route('filament.dashboard.resources.blocked-clients.index')),
+
             CreateAction::make(),
         ];
     }

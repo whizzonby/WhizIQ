@@ -15,7 +15,8 @@ class TasksDashboard extends Page
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
     protected static ?string $navigationLabel = 'Tasks Dashboard';
-    protected static UnitEnum|string|null $navigationGroup = 'Productivity';
+    protected static UnitEnum|string|null $navigationGroup = 'Work';
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $title = 'Tasks Dashboard';
 

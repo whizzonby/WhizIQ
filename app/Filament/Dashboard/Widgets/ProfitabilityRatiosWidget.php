@@ -13,6 +13,8 @@ class ProfitabilityRatiosWidget extends Widget
 
     protected static ?int $sort = 6;
 
+    protected static bool $isLazy = true;
+
 
     protected string $view = 'filament.dashboard.widgets.profitability-ratios-widget';
 

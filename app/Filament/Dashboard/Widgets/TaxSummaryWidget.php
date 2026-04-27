@@ -12,6 +12,8 @@ class TaxSummaryWidget extends BaseWidget
 {
     protected static ?int $sort = 10;
 
+    protected static bool $isLazy = true;
+
 
     public function getHeading(): string
     {

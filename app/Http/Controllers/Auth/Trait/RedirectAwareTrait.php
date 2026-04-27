@@ -28,11 +28,6 @@ trait RedirectAwareTrait
             return route('verification.notice');
         }
 
-        // Check if onboarding is required (only for non-admin users)
-        if (! $user->onboardingData) {
-            return route('filament.dashboard.pages.onboarding');
-        }
-
         // Check if user has active subscription (only for non-admin users)
         // If no subscription, redirect to plans page instead of dashboard
         if (! $user->isSubscribed()) {

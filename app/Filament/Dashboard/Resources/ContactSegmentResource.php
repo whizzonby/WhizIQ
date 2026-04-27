@@ -28,10 +28,7 @@ class ContactSegmentResource extends Resource
 
     protected static ?string $navigationLabel = 'Contact Segments';
 
-    public static function getNavigationGroup(): ?string
-    {
-        return 'CRM';
-    }
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?int $navigationSort = 11;
 

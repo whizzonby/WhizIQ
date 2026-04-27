@@ -26,7 +26,7 @@ class CRMDashboard extends Page
 
     protected static ?string $navigationLabel = 'CRM Dashboard';
 
-    protected static UnitEnum|string|null $navigationGroup = 'CRM';
+    protected static UnitEnum|string|null $navigationGroup = 'Clients';
 
     protected static ?int $navigationSort = 0;
 

@@ -16,10 +16,10 @@ class AppointmentCalendarPage extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Booking';
+        return 'Clients';
     }
 
-    //protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 5;
 
     protected static ?string $title = 'Appointment Calendar';
 

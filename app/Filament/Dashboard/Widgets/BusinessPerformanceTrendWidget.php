@@ -10,6 +10,8 @@ class BusinessPerformanceTrendWidget extends ChartWidget
 {
     protected static ?int $sort = 9;
 
+    protected static bool $isLazy = true;
+
 
     protected ?string $heading = '📈 Business Performance Trends';
 

@@ -3,7 +3,10 @@
 namespace App\Jobs;
 
 use App\Models\Appointment;
+use App\Models\AftercareLog;
 use App\Models\AftercareTemplate;
+use App\Models\NotificationPreference;
+use App\Services\MessagingService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
@@ -15,14 +18,19 @@ class SendAftercareMessage implements ShouldQueue
 
     public int $appointmentId;
     public int $templateId;
+    public ?int $logId;
+    public ?string $channelOverride;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(Appointment $appointment, AftercareTemplate $template)
-    {
-        $this->appointmentId = $appointment->id;
-        $this->templateId = $template->id;
+    public function __construct(
+        Appointment       $appointment,
+        AftercareTemplate $template,
+        ?int              $logId = null,
+        ?string           $channelOverride = null
+    ) {
+        $this->appointmentId   = $appointment->id;
+        $this->templateId      = $template->id;
+        $this->logId           = $logId;
+        $this->channelOverride = $channelOverride;
     }
 
     /**
@@ -92,13 +100,21 @@ class SendAftercareMessage implements ShouldQueue
                 'channels' => $channelsSent,
             ]);
 
+            if ($this->logId) {
+                AftercareLog::find($this->logId)?->markSent();
+            }
+
         } catch (\Exception $e) {
             Log::error('Failed to send aftercare message', [
                 'appointment_id' => $this->appointmentId,
-                'template_id' => $this->templateId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'template_id'    => $this->templateId,
+                'error'          => $e->getMessage(),
+                'trace'          => $e->getTraceAsString(),
             ]);
+
+            if ($this->logId) {
+                AftercareLog::find($this->logId)?->markFailed($e->getMessage());
+            }
 
             throw $e;
         }
@@ -140,6 +156,18 @@ class SendAftercareMessage implements ShouldQueue
     protected function sendSMS(Appointment $appointment, AftercareTemplate $template): void
     {
         try {
+            if (! $appointment->attendee_phone) {
+                return;
+            }
+
+            // Respect the owner's client_aftercare_enabled preference
+            if ($appointment->user_id) {
+                $prefs = NotificationPreference::forUser($appointment->user_id);
+                if (! $prefs->client_aftercare_enabled) {
+                    return;
+                }
+            }
+
             $smsData = $template->prepareMessageForAppointment($appointment, 'sms');
 
             if (empty($smsData['message'])) {
@@ -150,14 +178,14 @@ class SendAftercareMessage implements ShouldQueue
                 return;
             }
 
-            // TODO: Integrate with your SMS provider (Twilio, etc.)
-            // Example:
-            // \Twilio::message($appointment->attendee_phone, $smsData['message']);
+            app(MessagingService::class)->notifyClient(
+                $appointment->attendee_phone,
+                $smsData['message']
+            );
 
-            Log::info('Aftercare SMS queued (provider not configured)', [
+            Log::info('Aftercare SMS sent', [
                 'appointment_id' => $appointment->id,
                 'to' => $appointment->attendee_phone,
-                'message' => $smsData['message'],
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to send aftercare SMS', [
@@ -165,7 +193,6 @@ class SendAftercareMessage implements ShouldQueue
                 'to' => $appointment->attendee_phone,
                 'error' => $e->getMessage(),
             ]);
-            // Don't throw for SMS/WhatsApp as they're not fully implemented
         }
     }
 

@@ -3,15 +3,18 @@
 namespace App\Observers;
 
 use App\Models\Appointment;
-use App\Services\ContactSyncService;
+use App\Models\NotificationPreference;
 use App\Services\CalendarSyncService;
+use App\Services\ContactSyncService;
+use App\Services\MessagingService;
 use Illuminate\Support\Facades\Log;
 
 class AppointmentObserver
 {
     public function __construct(
         protected ContactSyncService $contactSyncService,
-        protected CalendarSyncService $calendarSyncService
+        protected CalendarSyncService $calendarSyncService,
+        protected MessagingService $messaging
     ) {}
 
     /**
@@ -20,13 +23,16 @@ class AppointmentObserver
      */
     public function created(Appointment $appointment): void
     {
-        // Auto-sync to contacts (runs in background to avoid slowing down booking)
+        // Auto-sync to contacts
         $this->contactSyncService->syncAppointmentToContact($appointment);
 
-        // Auto-sync to Google Calendar if appointment is confirmed/scheduled
+        // Auto-sync to Google Calendar
         if (in_array($appointment->status, ['confirmed', 'scheduled'])) {
             $this->syncToCalendar($appointment);
         }
+
+        // Messaging notifications
+        $this->sendBookingNotifications($appointment);
     }
 
     /**
@@ -40,19 +46,27 @@ class AppointmentObserver
             $this->contactSyncService->syncAppointmentToContact($appointment);
         }
 
-        // Check if status changed to completed - trigger aftercare
+        // Check if status changed to completed - trigger aftercare + update contact
         if ($appointment->wasChanged('status') && $appointment->status === 'completed') {
             $originalStatus = $appointment->getOriginal('status');
-            
-            // Only trigger if it wasn't already completed (avoid duplicate triggers)
+
             if ($originalStatus !== 'completed') {
-                Log::info('Appointment marked as completed via direct update - triggering aftercare', [
+                Log::info('Appointment completed — triggering aftercare and contact sync', [
                     'appointment_id' => $appointment->id,
                     'previous_status' => $originalStatus,
                 ]);
-                
-                // Schedule aftercare message
+
                 $appointment->scheduleAftercareMessage();
+
+                // Update contact's last appointment timestamp
+                if ($appointment->contact_id) {
+                    \App\Models\Contact::where('id', $appointment->contact_id)
+                        ->update(['last_appointment_at' => now()]);
+                } elseif ($appointment->attendee_email) {
+                    \App\Models\Contact::where('user_id', $appointment->user_id)
+                        ->where('email', $appointment->attendee_email)
+                        ->update(['last_appointment_at' => now()]);
+                }
             }
         }
 
@@ -108,6 +122,65 @@ class AppointmentObserver
         }
 
         // Permanent deletion - no action needed
+    }
+
+    /**
+     * Send SMS booking confirmation to client + new booking alert to owner.
+     */
+    protected function sendBookingNotifications(Appointment $appointment): void
+    {
+        if (! $appointment->user_id) {
+            return;
+        }
+
+        try {
+            $prefs = NotificationPreference::forUser($appointment->user_id);
+
+            $appointment->loadMissing(['user.businessProfile', 'appointmentType']);
+
+            $businessName = $appointment->user?->businessProfile?->biz_trading_name
+                ?? $appointment->user?->businessProfile?->biz_registered_name
+                ?? $appointment->user?->name
+                ?? 'your provider';
+
+            $serviceName  = $appointment->appointmentType?->name ?? $appointment->title;
+            $dateTime     = $appointment->start_datetime->format('D j M \a\t g:ia');
+
+            // Booking confirmation to client — SMS always, WhatsApp if owner has it configured
+            if ($prefs->client_booking_confirmation && $appointment->attendee_phone) {
+                $this->messaging->sendBookingConfirmationToClient(
+                    $appointment->attendee_phone,
+                    $appointment->attendee_name ?? 'there',
+                    $businessName,
+                    $serviceName,
+                    $dateTime
+                );
+
+                // Also send via WhatsApp if the owner's preferred channel includes it
+                if ($prefs->usesWhatsApp() && $appointment->user) {
+                    $this->messaging->sendWhatsApp(
+                        $appointment->attendee_phone,
+                        "Hi {$appointment->attendee_name}, your {$serviceName} appointment on {$dateTime} with {$businessName} is confirmed. See you then!",
+                        $appointment->user
+                    );
+                }
+            }
+
+            // New booking alert SMS to owner
+            if ($appointment->user) {
+                $this->messaging->sendNewBookingAlert(
+                    $appointment->user,
+                    $appointment->attendee_name ?? 'A client',
+                    $serviceName,
+                    $dateTime
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send booking SMS notifications', [
+                'appointment_id' => $appointment->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**

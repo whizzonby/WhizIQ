@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Services\ReceiptService;
 use Carbon\Carbon;
 
 class ClientInvoice extends Model
@@ -201,16 +202,19 @@ class ClientInvoice extends Model
     public function recordPayment(float $amount, string $paymentMethod, ?string $transactionId = null, ?string $notes = null, ?Carbon $paymentDate = null): ClientPayment
     {
         $payment = $this->payments()->create([
-            'user_id' => $this->user_id,
-            'invoice_client_id' => $this->invoice_client_id,
-            'amount' => $amount,
-            'payment_date' => $paymentDate ?? now(),
-            'payment_method' => $paymentMethod,
-            'transaction_id' => $transactionId,
-            'notes' => $notes,
+            'user_id'          => $this->user_id,
+            'invoice_client_id'=> $this->invoice_client_id,
+            'amount'           => $amount,
+            'payment_date'     => $paymentDate ?? now(),
+            'payment_method'   => $paymentMethod,
+            'transaction_id'   => $transactionId,
+            'notes'            => $notes,
         ]);
 
         $this->updatePaymentStatus();
+
+        // Auto-generate and email a receipt to the client
+        ReceiptService::createFromPayment($this, $payment);
 
         return $payment;
     }

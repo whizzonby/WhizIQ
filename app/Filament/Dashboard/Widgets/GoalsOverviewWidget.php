@@ -10,6 +10,8 @@ class GoalsOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 20;
 
+    protected static bool $isLazy = true;
+
     protected static bool $isDiscovered = false;
 
 

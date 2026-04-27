@@ -26,9 +26,9 @@ class InvoiceClientResource extends Resource
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationLabel = 'Clients';
+    protected static ?string $navigationLabel = 'Billing Contacts';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Finance';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
 
     protected static ?int $navigationSort = 2;
 

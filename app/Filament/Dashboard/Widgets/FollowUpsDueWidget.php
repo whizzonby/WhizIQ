@@ -16,6 +16,8 @@ class FollowUpsDueWidget extends BaseWidget
     
     protected static ?int $sort = 50;
 
+    protected static bool $isLazy = true;
+
     protected int | string | array $columnSpan = 'full';
 
     public function table(Table $table): Table

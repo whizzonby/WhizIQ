@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Services\MessagingService;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class Deal extends Model
 {
@@ -231,6 +233,27 @@ class Deal extends Model
             $this->contact->increment('deals_count');
             $this->contact->increment('lifetime_value', $this->value);
             $this->contact->convertToClient();
+        }
+
+        // SMS alert to owner on won/lost
+        if (in_array($newStage, ['won', 'lost']) && $this->user_id) {
+            try {
+                $this->loadMissing('user');
+                if ($this->user) {
+                    $emoji  = $newStage === 'won' ? '🎉' : '❌';
+                    $label  = $newStage === 'won' ? 'Deal WON' : 'Deal lost';
+                    $amount = $this->value ? ' — £' . number_format($this->value, 0) : '';
+                    app(MessagingService::class)->notifyOwner(
+                        $this->user,
+                        "{$emoji} {$label}: {$this->title}{$amount}\n\n— WhizIQ"
+                    );
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send deal stage SMS', [
+                    'deal_id' => $this->id,
+                    'error'   => $e->getMessage(),
+                ]);
+            }
         }
     }
 

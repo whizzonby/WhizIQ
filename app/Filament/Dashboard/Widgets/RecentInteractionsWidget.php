@@ -12,6 +12,8 @@ class RecentInteractionsWidget extends BaseWidget
 {
     protected static ?int $sort = 8;
 
+    protected static bool $isLazy = true;
+
     /**
      * Hide on main dashboard - only show on CRM Dashboard
      */

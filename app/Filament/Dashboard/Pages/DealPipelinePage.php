@@ -19,7 +19,7 @@ class DealPipelinePage extends Page
 
     protected static ?string $navigationLabel = 'Pipeline Board';
 
-    protected static UnitEnum|string|null $navigationGroup = 'CRM';
+    protected static UnitEnum|string|null $navigationGroup = 'Clients';
 
     protected static ?int $navigationSort = 3;
 

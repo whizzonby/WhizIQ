@@ -27,7 +27,7 @@ class BookingSettingsPage extends Page implements HasForms
 
     protected static ?string $title = 'Configure Your Booking Page';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Booking';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 3;
 
@@ -64,6 +64,7 @@ class BookingSettingsPage extends Page implements HasForms
             'business_country' => $this->settings->business_country,
             'brand_color' => $this->settings->brand_color,
             'timezone' => $this->settings->timezone,
+            'currency' => $this->settings->currency ?? 'USD',
             'min_booking_notice_hours' => $this->settings->min_booking_notice_hours,
             'max_booking_days_ahead' => $this->settings->max_booking_days_ahead,
             'require_approval' => $this->settings->require_approval,
@@ -149,6 +150,30 @@ class BookingSettingsPage extends Page implements HasForms
                             })
                             ->default(config('app.timezone', 'UTC'))
                             ->helperText('All appointment times will be shown in this timezone'),
+
+                        Forms\Components\Select::make('currency')
+                            ->label('Currency')
+                            ->required()
+                            ->searchable()
+                            ->default('USD')
+                            ->options([
+                                'USD' => 'USD — US Dollar',
+                                'GBP' => 'GBP — British Pound',
+                                'EUR' => 'EUR — Euro',
+                                'CAD' => 'CAD — Canadian Dollar',
+                                'AUD' => 'AUD — Australian Dollar',
+                                'NZD' => 'NZD — New Zealand Dollar',
+                                'ZAR' => 'ZAR — South African Rand',
+                                'NGN' => 'NGN — Nigerian Naira',
+                                'GHS' => 'GHS — Ghanaian Cedi',
+                                'KES' => 'KES — Kenyan Shilling',
+                                'INR' => 'INR — Indian Rupee',
+                                'SGD' => 'SGD — Singapore Dollar',
+                                'AED' => 'AED — UAE Dirham',
+                                'JPY' => 'JPY — Japanese Yen',
+                                'CHF' => 'CHF — Swiss Franc',
+                            ])
+                            ->helperText('Used on invoices and receipts generated from bookings'),
 
                         Forms\Components\TextInput::make('min_booking_notice_hours')
                             ->label('Minimum Booking Notice (hours)')

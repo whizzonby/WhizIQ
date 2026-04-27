@@ -35,8 +35,8 @@ class TaskResource extends Resource
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
-    protected static ?string $navigationLabel = 'Tasks & Actions';
-    protected static UnitEnum|string|null $navigationGroup = 'Productivity';
+    protected static ?string $navigationLabel = 'Tasks';
+    protected static UnitEnum|string|null $navigationGroup = 'Work';
 
     protected static ?string $modelLabel = 'Task';
 

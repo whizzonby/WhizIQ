@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\ClientInvoice;
+use App\Models\NotificationPreference;
 use App\Models\User;
 use App\Notifications\OverdueInvoiceNotification;
 use App\Notifications\PaymentReminderNotification;
+use App\Services\MessagingService;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -32,11 +34,36 @@ class InvoiceReminderService
             })
             ->get();
 
+        $messaging = app(MessagingService::class);
+
         foreach ($overdueInvoices as $invoice) {
             try {
+                // Email alert to business owner
                 $invoice->user->notify(new OverdueInvoiceNotification($invoice));
-                $sent++;
 
+                // SMS alert to business owner
+                $daysOverdue = (int) now()->diffInDays($invoice->due_date);
+                $messaging->sendOverdueInvoiceAlert(
+                    $invoice->user,
+                    $invoice->client->name ?? 'Client',
+                    (float) $invoice->total_amount,
+                    $invoice->invoice_number,
+                    $daysOverdue
+                );
+
+                // SMS reminder to the client
+                $prefs = NotificationPreference::forUser($invoice->user_id);
+                if ($prefs->client_invoice_reminders && $invoice->client?->phone) {
+                    $messaging->sendInvoiceReminderToClient(
+                        $invoice->client->phone,
+                        $invoice->client->name ?? 'there',
+                        $invoice->invoice_number,
+                        (float) $invoice->total_amount,
+                        $invoice->due_date->format('j M Y')
+                    );
+                }
+
+                $sent++;
                 Log::info("Overdue notification sent for invoice #{$invoice->invoice_number}");
             } catch (\Exception $e) {
                 Log::error("Failed to send overdue notification for invoice #{$invoice->invoice_number}: {$e->getMessage()}");
@@ -105,10 +132,11 @@ class InvoiceReminderService
      */
     public function sendReminderToClient(ClientInvoice $invoice, string $reminderType = 'standard'): bool
     {
+        $sent = false;
+
         try {
-            // Send email to client
+            // Email to client
             if ($invoice->client->email) {
-                // Create a notifiable for the client (since they might not be a User)
                 $clientNotifiable = new class($invoice->client->email, $invoice->client->name) {
                     use Notifiable;
 
@@ -124,11 +152,23 @@ class InvoiceReminderService
                 };
 
                 $clientNotifiable->notify(new PaymentReminderNotification($invoice, $reminderType));
-
-                return true;
+                $sent = true;
             }
 
-            return false;
+            // SMS to client (if owner has client invoice reminders enabled)
+            $prefs = NotificationPreference::forUser($invoice->user_id);
+            if ($prefs->client_invoice_reminders && $invoice->client?->phone) {
+                app(MessagingService::class)->sendInvoiceReminderToClient(
+                    $invoice->client->phone,
+                    $invoice->client->name ?? 'there',
+                    $invoice->invoice_number,
+                    (float) $invoice->total_amount,
+                    $invoice->due_date->format('j M Y')
+                );
+                $sent = true;
+            }
+
+            return $sent;
         } catch (\Exception $e) {
             Log::error("Failed to send reminder to client for invoice #{$invoice->invoice_number}: {$e->getMessage()}");
             return false;

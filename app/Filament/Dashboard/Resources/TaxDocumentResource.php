@@ -34,7 +34,7 @@ class TaxDocumentResource extends Resource
 
     protected static ?string $navigationLabel = 'Tax Documents';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Tax & Compliance';
+    protected static UnitEnum|string|null $navigationGroup = 'Money';
 
     protected static ?int $navigationSort = 2;
 

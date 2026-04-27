@@ -30,8 +30,8 @@ class GoalResource extends Resource
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-flag';
 
-    protected static ?string $navigationLabel = 'Goals Tracker';
-    protected static UnitEnum|string|null $navigationGroup = 'Productivity';
+    protected static ?string $navigationLabel = 'Goals';
+    protected static UnitEnum|string|null $navigationGroup = 'Work';
 
     protected static ?string $modelLabel = 'Goal';
 
