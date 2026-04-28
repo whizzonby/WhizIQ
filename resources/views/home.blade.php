@@ -195,7 +195,7 @@
 
     {{-- Sub --}}
     <p class="reveal d2 mx-auto text-xl leading-relaxed" style="color:rgba(255,255,255,.68);max-width:580px;line-height:1.8;margin-top:2rem;">
-        CRM, Invoicing, Booking, Tasks, Financial health. All. One tool. One subscription.
+        CRM &middot; Invoicing &middot; Booking &middot; Tasks &middot; Financial health. All. One tool. One subscription.
     </p>
 
     {{-- CTAs --}}
@@ -503,7 +503,7 @@
                 Running your business<br>
                 <span class="grad-text">shouldn't feel like this.</span>
             </h2>
-            <p class="mx-auto" style="color:rgba(255,255,255,.42);font-size:1.08rem;max-width:500px;line-height:1.9;margin-top:1.75rem;">
+            <p class="mx-auto" style="color:rgba(255,255,255,.72);font-size:1.08rem;max-width:500px;line-height:1.9;margin-top:1.75rem;">
                 Every independent operator knows the feeling. These are the problems we hear every single day and built WhizziQ to fix.
             </p>
         </div>
@@ -535,7 +535,7 @@
                 <div style="position:relative;padding-top:.25rem;">
                     <h3 class="font-bold text-white"
                         style="font-size:1.08rem;letter-spacing:-.02em;line-height:1.45;margin-bottom:1.1rem;">{{ $title }}</h3>
-                    <p style="color:rgba(255,255,255,.4);font-size:.9rem;line-height:1.9;">{{ $desc }}</p>
+                    <p style="color:rgba(255,255,255,.68);font-size:.9rem;line-height:1.9;">{{ $desc }}</p>
                 </div>
 
                 {{-- Bottom accent --}}
@@ -1080,7 +1080,7 @@
             <h2 class="font-black text-white" style="font-size:clamp(2.4rem,5vw,3.6rem);letter-spacing:-.04em;line-height:1.08;">
                 Everything else,<br><span class="grad-text">included.</span>
             </h2>
-            <p class="mx-auto" style="color:rgba(255,255,255,.4);font-size:1.05rem;max-width:440px;line-height:1.85;margin-top:1.5rem;">
+            <p class="mx-auto" style="color:rgba(255,255,255,.72);font-size:1.05rem;max-width:440px;line-height:1.85;margin-top:1.5rem;">
                 No add-ons. No upsells. No feature gates. Every tool ships with every plan.
             </p>
         </div>
@@ -1126,7 +1126,7 @@
                 {{-- Content --}}
                 <div style="position:relative;">
                     <h3 class="font-bold text-white" style="font-size:{{ $wide ? '1.2rem' : '1.05rem' }};letter-spacing:-.02em;line-height:1.4;margin-bottom:1rem;">{{ $title }}</h3>
-                    <p style="color:rgba(255,255,255,.38);font-size:.9rem;line-height:1.88;">{{ $desc }}</p>
+                    <p style="color:rgba(255,255,255,.68);font-size:.9rem;line-height:1.88;">{{ $desc }}</p>
                 </div>
 
                 {{-- Bottom accent --}}
@@ -1159,7 +1159,7 @@
             <h2 class="font-black text-white" style="font-size:clamp(2.4rem,5vw,3.8rem);letter-spacing:-.04em;line-height:1.08;">
                 One plan for every stage.<br><span class="grad-text">Zero surprises.</span>
             </h2>
-            <p class="mx-auto" style="color:rgba(255,255,255,.4);font-size:1.05rem;max-width:460px;line-height:1.85;margin-top:1.5rem;">
+            <p class="mx-auto" style="color:rgba(255,255,255,.72);font-size:1.05rem;max-width:460px;line-height:1.85;margin-top:1.5rem;">
                 14-day free trial on every plan. No credit card required. Cancel anytime.
             </p>
         </div>
@@ -1208,11 +1208,11 @@
                                 <span x-text="annual ? '$24.00' : '$29.99'"
                                       class="text-white font-black"
                                       style="font-size:3.75rem;letter-spacing:-.05em;"></span>
-                                <span style="font-size:.9rem;color:rgba(255,255,255,.38);font-weight:600;padding-bottom:.6rem;">/mo</span>
+                                <span style="font-size:.9rem;color:rgba(255,255,255,.55);font-weight:600;padding-bottom:.6rem;">/mo</span>
                             </div>
                             <div style="margin-top:.6rem;min-height:1.25rem;">
-                                <p x-show="annual" style="font-size:.78rem;color:rgba(255,255,255,.28);">Billed $288/yr · you save $72</p>
-                                <p x-show="!annual" style="font-size:.78rem;color:rgba(255,255,255,.22);">Switch to annual and save $72/yr</p>
+                                <p x-show="annual" style="font-size:.78rem;color:rgba(255,255,255,.5);">Billed $288/yr · you save $72</p>
+                                <p x-show="!annual" style="font-size:.78rem;color:rgba(255,255,255,.45);">Switch to annual and save $72/yr</p>
                             </div>
                         </div>
 
@@ -1221,7 +1221,7 @@
 
                         {{-- Features --}}
                         <div class="flex-1">
-                            <p style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.2);margin-bottom:1.1rem;">What's included</p>
+                            <p style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.45);margin-bottom:1.1rem;">What's included</p>
                             <ul style="display:flex;flex-direction:column;gap:1rem;margin-bottom:1.75rem;">
                                 @foreach([
                                     ['500 contacts & lead pipeline', '#60a5fa'],
@@ -1282,8 +1282,8 @@
                                 <span style="font-size:.9rem;color:rgba(196,181,253,.55);font-weight:600;padding-bottom:.6rem;">/mo</span>
                             </div>
                             <div style="margin-top:.6rem;min-height:1.25rem;">
-                                <p x-show="annual" style="font-size:.78rem;color:rgba(196,181,253,.4);">Billed $384/yr · you save $96</p>
-                                <p x-show="!annual" style="font-size:.78rem;color:rgba(196,181,253,.3);">Switch to annual and save $96/yr</p>
+                                <p x-show="annual" style="font-size:.78rem;color:rgba(196,181,253,.65);">Billed $384/yr · you save $96</p>
+                                <p x-show="!annual" style="font-size:.78rem;color:rgba(196,181,253,.55);">Switch to annual and save $96/yr</p>
                             </div>
                         </div>
 
@@ -1292,7 +1292,7 @@
 
                         {{-- Features --}}
                         <div class="flex-1">
-                            <p style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(196,181,253,.3);margin-bottom:1.1rem;">Everything in Starter, plus</p>
+                            <p style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(196,181,253,.6);margin-bottom:1.1rem;">Everything in Starter, plus</p>
                             <ul style="display:flex;flex-direction:column;gap:1rem;margin-bottom:1.75rem;">
                                 @foreach([
                                     'Unlimited contacts & invoices',
@@ -1340,11 +1340,11 @@
                                 <span x-text="annual ? '$40.00' : '$49.99'"
                                       class="text-white font-black"
                                       style="font-size:3.75rem;letter-spacing:-.05em;"></span>
-                                <span style="font-size:.9rem;color:rgba(255,255,255,.38);font-weight:600;padding-bottom:.6rem;">/mo</span>
+                                <span style="font-size:.9rem;color:rgba(255,255,255,.55);font-weight:600;padding-bottom:.6rem;">/mo</span>
                             </div>
                             <div style="margin-top:.6rem;min-height:1.25rem;">
-                                <p x-show="annual" style="font-size:.78rem;color:rgba(255,255,255,.28);">Billed $480/yr · you save $120</p>
-                                <p x-show="!annual" style="font-size:.78rem;color:rgba(255,255,255,.22);">Switch to annual and save $120/yr</p>
+                                <p x-show="annual" style="font-size:.78rem;color:rgba(255,255,255,.5);">Billed $480/yr · you save $120</p>
+                                <p x-show="!annual" style="font-size:.78rem;color:rgba(255,255,255,.45);">Switch to annual and save $120/yr</p>
                             </div>
                         </div>
 
@@ -1353,7 +1353,7 @@
 
                         {{-- Features --}}
                         <div class="flex-1">
-                            <p style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.2);margin-bottom:1.1rem;">Everything in Pro, plus</p>
+                            <p style="font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.45);margin-bottom:1.1rem;">Everything in Pro, plus</p>
                             <ul style="display:flex;flex-direction:column;gap:1rem;margin-bottom:1.75rem;">
                                 @foreach([
                                     ['Team members up to 5 seats', '#fb923c'],
@@ -1391,7 +1391,7 @@
                     <svg class="w-3.5 h-3.5 flex-shrink-0" style="color:#a78bfa;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                     </svg>
-                    <span style="font-size:.82rem;color:rgba(255,255,255,.28);">{{ $t }}</span>
+                    <span style="font-size:.82rem;color:rgba(255,255,255,.6);">{{ $t }}</span>
                 </div>
                 @endforeach
             </div>
@@ -1422,7 +1422,7 @@
         <h2 class="font-black text-white leading-tight" style="font-size:clamp(2.2rem,4vw,3rem);letter-spacing:-.03em;margin-bottom:.75rem;">
             Everything you need to know
         </h2>
-        <p style="color:rgba(255,255,255,.42);font-size:1.05rem;line-height:1.75;">
+        <p style="color:rgba(255,255,255,.72);font-size:1.05rem;line-height:1.75;">
             Still curious? Email us and we'll respond within one business day.
         </p>
     </div>
