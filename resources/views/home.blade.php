@@ -520,7 +520,7 @@
         ];
         @endphp
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3" style="gap:1.25rem;">
             @foreach($pains as [$c, $delay, $num, $title, $desc])
             <div class="reveal pain-card">
 
@@ -1183,7 +1183,7 @@
             </div>
 
             {{-- Cards --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+            <div class="grid grid-cols-1 md:grid-cols-3 items-stretch" style="gap:1.25rem;">
 
                 {{-- ── Starter ── --}}
                 <div class="reveal rounded-2xl flex flex-col"
