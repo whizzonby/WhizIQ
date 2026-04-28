@@ -586,24 +586,25 @@
     {{-- Tabbed timeline --}}
     <div x-data="{ tab: 'beautician' }">
 
-        {{-- Tab buttons --}}
-        <div class="flex flex-wrap justify-center" style="gap:.625rem;margin-bottom:3rem;">
-            @foreach([
-                ['beautician',      'Beautician'],
-                ['lawyer',          'Lawyer'],
-                ['cleaning',        'Cleaning Service'],
-                ['consultant',      'Consultant'],
-            ] as [$key, $label])
-            <button
-                @click="tab = '{{ $key }}'"
-                :style="tab === '{{ $key }}'
-                    ? 'background:#7c3aed;color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.35);border:1px solid #7c3aed;'
-                    : 'background:#fff;color:#4b5563;border:1px solid #ddd6fe;'"
-                class="rounded-full text-sm font-semibold transition-all"
-                style="padding:10px 22px;">
-                {{ $label }}
-            </button>
-            @endforeach
+        {{-- Tab segmented control --}}
+        <div class="flex justify-center" style="margin-bottom:3rem;">
+            <div class="flex flex-wrap justify-center" style="background:#ede9fe;border-radius:14px;padding:5px;gap:3px;">
+                @foreach([
+                    ['beautician', 'Beautician'],
+                    ['lawyer',     'Lawyer'],
+                    ['cleaning',   'Cleaning Service'],
+                    ['consultant', 'Consultant'],
+                ] as [$key, $label])
+                <button
+                    @click="tab = '{{ $key }}'"
+                    :style="tab === '{{ $key }}'
+                        ? 'background:#fff;color:#5b21b6;box-shadow:0 1px 4px rgba(0,0,0,.12),0 0 0 1px rgba(124,58,237,.1);font-weight:700;'
+                        : 'background:transparent;color:#6d5a9e;font-weight:500;'"
+                    style="border:none;border-radius:10px;font-size:.875rem;padding:9px 20px;cursor:pointer;transition:all .18s ease;line-height:1;white-space:nowrap;">
+                    {{ $label }}
+                </button>
+                @endforeach
+            </div>
         </div>
 
         {{-- ── BEAUTICIAN ── --}}
