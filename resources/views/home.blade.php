@@ -1,5 +1,5 @@
 <x-layouts.app>
-<x-slot name="title">WhizziQ One Dashboard. Every Client. Zero Chaos.</x-slot>
+<x-slot name="title">Business Management Software for Freelancers & Small Teams</x-slot>
 
 <style>
 /* ─── Scroll reveal ─────────────────────────────────── */

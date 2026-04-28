@@ -1,3 +1,8 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /checkout
+Disallow: /subscription
+Disallow: /api
 
+Sitemap: https://whizziq.com/sitemap.xml
