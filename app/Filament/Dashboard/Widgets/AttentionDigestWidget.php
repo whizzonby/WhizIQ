@@ -23,56 +23,83 @@ class AttentionDigestWidget extends Widget
 
     public function getDigestData(): array
     {
-        $userId = Auth::id();
+        $userId   = Auth::id();
         $cacheKey = "attention_digest_{$userId}_" . now()->format('Y-m-d-H');
 
         return Cache::remember($cacheKey, 900, function () use ($userId) {
-            // Overdue invoices
-            $overdueInvoices = ClientInvoice::where('user_id', $userId)
+            $items = collect();
+
+            // Overdue invoices — show up to 3, highest amount first
+            ClientInvoice::with('client')
+                ->where('user_id', $userId)
                 ->where('status', 'overdue')
-                ->selectRaw('COUNT(*) as count, COALESCE(SUM(total_amount - amount_paid), 0) as total')
-                ->first();
+                ->orderByRaw('(total_amount - amount_paid) DESC')
+                ->limit(3)
+                ->get()
+                ->each(function ($inv) use ($items) {
+                    $owed = $inv->total_amount - $inv->amount_paid;
+                    $days = max(0, (int) now()->diffInDays($inv->due_date));
+                    $name = optional($inv->client)->name ?? 'Client';
+                    $items->push([
+                        'type'         => 'overdue_invoice',
+                        'border_color' => '#ef4444',
+                        'title'        => $name . ' invoice overdue',
+                        'subtitle'     => '£' . number_format($owed, 0) . ' · ' . $days . ' ' . ($days === 1 ? 'day' : 'days') . ' past due',
+                        'action_label' => 'Send reminder',
+                        'action_color' => '#fef2f2',
+                        'action_text'  => '#dc2626',
+                        'action_url'   => route('filament.dashboard.resources.client-invoices.index'),
+                    ]);
+                });
 
-            // Follow-ups due today or overdue
-            $followUpsDue = FollowUpReminder::where('user_id', $userId)
-                ->where('status', 'pending')
-                ->where('remind_at', '<=', now())
-                ->count();
-
-            // Stale deals — open deals not updated in 14+ days
-            $staleDeals = Deal::where('user_id', $userId)
+            // Stale deals — show up to 2, longest stale first
+            Deal::where('user_id', $userId)
                 ->whereIn('stage', ['lead', 'qualified', 'proposal', 'negotiation'])
                 ->where('updated_at', '<', now()->subDays(14))
-                ->count();
+                ->orderBy('updated_at')
+                ->limit(2)
+                ->get()
+                ->each(function ($deal) use ($items) {
+                    $days = (int) now()->diffInDays($deal->updated_at);
+                    $items->push([
+                        'type'         => 'stale_deal',
+                        'border_color' => '#8b5cf6',
+                        'title'        => ($deal->title ?? 'Deal') . ' going cold',
+                        'subtitle'     => '£' . number_format($deal->value ?? 0, 0) . ' · ' . $days . ' days no contact',
+                        'action_label' => 'Follow up',
+                        'action_color' => '#f5f3ff',
+                        'action_text'  => '#7c3aed',
+                        'action_url'   => route('filament.dashboard.resources.deals.index'),
+                    ]);
+                });
 
-            // Tasks due today
-            $tasksDueToday = Task::where('user_id', $userId)
-                ->where('status', '!=', 'completed')
-                ->whereDate('due_date', today())
-                ->count();
-
-            // Upcoming appointments in next 24 hours
-            $upcomingAppointments = Appointment::where('user_id', $userId)
+            // Today's appointments
+            Appointment::with('contact')
+                ->where('user_id', $userId)
                 ->whereIn('status', ['scheduled', 'confirmed'])
-                ->whereBetween('start_datetime', [now(), now()->addHours(24)])
-                ->count();
-
-            // Overdue tasks (past due, not completed)
-            $overdueTasks = Task::where('user_id', $userId)
-                ->where('status', '!=', 'completed')
-                ->whereNotNull('due_date')
-                ->where('due_date', '<', today())
-                ->count();
+                ->whereDate('start_datetime', today())
+                ->orderBy('start_datetime')
+                ->limit(3)
+                ->get()
+                ->each(function ($appt) use ($items) {
+                    $clientName = optional($appt->contact)->name ?? ($appt->attendee_name ?? 'Client');
+                    $time       = $appt->start_datetime->format('g:i A');
+                    $label      = ucfirst($appt->status);
+                    $items->push([
+                        'type'         => 'appointment',
+                        'border_color' => '#22c55e',
+                        'title'        => ($appt->title ?? 'Appointment') . ' with ' . $clientName,
+                        'subtitle'     => 'Today at ' . $time . ' · ' . $label,
+                        'action_label' => $label,
+                        'action_color' => '#f0fdf4',
+                        'action_text'  => '#16a34a',
+                        'action_url'   => route('filament.dashboard.pages.appointment-calendar'),
+                    ]);
+                });
 
             return [
-                'overdue_invoices_count'  => (int) $overdueInvoices->count,
-                'overdue_invoices_total'  => (float) $overdueInvoices->total,
-                'follow_ups_due'          => $followUpsDue,
-                'stale_deals'             => $staleDeals,
-                'tasks_due_today'         => $tasksDueToday,
-                'overdue_tasks'           => $overdueTasks,
-                'upcoming_appointments'   => $upcomingAppointments,
-                'total_items'             => (int) $overdueInvoices->count + $followUpsDue + $staleDeals + $tasksDueToday + $overdueTasks,
+                'items'       => $items->all(),
+                'total_items' => $items->count(),
             ];
         });
     }

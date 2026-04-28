@@ -4,11 +4,9 @@ namespace App\Filament\Dashboard\Pages;
 
 use App\Filament\Dashboard\Widgets\AttentionDigestWidget;
 use App\Filament\Dashboard\Widgets\BusinessMetricsOverviewWidget;
-use App\Filament\Dashboard\Widgets\CashVsProfitWidget;
+use App\Filament\Dashboard\Widgets\DashboardGreetingWidget;
 use App\Filament\Dashboard\Widgets\FinancialAlertBarWidget;
-use App\Filament\Dashboard\Widgets\GetStartedWidget;
-use App\Filament\Dashboard\Widgets\MonthlyExpensesAndProfitWidget;
-use App\Filament\Dashboard\Widgets\OutstandingInvoicesWidget;
+use App\Filament\Dashboard\Widgets\FinancialSnapshotWidget;
 use App\Services\DemoDataService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -28,19 +26,11 @@ class Dashboard extends BaseDashboard
      * - Appointment widgets → AppointmentAnalyticsDashboard
      */
 
-    /**
-     * Get personalized dashboard title with user's name
-     */
     public function getTitle(): string
     {
-        $userName = auth()->user()->name ?? 'User';
-        return "{$userName}'s Dashboard";
+        return '';
     }
 
-    /**
-     * Override to prevent auto-discovered widgets from appearing
-     * Only return widgets we explicitly want on the main dashboard
-     */
     public function getWidgets(): array
     {
         return [];
@@ -98,35 +88,22 @@ class Dashboard extends BaseDashboard
     protected function getHeaderWidgets(): array
     {
         return [
-            GetStartedWidget::class,
+            DashboardGreetingWidget::class,
+            FinancialAlertBarWidget::class,
+            FinancialSnapshotWidget::class,
             AttentionDigestWidget::class,
-            CashVsProfitWidget::class,
+            BusinessMetricsOverviewWidget::class,
         ];
     }
 
     protected function getFooterWidgets(): array
     {
-        return [
-            FinancialAlertBarWidget::class,
-            OutstandingInvoicesWidget::class,
-            BusinessMetricsOverviewWidget::class,
-            MonthlyExpensesAndProfitWidget::class,
-        ];
+        return [];
     }
 
     public function getHeaderWidgetsColumns(): int | array
     {
-        return 4;
-    }
-
-    public function getFooterWidgetsColumns(): int | array
-    {
-        return [
-            'default' => 1,
-            'sm' => 1,
-            'md' => 2,
-            'lg' => 4,
-        ];
+        return 1;
     }
 }
 
