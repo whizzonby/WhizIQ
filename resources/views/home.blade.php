@@ -187,8 +187,8 @@
     </div>
 
     {{-- Headline --}}
-    <h1 class="reveal d1 font-black text-white leading-[1.03] tracking-[-0.04em]"
-        style="font-size:clamp(3.4rem,8vw,6.5rem);">
+    <h1 class="reveal d1 text-white tracking-[-0.04em]"
+        style="font-size:clamp(2.6rem,5.5vw,4.8rem);line-height:1.0;font-weight:950;">
         Manage your clients, your money,<br>
         <span class="grad-text">and your business all from WhizziQ.</span>
     </h1>
