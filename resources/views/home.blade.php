@@ -1164,6 +1164,16 @@
             </p>
         </div>
 
+        @php
+            $pricingUser = auth()->user();
+            $userPlanRank = 0;
+            if ($pricingUser) {
+                if ($pricingUser->isSubscribed('premium'))     $userPlanRank = 3;
+                elseif ($pricingUser->isSubscribed('pro'))     $userPlanRank = 2;
+                elseif ($pricingUser->isSubscribed('starter')) $userPlanRank = 1;
+            }
+        @endphp
+
         <div x-data="{ annual: false }" class="reveal">
 
             {{-- Billing toggle --}}
@@ -1245,11 +1255,19 @@
                         </div>
 
                         {{-- CTA --}}
+                        @if($userPlanRank >= 1)
+                        <a href="{{ route('filament.dashboard.pages.dashboard') }}"
+                           class="block text-center font-semibold rounded-2xl transition-all hover:bg-white/5"
+                           style="padding:15px 24px;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.65);font-size:.9rem;">
+                            Go to Dashboard
+                        </a>
+                        @else
                         <a href="{{ route('register') }}"
                            class="block text-center font-semibold rounded-2xl transition-all hover:bg-white/5"
                            style="padding:15px 24px;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.65);font-size:.9rem;">
                             Start free 14 days
                         </a>
+                        @endif
                     </div>
                 </div>
 
@@ -1315,11 +1333,25 @@
                         </div>
 
                         {{-- CTA --}}
+                        @if($userPlanRank >= 2)
+                        <a href="{{ route('filament.dashboard.pages.dashboard') }}"
+                           class="block text-center font-bold text-white rounded-2xl transition-all hover:opacity-90"
+                           style="padding:16px 24px;background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 8px 32px rgba(124,58,237,.55);font-size:.9rem;">
+                            Go to Dashboard
+                        </a>
+                        @elseif($userPlanRank === 1)
+                        <a :href="annual ? '{{ route('checkout.subscription', ['planSlug' => 'pro-yearly']) }}' : '{{ route('checkout.subscription', ['planSlug' => 'pro-monthly']) }}'"
+                           class="block text-center font-bold text-white rounded-2xl transition-all hover:opacity-90"
+                           style="padding:16px 24px;background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 8px 32px rgba(124,58,237,.55);font-size:.9rem;">
+                            Upgrade to Pro
+                        </a>
+                        @else
                         <a href="{{ route('register') }}"
                            class="block text-center font-bold text-white rounded-2xl transition-all hover:opacity-90"
                            style="padding:16px 24px;background:linear-gradient(135deg,#7c3aed,#4f46e5);box-shadow:0 8px 32px rgba(124,58,237,.55);font-size:.9rem;">
                             Start free 14 days
                         </a>
+                        @endif
                     </div>
                 </div>
 
@@ -1374,11 +1406,25 @@
                         </div>
 
                         {{-- CTA --}}
+                        @if($userPlanRank >= 3)
+                        <a href="{{ route('filament.dashboard.pages.dashboard') }}"
+                           class="block text-center font-semibold rounded-2xl transition-all hover:bg-white/5"
+                           style="padding:15px 24px;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.65);font-size:.9rem;">
+                            Go to Dashboard
+                        </a>
+                        @elseif($userPlanRank > 0)
+                        <a :href="annual ? '{{ route('checkout.subscription', ['planSlug' => 'premium-yearly']) }}' : '{{ route('checkout.subscription', ['planSlug' => 'premium-monthly']) }}'"
+                           class="block text-center font-semibold rounded-2xl transition-all hover:bg-white/5"
+                           style="padding:15px 24px;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.65);font-size:.9rem;">
+                            Upgrade to Premium
+                        </a>
+                        @else
                         <a href="{{ route('register') }}"
                            class="block text-center font-semibold rounded-2xl transition-all hover:bg-white/5"
                            style="padding:15px 24px;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.65);font-size:.9rem;">
                             Start free 14 days
                         </a>
+                        @endif
                     </div>
                 </div>
 
