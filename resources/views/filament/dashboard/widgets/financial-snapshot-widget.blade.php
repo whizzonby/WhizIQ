@@ -5,7 +5,7 @@
         [
             'border'    => '#8b5cf6',
             'label'     => 'Cash Collected',
-            'value'     => '£' . number_format($d['cash_collected'], 0),
+            'value'     => '$' . number_format($d['cash_collected'], 0),
             'sub'       => $d['cash_change_pct'] !== null
                 ? ($d['cash_change_pct'] >= 0 ? '+' : '') . number_format($d['cash_change_pct'], 1) . '% vs last month'
                 : 'This month',
@@ -14,7 +14,7 @@
         [
             'border'    => '#22c55e',
             'label'     => 'Actual Profit',
-            'value'     => '£' . number_format($d['actual_profit'], 0),
+            'value'     => '$' . number_format($d['actual_profit'], 0),
             'sub'       => number_format($d['profit_margin'], 1) . '% margin',
             'sub_class' => $d['profit_margin'] >= 20
                 ? 'text-green-600 dark:text-green-400'
@@ -23,7 +23,7 @@
         [
             'border'    => '#ef4444',
             'label'     => 'Total Expenses',
-            'value'     => '£' . number_format($d['total_expenses'], 0),
+            'value'     => '$' . number_format($d['total_expenses'], 0),
             'sub'       => $d['expenses_pct'] !== null
                 ? ($d['expenses_pct'] >= 0 ? '+' : '') . number_format($d['expenses_pct'], 1) . '% vs last month'
                 : 'This month',
@@ -32,14 +32,14 @@
         [
             'border'    => '#f59e0b',
             'label'     => 'Outstanding',
-            'value'     => '£' . number_format($d['outstanding'], 0),
+            'value'     => '$' . number_format($d['outstanding'], 0),
             'sub'       => $d['outstanding_count'] . ' ' . Str::plural('invoice', $d['outstanding_count']) . ' unpaid',
             'sub_class' => $d['outstanding_count'] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400',
         ],
         [
             'border'    => '#14b8a6',
             'label'     => 'Cash vs Profit Gap',
-            'value'     => '£' . number_format(abs($d['gap']), 0),
+            'value'     => '$' . number_format(abs($d['gap']), 0),
             'sub'       => $d['gap_label'],
             'sub_class' => 'text-gray-500 dark:text-gray-400',
         ],
