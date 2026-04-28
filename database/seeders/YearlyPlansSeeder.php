@@ -67,18 +67,6 @@ class YearlyPlansSeeder extends Seeder
                 continue;
             }
 
-            // Check if yearly plan already exists
-            $yearlySlug = $product->slug . '-yearly';
-            $existingYearlyPlan = Plan::where('product_id', $product->id)
-                ->where('slug', $yearlySlug)
-                ->first();
-
-            if ($existingYearlyPlan) {
-                $this->command->info("⏭️  Skipping {$product->name} - yearly plan already exists");
-                $skippedCount++;
-                continue;
-            }
-
             // Get monthly price
             $monthlyPrice = $monthlyPlan->prices()
                 ->where('currency_id', $usdCurrency->id)
@@ -90,14 +78,17 @@ class YearlyPlansSeeder extends Seeder
                 continue;
             }
 
-            // Calculate yearly price (10 months worth = 17% discount)
-            // This is a common SaaS pricing strategy
+            // Calculate yearly price: 20% off annual billing, rounded up to nearest whole dollar
+            // Matches the "SAVE 20%" badge on the landing page pricing table
             $monthlyPriceCents = $monthlyPrice->price;
-            $yearlyPriceCents = $monthlyPriceCents * 10; // 10 months = save 2 months
+            $yearlyPriceCents  = (int) ceil($monthlyPriceCents * 12 * 0.8 / 100) * 100;
+            $savingsPerYear    = ($monthlyPriceCents * 12) - $yearlyPriceCents;
 
-            $this->command->info("📦 Creating yearly plan for: {$product->name}");
+            $yearlySlug = $product->slug . '-yearly';
+
+            $this->command->info("📦 Upserting yearly plan for: {$product->name}");
             $this->command->info("   Monthly: $" . number_format($monthlyPriceCents / 100, 2) . "/month");
-            $this->command->info("   Yearly: $" . number_format($yearlyPriceCents / 100, 2) . "/year (Save $" . number_format(($monthlyPriceCents * 2) / 100, 2) . "/year)");
+            $this->command->info("   Yearly: $" . number_format($yearlyPriceCents / 100, 2) . "/year (Save $" . number_format($savingsPerYear / 100, 2) . "/year — 20% off)");
 
             // Create or update yearly plan (safe for re-running)
             $yearlyPlan = Plan::updateOrCreate(
@@ -158,8 +149,8 @@ class YearlyPlansSeeder extends Seeder
         $this->command->info("   • Plans Skipped: {$skippedCount}");
         $this->command->info('');
         $this->command->info('💰 Pricing Strategy:');
-        $this->command->info('   • Yearly plans are priced at 10 months worth');
-        $this->command->info('   • Customers save 2 months (17% discount)');
+        $this->command->info('   • Yearly plans are priced at 20% off annual billing');
+        $this->command->info('   • Rounded up to the nearest whole dollar');
         $this->command->info('   • Same metadata as monthly plans (shared product)');
         $this->command->info('');
         $this->command->info('🎯 Next Steps:');

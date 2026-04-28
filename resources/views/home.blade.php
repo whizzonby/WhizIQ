@@ -1199,7 +1199,7 @@
                         {{-- Price --}}
                         <div style="margin-bottom:1.75rem;">
                             <div class="flex items-end gap-1.5" style="line-height:1;">
-                                <span x-text="annual ? '$24' : '$29.99'"
+                                <span x-text="annual ? '$24.00' : '$29.99'"
                                       class="text-white font-black"
                                       style="font-size:3.75rem;letter-spacing:-.05em;"></span>
                                 <span style="font-size:.9rem;color:rgba(255,255,255,.38);font-weight:600;padding-bottom:.6rem;">/mo</span>
@@ -1270,7 +1270,7 @@
                         {{-- Price --}}
                         <div style="margin-bottom:1.75rem;">
                             <div class="flex items-end gap-1.5" style="line-height:1;">
-                                <span x-text="annual ? '$32' : '$39.99'"
+                                <span x-text="annual ? '$32.00' : '$39.99'"
                                       class="text-white font-black"
                                       style="font-size:3.75rem;letter-spacing:-.05em;"></span>
                                 <span style="font-size:.9rem;color:rgba(196,181,253,.55);font-weight:600;padding-bottom:.6rem;">/mo</span>
@@ -1331,7 +1331,7 @@
                         {{-- Price --}}
                         <div style="margin-bottom:1.75rem;">
                             <div class="flex items-end gap-1.5" style="line-height:1;">
-                                <span x-text="annual ? '$40' : '$49.99'"
+                                <span x-text="annual ? '$40.00' : '$49.99'"
                                       class="text-white font-black"
                                       style="font-size:3.75rem;letter-spacing:-.05em;"></span>
                                 <span style="font-size:.9rem;color:rgba(255,255,255,.38);font-weight:600;padding-bottom:.6rem;">/mo</span>
