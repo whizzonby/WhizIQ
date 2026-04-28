@@ -107,7 +107,7 @@
                 © {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
             </p>
             <p class="text-xs" style="color:rgba(255,255,255,.15);">
-                Built for freelancers · Designed for growth
+                Built for Freelancers & Business · Designed for growth
             </p>
         </div>
     </div>
