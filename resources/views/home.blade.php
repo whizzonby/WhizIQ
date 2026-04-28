@@ -1239,8 +1239,8 @@
                                 </li>
                                 @endforeach
                             </ul>
-                            <div style="padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);margin-bottom:1.75rem;">
-                                <p style="font-size:.78rem;color:rgba(255,255,255,.2);line-height:1.65;">Automations, WhatsApp & SMS, and team tools are available on Pro.</p>
+                            <div style="padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.16);margin-bottom:1.75rem;">
+                                <p style="font-size:.78rem;color:rgba(255,255,255,.45);line-height:1.65;">Automations, WhatsApp & SMS, and team tools are available on Pro.</p>
                             </div>
                         </div>
 
