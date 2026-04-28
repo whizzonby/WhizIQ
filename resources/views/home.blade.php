@@ -189,13 +189,13 @@
     {{-- Headline --}}
     <h1 class="reveal d1 font-black text-white leading-[1.03] tracking-[-0.04em]"
         style="font-size:clamp(3.4rem,8vw,6.5rem);">
-        Your business,<br>
-        <span class="grad-text">finally clear.</span>
+        Manage your clients, your money,<br>
+        <span class="grad-text">and your business all from WhizziQ.</span>
     </h1>
 
     {{-- Sub --}}
     <p class="reveal d2 mx-auto text-xl leading-relaxed" style="color:rgba(255,255,255,.68);max-width:580px;line-height:1.8;margin-top:2rem;">
-        WhizziQ gives solo operators and small teams one home for CRM, invoicing, booking, tasks, and AI so you always know exactly what's happening in your business.
+        CRM, Invoicing, Booking, Tasks, Financial health. All. One tool. One subscription.
     </p>
 
     {{-- CTAs --}}
