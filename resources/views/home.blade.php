@@ -554,9 +554,9 @@
                 <svg class="w-4 h-4 flex-shrink-0" style="color:#a78bfa;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M5 13l4 4L19 7"/>
                 </svg>
-                <p style="color:rgba(255,255,255,.6);font-size:.9rem;">
+                <p style="color:rgba(255,255,255,.8);font-size:1.15rem;font-weight:600;">
                     WhizziQ is built to solve exactly this
-                    <a href="{{ route('register') }}" style="color:#c4b5fd;font-weight:700;"
+                    <a href="{{ route('register') }}" style="color:#c4b5fd;font-weight:800;"
                        class="hover:opacity-80 transition-opacity">start free today →</a>
                 </p>
             </div>
