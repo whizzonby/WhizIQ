@@ -368,7 +368,7 @@ class MessagingService
 
     private function formatOwnerMessage(string $body): string
     {
-        return $body . "\n\n— WhizIQ";
+        return $body . "\n\nWhizziQ";
     }
 
     private function formatMoney(float $amount): string
