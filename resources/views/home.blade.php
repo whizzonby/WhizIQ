@@ -567,13 +567,13 @@
 
 
 {{-- ══════════════════════════════════════════════════════════
-     4 · A DAY WITH WHIZIQ (timeline)
+     4 · A DAY WITH WHIZIQ (tabbed timeline)
      ══════════════════════════════════════════════════════════ --}}
 <section class="bg-white" style="padding:120px 0;" id="how-it-works">
 <div class="max-w-2xl mx-auto px-6">
 
     {{-- Header --}}
-    <div class="text-center reveal" style="margin-bottom:5rem;">
+    <div class="text-center reveal" style="margin-bottom:3.5rem;">
         <div class="sec-label" style="display:inline-flex;justify-content:center;margin-bottom:1.25rem;">A day with WhizziQ</div>
         <h2 class="font-black leading-tight" style="font-size:clamp(2rem,3.8vw,3rem);letter-spacing:-.035em;color:#0a0714;">
             Your business runs itself<br>while you do what you love.
@@ -583,69 +583,101 @@
         </p>
     </div>
 
-    {{-- Timeline --}}
-    @php
-    $timeline = [
-        [
-            '#a78bfa', '8:00 AM',
-            'AI reviews your business overnight',
-            'You wake up to a clear, prioritised list one invoice is overdue, a deal has gone quiet for 12 days, and a new booking landed at 11 PM. No logging in, no digging. Just clarity before your first coffee.',
-        ],
-        [
-            '#60a5fa', '10:30 AM',
-            'A client books without calling you',
-            'Your booking link is live around the clock. They pick a slot, fill in their details, and receive a confirmation automatically. You\'re already on the call before you even knew they booked.',
-        ],
-        [
-            '#34d399', '1:00 PM',
-            'Invoice out, payment link attached',
-            'The project is approved. You open WhizziQ, select the client, add your line items, and hit send. A Stripe payment link goes with it. The client pays by card the same afternoon no chasing needed.',
-        ],
-        [
-            '#fb923c', '3:30 PM',
-            'Deal moves forward, task created itself',
-            'A prospect replies positively. You log the note and drag the deal to Proposal. WhizziQ automatically creates a follow-up task for Thursday without you asking it to.',
-        ],
-        [
-            '#f472b6', '6:00 PM',
-            'Day done. Nothing left behind.',
-            'Every interaction is logged. Every task is tracked. Your pipeline, revenue forecast, and outstanding invoices are all up to date. Close your laptop knowing the business is running not just surviving.',
-        ],
-    ];
-    @endphp
+    {{-- Tabbed timeline --}}
+    <div x-data="{ tab: 'beautician' }">
 
-    <div class="relative">
+        {{-- Tab buttons --}}
+        <div class="flex flex-wrap justify-center" style="gap:.625rem;margin-bottom:3rem;">
+            @foreach([
+                ['beautician',      'Beautician'],
+                ['lawyer',          'Lawyer'],
+                ['cleaning',        'Cleaning Service'],
+                ['consultant',      'Consultant'],
+            ] as [$key, $label])
+            <button
+                @click="tab = '{{ $key }}'"
+                :class="tab === '{{ $key }}'
+                    ? 'bg-violet-600 text-white shadow-md'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-violet-300 hover:text-violet-700'"
+                class="rounded-full text-sm font-semibold transition-all"
+                style="padding:10px 22px;">
+                {{ $label }}
+            </button>
+            @endforeach
+        </div>
 
-        {{-- Vertical line --}}
-        <div class="absolute" style="left:.6875rem;top:1.5rem;bottom:1.5rem;width:1px;background:linear-gradient(to bottom,transparent 0%,#ddd6fe 8%,#ddd6fe 92%,transparent 100%);"></div>
+        {{-- ── BEAUTICIAN ── --}}
+        @php
+        $tabs = [
+            'beautician' => [
+                ['#a78bfa', '7:00 AM', 'Your day is already mapped out', 'WhizziQ flags that today\'s bookings total £380 in expected revenue. One client is a repeat with a gap since her last visit. You\'re ready before anyone walks through the door.'],
+                ['#60a5fa', '9:30 AM', 'Client pays before she leaves', 'After the appointment, you tap "Send Invoice" and a Stripe payment link goes straight to her phone. She pays in under a minute. No card machine awkwardness. No chasing.'],
+                ['#34d399', '1:00 PM', 'Aftercare sent, review requested', 'Your aftercare message goes out automatically an hour after the appointment. WhizziQ follows up with a gentle review nudge. You\'re building trust while doing your next client.'],
+                ['#fb923c', '4:00 PM', 'Quiet month? WhizziQ flags it early', 'Revenue is 22% below last month at this point. WhizziQ surfaces the gap so you can post a flash offer, nudge lapsed clients, or push your booking link, before the month is lost.'],
+                ['#f472b6', '6:00 PM', 'Day done, everything accounted for', 'Every appointment logged. Every payment tracked. Your CRM updated. Tomorrow\'s schedule visible. You close the app knowing nothing slipped through.'],
+            ],
+            'lawyer' => [
+                ['#a78bfa', '8:00 AM', 'Pipeline at a glance before court', 'WhizziQ shows three active matters in different stages, one awaiting documents, one in negotiation, one ready to close. You know exactly where to focus before the day starts.'],
+                ['#60a5fa', '10:00 AM', 'Consultation booked, billable hours started', 'A new client books a consultation via your link. WhizziQ logs the intake automatically and starts a matter file. You open the session already knowing their context.'],
+                ['#34d399', '2:00 PM', 'Invoice raised in under 30 seconds', 'Matter closed. You open WhizziQ, select the client, add your time entries, and send. The invoice goes out with a payment link. No spreadsheets. No forgotten billable hours.'],
+                ['#fb923c', '3:30 PM', 'New enquiry captured, follow-up scheduled', 'A prospect submits a form on your booking page. WhizziQ creates a contact, adds them to your pipeline, and sets a follow-up task for tomorrow morning automatically.'],
+                ['#f472b6', '6:00 PM', 'Retainer clients visible at a glance', 'Your dashboard shows retainer clients by status, hours used, and renewal dates. Nothing falls through the cracks. You head home with a clear picture of next week.'],
+            ],
+            'cleaning' => [
+                ['#a78bfa', '7:00 AM', 'Jobs assigned, team notified', 'Your crew\'s schedule is set. WhizziQ shows which jobs are confirmed, which clients are recurring, and where the day starts. Everyone knows where to be before you say a word.'],
+                ['#60a5fa', '10:00 AM', 'Job done, invoice sent automatically', 'The team marks a job complete. WhizziQ generates and sends the invoice to the client instantly. No manual write-ups. No end-of-day admin pile.'],
+                ['#34d399', '12:30 PM', 'Payment received, receipt sent, rebook prompted', 'The client pays online. They receive a receipt and a soft nudge to book their next clean. Your recurring revenue builds itself in the background.'],
+                ['#fb923c', '3:00 PM', 'Recurring client books their next slot online', 'A client you haven\'t seen in six weeks books a one-off through your link. WhizziQ adds them back to the pipeline and flags the opportunity to convert them to a recurring plan.'],
+                ['#f472b6', '6:00 PM', 'All jobs invoiced, no loose ends', 'Every completed job has an invoice. Every invoice has a status. Outstanding payments are flagged. You\'re not chasing tomorrow what could be paid today.'],
+            ],
+            'consultant' => [
+                ['#a78bfa', '8:00 AM', 'Three open bids, one needs attention', 'WhizziQ shows your active proposals with last-contact dates. One prospect hasn\'t responded in nine days. You send a brief follow-up before your first meeting. That\'s the one that closes.'],
+                ['#60a5fa', '10:30 AM', 'Discovery call booked, scope captured', 'A new lead books a discovery call through your link. You use the pre-call notes WhizziQ gathered from their intake form to walk in prepared. Scope and timeline agreed by end of call.'],
+                ['#34d399', '2:00 PM', 'Deposit invoice sent, project started', 'Engagement confirmed. You raise a 50% deposit invoice in WhizziQ, attach your terms, and send. The client pays the same afternoon. The project is live before the day ends.'],
+                ['#fb923c', '4:30 PM', 'Completion certificate and final invoice out', 'Deliverables approved. WhizziQ sends the completion summary and final invoice together. Professional close, clean paper trail, and funds on the way.'],
+                ['#f472b6', '6:00 PM', 'Pipeline and forecast updated', 'Your dashboard shows the closed deal, updated forecast, and two new prospects in the pipeline. You know your next 60 days of revenue at a glance. No guessing.'],
+            ],
+        ];
+        @endphp
 
-        <div style="display:flex;flex-direction:column;gap:2rem;">
-        @foreach($timeline as $i => [$c, $time, $title, $desc])
-        <div class="reveal flex" style="gap:1.75rem;align-items:flex-start;">
+        @foreach($tabs as $tabKey => $timeline)
+        <div x-show="tab === '{{ $tabKey }}'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+        <div class="relative">
 
-            {{-- Dot --}}
-            <div style="width:1.375rem;flex-shrink:0;display:flex;justify-content:center;padding-top:.3rem;">
-                <div style="width:14px;height:14px;border-radius:50%;background:{{ $c }};box-shadow:0 0 0 3px #fff,0 0 0 5px {{ $c }};flex-shrink:0;position:relative;z-index:1;"></div>
+            {{-- Vertical line --}}
+            <div class="absolute" style="left:.6875rem;top:1.5rem;bottom:1.5rem;width:1px;background:linear-gradient(to bottom,transparent 0%,#ddd6fe 8%,#ddd6fe 92%,transparent 100%);"></div>
+
+            <div style="display:flex;flex-direction:column;gap:2rem;">
+            @foreach($timeline as [$c, $time, $title, $desc])
+            <div class="flex" style="gap:1.75rem;align-items:flex-start;">
+
+                {{-- Dot --}}
+                <div style="width:1.375rem;flex-shrink:0;display:flex;justify-content:center;padding-top:.3rem;">
+                    <div style="width:14px;height:14px;border-radius:50%;background:{{ $c }};box-shadow:0 0 0 3px #fff,0 0 0 5px {{ $c }};flex-shrink:0;position:relative;z-index:1;"></div>
+                </div>
+
+                {{-- Card --}}
+                <div class="flex-1 rounded-2xl bg-white card-lift"
+                     style="border:1px solid #ede9fe;border-left:3px solid {{ $c }};box-shadow:0 2px 12px rgba(0,0,0,.04);padding:1.75rem 1.875rem 1.875rem;">
+
+                    {{-- Time badge --}}
+                    <span class="inline-block text-xs font-bold rounded-full mb-4"
+                          style="padding:4px 14px;background:{{ $c }}18;color:{{ $c }};border:1px solid {{ $c }}44;letter-spacing:.05em;">
+                        {{ $time }}
+                    </span>
+
+                    <h3 class="font-bold text-gray-900" style="font-size:1.05rem;letter-spacing:-.015em;line-height:1.42;margin-bottom:.875rem;">{{ $title }}</h3>
+                    <p class="text-gray-500" style="font-size:.9rem;line-height:1.9;">{{ $desc }}</p>
+
+                </div>
+
+            </div>
+            @endforeach
             </div>
 
-            {{-- Card --}}
-            <div class="flex-1 rounded-2xl bg-white card-lift"
-                 style="border:1px solid #ede9fe;border-left:3px solid {{ $c }};box-shadow:0 2px 12px rgba(0,0,0,.04);padding:1.75rem 1.875rem 1.875rem;">
-
-                {{-- Time badge --}}
-                <span class="inline-block text-xs font-bold rounded-full mb-4"
-                      style="padding:4px 14px;background:{{ $c }}18;color:{{ $c }};border:1px solid {{ $c }}44;letter-spacing:.05em;">
-                    {{ $time }}
-                </span>
-
-                <h3 class="font-bold text-gray-900" style="font-size:1.05rem;letter-spacing:-.015em;line-height:1.42;margin-bottom:.875rem;">{{ $title }}</h3>
-                <p class="text-gray-500" style="font-size:.9rem;line-height:1.9;">{{ $desc }}</p>
-
-            </div>
-
+        </div>
         </div>
         @endforeach
-        </div>
 
     </div>
 
