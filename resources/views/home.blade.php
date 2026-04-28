@@ -1167,18 +1167,24 @@
         <div x-data="{ annual: false }" class="reveal">
 
             {{-- Billing toggle --}}
-            <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:4rem;">
+            <div style="display:flex;align-items:center;justify-content:center;gap:.75rem;margin-bottom:4rem;">
 
-                <span @click="annual=false" style="font-size:.9rem;cursor:pointer;transition:color .2s;" :style="!annual ? 'color:#ffffff;font-weight:700' : 'color:rgba(255,255,255,.35);font-weight:500'">Monthly</span>
-
-                <button @click="annual=!annual" style="position:relative;width:52px;height:28px;border-radius:999px;border:none;cursor:pointer;outline:none;flex-shrink:0;transition:background .25s,box-shadow .25s;" :style="annual ? 'background:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.3)' : 'background:rgba(255,255,255,.18);box-shadow:none'">
-                    <span style="position:absolute;top:4px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:left .25s cubic-bezier(.16,1,.3,1);" :style="annual ? 'left:28px' : 'left:4px'"></span>
+                <button
+                    @click="annual=false"
+                    :style="!annual
+                        ? 'border-radius:9999px;padding:13px 28px;display:inline-flex;align-items:center;gap:9px;font-size:.9rem;font-family:inherit;cursor:pointer;transition:all .2s ease;line-height:1;white-space:nowrap;outline:none;background:rgba(139,92,246,0.25);color:#fff;border:1.5px solid rgba(139,92,246,0.8);font-weight:600;'
+                        : 'border-radius:9999px;padding:13px 28px;display:inline-flex;align-items:center;gap:9px;font-size:.9rem;font-family:inherit;cursor:pointer;transition:all .2s ease;line-height:1;white-space:nowrap;outline:none;background:transparent;color:rgba(255,255,255,0.52);border:1.5px solid rgba(255,255,255,0.18);font-weight:400;'">
+                    Monthly
                 </button>
 
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span @click="annual=true" style="font-size:.9rem;cursor:pointer;transition:color .2s;" :style="annual ? 'color:#ffffff;font-weight:700' : 'color:rgba(255,255,255,.35);font-weight:500'">Annual</span>
-                    <span style="font-size:.65rem;font-weight:800;letter-spacing:.07em;padding:3px 9px;border-radius:999px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;white-space:nowrap;">SAVE 20%</span>
-                </div>
+                <button
+                    @click="annual=true"
+                    :style="annual
+                        ? 'border-radius:9999px;padding:13px 28px;display:inline-flex;align-items:center;gap:9px;font-size:.9rem;font-family:inherit;cursor:pointer;transition:all .2s ease;line-height:1;white-space:nowrap;outline:none;background:rgba(139,92,246,0.25);color:#fff;border:1.5px solid rgba(139,92,246,0.8);font-weight:600;'
+                        : 'border-radius:9999px;padding:13px 28px;display:inline-flex;align-items:center;gap:9px;font-size:.9rem;font-family:inherit;cursor:pointer;transition:all .2s ease;line-height:1;white-space:nowrap;outline:none;background:transparent;color:rgba(255,255,255,0.52);border:1.5px solid rgba(255,255,255,0.18);font-weight:400;'">
+                    Annual
+                    <span style="font-size:.62rem;font-weight:800;letter-spacing:.07em;padding:3px 9px;border-radius:999px;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;white-space:nowrap;line-height:1;">SAVE 20%</span>
+                </button>
 
             </div>
 
