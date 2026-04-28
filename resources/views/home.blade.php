@@ -569,7 +569,7 @@
 {{-- ══════════════════════════════════════════════════════════
      4 · A DAY WITH WHIZIQ (tabbed timeline)
      ══════════════════════════════════════════════════════════ --}}
-<section class="bg-white" style="padding:120px 0;" id="how-it-works">
+<section style="background:#f5f3ff;padding:120px 0;" id="how-it-works">
 <div class="max-w-2xl mx-auto px-6">
 
     {{-- Header --}}
@@ -578,7 +578,7 @@
         <h2 class="font-black leading-tight" style="font-size:clamp(2rem,3.8vw,3rem);letter-spacing:-.035em;color:#0a0714;">
             Your business runs itself<br>while you do what you love.
         </h2>
-        <p class="text-gray-500 mx-auto" style="font-size:1.05rem;line-height:1.85;max-width:420px;margin-top:1.25rem;">
+        <p style="color:#6b5fa6;font-size:1.05rem;line-height:1.85;max-width:420px;margin:1.25rem auto 0;">
             From the moment you wake up to the moment you close your laptop.
         </p>
     </div>
@@ -596,9 +596,9 @@
             ] as [$key, $label])
             <button
                 @click="tab = '{{ $key }}'"
-                :class="tab === '{{ $key }}'
-                    ? 'bg-violet-600 text-white shadow-md'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-violet-300 hover:text-violet-700'"
+                :style="tab === '{{ $key }}'
+                    ? 'background:#7c3aed;color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.35);border:1px solid #7c3aed;'
+                    : 'background:#fff;color:#4b5563;border:1px solid #ddd6fe;'"
                 class="rounded-full text-sm font-semibold transition-all"
                 style="padding:10px 22px;">
                 {{ $label }}
@@ -666,8 +666,8 @@
                         {{ $time }}
                     </span>
 
-                    <h3 class="font-bold text-gray-900" style="font-size:1.05rem;letter-spacing:-.015em;line-height:1.42;margin-bottom:.875rem;">{{ $title }}</h3>
-                    <p class="text-gray-500" style="font-size:.9rem;line-height:1.9;">{{ $desc }}</p>
+                    <h3 class="font-bold" style="color:#1a1033;font-size:1.05rem;letter-spacing:-.015em;line-height:1.42;margin-bottom:.875rem;">{{ $title }}</h3>
+                    <p style="color:#4b4668;font-size:.9rem;line-height:1.9;">{{ $desc }}</p>
 
                 </div>
 
