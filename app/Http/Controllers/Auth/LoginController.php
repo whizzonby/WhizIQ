@@ -55,7 +55,7 @@ class LoginController extends Controller
             ]);
         }
 
-        return redirect($this->getRedirectUrl($user));
+        return redirect()->intended($this->getRedirectUrl($user));
     }
 
     protected function validateLogin(Request $request)

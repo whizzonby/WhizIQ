@@ -38,7 +38,13 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 
     $user = $request->user();
     if ($user->hasVerifiedEmail()) {
-        return redirect()->route('registration.thank-you');
+        if (! $user->onboardingData) {
+            return redirect()->route('filament.dashboard.pages.onboarding');
+        }
+        if (! $user->isSubscribed()) {
+            return redirect()->route('filament.dashboard.resources.subscriptions.index');
+        }
+        return redirect()->route('filament.dashboard.pages.dashboard');
     }
 
     return redirect('/');
