@@ -28,6 +28,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Jeffgreco13\FilamentBreezy\BreezyCore;
+use Saasykit\FilamentOnboarding\FilamentOnboardingPlugin;
 
 class DashboardPanelProvider extends PanelProvider
 {
@@ -104,6 +105,8 @@ class DashboardPanelProvider extends PanelProvider
                     ->myProfileComponents([
                         AddressForm::class,
                     ]),
+                FilamentOnboardingPlugin::make()
+                    ->onboardingPage(\App\Filament\Dashboard\Pages\CustomOnboardingPage::class),
             ]);
     }
 }
