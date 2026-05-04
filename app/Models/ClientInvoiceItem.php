@@ -13,6 +13,7 @@ class ClientInvoiceItem extends Model
     protected $fillable = [
         'client_invoice_id',
         'description',
+        'details',
         'quantity',
         'unit_price',
         'amount',
