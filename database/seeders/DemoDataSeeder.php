@@ -28,6 +28,7 @@ class DemoDataSeeder extends Seeder
 
         $this->command->info('Seeding demo data for: ' . $user->email);
 
+        $this->clearExistingDemoData($user);
         $this->seedBusinessProfile($user);
 
         $clients = $this->seedInvoiceClients($user);
@@ -56,6 +57,25 @@ class DemoDataSeeder extends Seeder
         $this->seedTasks($user);
 
         $this->command->info('Demo data seeded successfully.');
+    }
+
+    private function clearExistingDemoData(User $user): void
+    {
+        $this->command->info('Clearing existing demo data...');
+
+        $invoiceIds = ClientInvoice::where('user_id', $user->id)->pluck('id');
+        ClientInvoiceItem::whereIn('client_invoice_id', $invoiceIds)->delete(); // no SoftDeletes
+        ClientInvoice::where('user_id', $user->id)->forceDelete();
+        InvoiceClient::where('user_id', $user->id)->forceDelete();
+
+        Expense::where('user_id', $user->id)->delete(); // no SoftDeletes
+
+        Deal::where('user_id', $user->id)->forceDelete();
+        Contact::where('user_id', $user->id)->forceDelete();
+
+        Goal::where('user_id', $user->id)->forceDelete();
+        Task::where('user_id', $user->id)->forceDelete();
+        BusinessProfile::where('user_id', $user->id)->delete(); // no SoftDeletes
     }
 
     private function seedBusinessProfile(User $user): void
