@@ -29,11 +29,29 @@ class DemoDataSeeder extends Seeder
         $this->command->info('Seeding demo data for: ' . $user->email);
 
         $this->seedBusinessProfile($user);
+
         $clients = $this->seedInvoiceClients($user);
-        $this->seedInvoices($user, $clients);
-        $this->seedExpenses($user);
+
+        // Wrap invoice + item creates to prevent the item saved event from
+        // triggering invoice recalculation on every single row insert
+        ClientInvoice::withoutEvents(function () use ($user, $clients) {
+            ClientInvoiceItem::withoutEvents(function () use ($user, $clients) {
+                $this->seedInvoices($user, $clients);
+            });
+        });
+
+        // Wrap expense creates to prevent AI auto-categorization API calls
+        Expense::withoutEvents(function () use ($user) {
+            $this->seedExpenses($user);
+        });
+
         $contacts = $this->seedContacts($user);
-        $this->seedDeals($user, $contacts);
+
+        // Wrap deal creates to prevent Twilio SMS on stage changes
+        Deal::withoutEvents(function () use ($user, $contacts) {
+            $this->seedDeals($user, $contacts);
+        });
+
         $this->seedGoals($user);
         $this->seedTasks($user);
 
