@@ -124,7 +124,7 @@ class OAuthController extends Controller
 
         if ($isRegistration) {
             Mail::to($resolvedUser)->queue(new WelcomeMail($resolvedUser));
-            return redirect()->route('filament.dashboard.pages.onboarding');
+            return redirect()->route('registration.thank-you');
         }
 
         return redirect($this->getRedirectUrl($resolvedUser));
