@@ -2,257 +2,390 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+use App\Models\AppointmentType;
+use App\Models\BookingSetting;
 use App\Models\BusinessProfile;
+use App\Models\Contact;
+use App\Models\NotificationPreference;
 use App\Services\CountriesService;
-use Filament\Forms\Components\DatePicker;
+use App\Services\EmailCampaignService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Placeholder;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
+use Illuminate\Support\Str;
 use Saasykit\FilamentOnboarding\Pages\OnboardingPage;
 
 class CustomOnboardingPage extends OnboardingPage
 {
-
-    // Essential Business Information
+    // Step 1 — Your Business
     public string $biz_registered_name = '';
     public string $biz_country = '';
-    public string $biz_incorporation_date = '';
-    public string $biz_legal_type = '';
-    public int $ops_employee_count = 1;
-    public string $comp_tax_cycle = '';
+    public string $currency = 'USD';
+    public string $comp_tax_cycle = 'annually';
 
-    // Revenue & Preferences
-    public float $rev_monthly_avg = 0;
-    public string $prefs_insight_freq = 'weekly';
-    public string $prefs_detail_level = 'basic';
+    // Step 2 — Your First Service
+    public string $service_name = '';
+    public int|string $service_duration = 60;
+    public float|string $service_price = 0;
+    public string $service_payment_type = 'invoice';
+    public string $service_format = 'in_person';
+
+    // Step 3 — Your First Client (optional)
+    public string $client_name = '';
+    public string $client_email = '';
+    public string $client_phone = '';
+    public bool $send_booking_link = false;
+
+    // Step 4 — Stay Connected
+    public string $owner_phone = '';
+    public string $preferred_channel = 'sms';
 
     protected function getFormSchema(): array
     {
         return [
             Wizard::make([
-                // Step 1: Business Essentials
-                Step::make('Business Essentials')
+
+                Step::make('Your Business')
                     ->icon('heroicon-o-building-storefront')
                     ->schema([
                         Section::make('Tell us about your business')
-                            ->description('Just the essentials - you can add more details later in Business Metrics')
+                            ->description('Just the essentials — you can add more detail later.')
                             ->schema([
-                                    TextInput::make('biz_registered_name')
-                                        ->label('Business Name')
+                                TextInput::make('biz_registered_name')
+                                    ->label('Business Name')
+                                    ->required()
+                                    ->maxLength(80)
+                                    ->placeholder('e.g., Acme Consulting'),
+
+                                Grid::make(2)->schema([
+                                    Select::make('biz_country')
+                                        ->label('Country')
+                                        ->options(CountriesService::getAllCountries())
                                         ->required()
-                                        ->maxLength(80)
-                                        ->placeholder('e.g., Acme Consulting LLC')
-                                        ->helperText('Your official business or trading name'),
+                                        ->searchable(),
 
-                                    Grid::make(2)->schema([
-                                        Select::make('biz_country')
-                                            ->label('Country')
-                                            ->options(CountriesService::getAllCountries())
-                                            ->required()
-                                            ->searchable(),
+                                    Select::make('currency')
+                                        ->label('Currency')
+                                        ->required()
+                                        ->default('USD')
+                                        ->options([
+                                            'USD' => 'USD — US Dollar',
+                                            'GBP' => 'GBP — British Pound',
+                                            'EUR' => 'EUR — Euro',
+                                            'GHS' => 'GHS — Ghanaian Cedi',
+                                            'NGN' => 'NGN — Nigerian Naira',
+                                            'ZAR' => 'ZAR — South African Rand',
+                                            'CAD' => 'CAD — Canadian Dollar',
+                                            'AUD' => 'AUD — Australian Dollar',
+                                        ]),
+                                ]),
 
-                                        Select::make('biz_legal_type')
-                                            ->label('Business Structure')
-                                            ->options([
-                                                'sole_trader' => 'Sole Proprietor / Freelancer',
-                                                'partnership' => 'Partnership',
-                                                'llc' => 'Limited Liability Company (LLC)',
-                                                'cooperative' => 'Co-operative',
-                                                'other' => 'Other',
-                                            ])
-                                            ->required()
-                                            ->default('sole_trader'),
-                                    ]),
-
-                                    Grid::make(3)->schema([
-                                        DatePicker::make('biz_incorporation_date')
-                                            ->label('Start Date')
-                                            ->required()
-                                            ->maxDate(now())
-                                            ->default(now())
-                                            ->helperText('When did you start?'),
-
-                                        TextInput::make('ops_employee_count')
-                                            ->label('Team Size')
-                                            ->numeric()
-                                            ->required()
-                                            ->minValue(1)
-                                            ->default(1)
-                                            ->helperText('Including yourself'),
-
-                                        Select::make('comp_tax_cycle')
-                                            ->label('Tax Filing')
-                                            ->options([
-                                                'monthly' => 'Monthly',
-                                                'quarterly' => 'Quarterly',
-                                                'annually' => 'Annually',
-                                            ])
-                                            ->required()
-                                            ->default('annually')
-                                            ->helperText('How often do you file?'),
+                                Select::make('comp_tax_cycle')
+                                    ->label('Tax Filing Cycle')
+                                    ->required()
+                                    ->default('annually')
+                                    ->options([
+                                        'monthly'   => 'Monthly',
+                                        'quarterly' => 'Quarterly',
+                                        'annually'  => 'Annually',
                                     ]),
                             ]),
                     ]),
 
-                // Step 2: Quick Setup
-                Step::make('Quick Setup')
-                    ->icon('heroicon-o-cog-6-tooth')
+                Step::make('Your First Service')
+                    ->icon('heroicon-o-briefcase')
                     ->schema([
-                        Section::make('Revenue & Preferences')
-                            ->description('Help us tailor WhizIQ to your needs')
+                        Section::make('Set up your first bookable service')
+                            ->description('This turns on your booking page so clients can book you online.')
                             ->schema([
-                                    TextInput::make('rev_monthly_avg')
-                                        ->label('Average Monthly Revenue')
-                                        ->numeric()
-                                        ->prefix('$')
+                                TextInput::make('service_name')
+                                    ->label('Service Name')
+                                    ->required()
+                                    ->placeholder('e.g. Consultation, Haircut, 1-on-1 Session'),
+
+                                Grid::make(2)->schema([
+                                    Select::make('service_duration')
+                                        ->label('Duration')
                                         ->required()
+                                        ->default(60)
+                                        ->options([
+                                            15  => '15 minutes',
+                                            30  => '30 minutes',
+                                            45  => '45 minutes',
+                                            60  => '60 minutes',
+                                            90  => '90 minutes',
+                                            120 => '2 hours',
+                                        ]),
+
+                                    TextInput::make('service_price')
+                                        ->label('Price')
+                                        ->numeric()
                                         ->default(0)
-                                        ->helperText('Approximate monthly sales/revenue (we\'ll help you track this better)')
-                                        ->placeholder('e.g., 5000'),
+                                        ->minValue(0)
+                                        ->prefix(fn () => $this->currency ?: 'USD')
+                                        ->helperText('Set to 0 for free services'),
+                                ]),
 
-                                    Grid::make(2)->schema([
-                                        Select::make('prefs_insight_freq')
-                                            ->label('How often do you want insights?')
-                                            ->options([
-                                                'daily' => 'Daily - I want regular updates',
-                                                'weekly' => 'Weekly - Keep me informed',
-                                                'monthly' => 'Monthly - Just the highlights',
-                                            ])
-                                            ->required()
-                                            ->default('weekly')
-                                            ->helperText('AI-powered business insights'),
+                                Grid::make(2)->schema([
+                                    Select::make('service_payment_type')
+                                        ->label('Payment Requirement')
+                                        ->required()
+                                        ->default('invoice')
+                                        ->options([
+                                            'none'    => 'No payment required',
+                                            'invoice' => 'Invoice after booking (pay later)',
+                                            'upfront' => 'Full payment upfront',
+                                        ]),
 
-                                        Select::make('prefs_detail_level')
-                                            ->label('Detail level for reports')
-                                            ->options([
-                                                'basic' => 'Basic - Simple & clear',
-                                                'advanced' => 'Advanced - All the details',
-                                            ])
-                                            ->required()
-                                            ->default('basic')
-                                            ->helperText('How detailed should reports be?'),
-                                    ]),
-
-                                Section::make('📊 What happens next?')
-                                    ->schema([])
-                                    ->description('
-                                        **You\'re all set!** After this, you can:
-                                        - Add detailed financial info in Business Metrics
-                                        - Set up your appointment types and availability
-                                        - Start managing contacts and deals
-                                        - Track revenue and expenses
-
-                                        *You can always update these details later.*
-                                    ')
-                                    ->collapsible()
-                                    ->collapsed(false),
+                                    Select::make('service_format')
+                                        ->label('Format')
+                                        ->required()
+                                        ->default('in_person')
+                                        ->options([
+                                            'in_person' => 'In-Person',
+                                            'online'    => 'Online',
+                                            'phone'     => 'Phone Call',
+                                        ]),
+                                ]),
                             ]),
                     ]),
+
+                Step::make('Your First Client')
+                    ->icon('heroicon-o-user-plus')
+                    ->schema([
+                        Section::make('Add a client (optional)')
+                            ->description('Add one client now. You can import or add more later.')
+                            ->schema([
+                                TextInput::make('client_name')
+                                    ->label('Client Name')
+                                    ->placeholder('e.g. Jane Smith'),
+
+                                Grid::make(2)->schema([
+                                    TextInput::make('client_email')
+                                        ->label('Email')
+                                        ->email()
+                                        ->placeholder('jane@example.com'),
+
+                                    TextInput::make('client_phone')
+                                        ->label('Phone')
+                                        ->tel()
+                                        ->placeholder('+1 555 000 0000'),
+                                ]),
+
+                                Toggle::make('send_booking_link')
+                                    ->label('Send them your booking link by email')
+                                    ->default(false)
+                                    ->visible(fn () => filled($this->client_email)),
+                            ]),
+                    ]),
+
+                Step::make('Stay Connected')
+                    ->icon('heroicon-o-bell')
+                    ->schema([
+                        Section::make('Get notified instantly')
+                            ->description('WhizIQ alerts you the moment a booking comes in, an invoice is overdue, or a deal goes stale.')
+                            ->schema([
+                                TextInput::make('owner_phone')
+                                    ->label('Your Phone Number')
+                                    ->tel()
+                                    ->placeholder('+1 555 000 0000')
+                                    ->helperText('For SMS/WhatsApp booking alerts'),
+
+                                Select::make('preferred_channel')
+                                    ->label('Preferred Alert Channel')
+                                    ->default('sms')
+                                    ->options([
+                                        'sms'       => 'SMS',
+                                        'whatsapp'  => 'WhatsApp',
+                                        'both'      => 'Both SMS & WhatsApp',
+                                    ])
+                                    ->visible(fn () => filled($this->owner_phone)),
+
+                                Placeholder::make('booking_url_preview')
+                                    ->label('Your booking page will be live at')
+                                    ->content(function () {
+                                        $slug = Str::slug($this->biz_registered_name ?: auth()->user()->name);
+                                        return url('book/' . $slug);
+                                    }),
+                            ]),
+                    ]),
+
             ])
                 ->submitAction(view('filament.components.wizard-submit-action'))
                 ->columnSpanFull(),
         ];
     }
 
-    public function submit()
+    public function submit(): void
     {
         $this->validate();
 
-        // Create or update business profile with smart defaults
+        $userId = auth()->id();
+        $user   = auth()->user();
+
+        // Step 1 — Create/update BusinessProfile
         $businessProfile = BusinessProfile::updateOrCreate(
-            ['user_id' => auth()->id()],
+            ['user_id' => $userId],
             [
-
-            // Required fields from form
-            'biz_registered_name' => $this->biz_registered_name,
-            'biz_country' => $this->biz_country,
-            'biz_incorporation_date' => $this->biz_incorporation_date,
-            'biz_legal_type' => $this->biz_legal_type,
-            'ops_employee_count' => $this->ops_employee_count,
-            'comp_tax_cycle' => $this->comp_tax_cycle,
-            'rev_monthly_avg' => $this->rev_monthly_avg,
-            'prefs_insight_freq' => $this->prefs_insight_freq,
-            'prefs_detail_level' => $this->prefs_detail_level,
-
-            // Smart defaults for optional fields
-            'biz_trading_name' => null,
-            'biz_tax_id' => null,
-            'ops_location' => null,
-            'ops_hours' => null,
-            'ops_systems' => [],
-
-            // Revenue defaults
-            'rev_yoy_change' => 0,
-            'rev_payment_methods' => [],
-            'rev_channels' => [],
-            'rev_top_customers' => [],
-
-            // Expense defaults (all zero - users can add later)
-            'exp_fixed_monthly' => 0,
-            'exp_variable_monthly' => 0,
-            'exp_payroll' => 0,
-            'exp_marketing' => 0,
-            'exp_loans' => 0,
-
-            // HR defaults
-            'hr_full_time' => $this->ops_employee_count > 0 ? $this->ops_employee_count : 1,
-            'hr_part_time' => 0,
-            'hr_avg_salary' => 0,
-            'hr_roles' => [],
-            'hr_contractors' => null,
-
-            // Marketing defaults
-            'mkt_platforms' => [],
-            'mkt_followers' => [],
-            'mkt_budget' => 0,
-            'mkt_traffic' => null,
-            'mkt_bounce_rate' => null,
-
-            // Compliance defaults
-            'comp_licenses' => [],
-            'comp_bookkeeping_type' => null,
-            'comp_accountant_name' => null,
-
-            // Financial defaults
-            'fin_ar_days' => null,
-            'fin_ap_days' => null,
-            'fin_bank_balance' => null,
-            'fin_debt_amount' => null,
-
-            // Strategy defaults
-            'strat_goals' => [],
-            'strat_investments' => [],
-            'strat_challenges' => [],
-
-            // Preferences
-            'prefs_report_format' => 'interactive',
-            'prefs_ai_actions' => true,
+                'biz_registered_name'  => $this->biz_registered_name,
+                'biz_country'          => $this->biz_country,
+                'comp_tax_cycle'       => $this->comp_tax_cycle,
+                'biz_trading_name'     => null,
+                'biz_tax_id'           => null,
+                'biz_legal_type'       => 'sole_trader',
+                'biz_incorporation_date' => now()->toDateString(),
+                'ops_employee_count'   => 1,
+                'ops_location'         => null,
+                'ops_hours'            => null,
+                'ops_systems'          => [],
+                'rev_monthly_avg'      => 0,
+                'rev_yoy_change'       => 0,
+                'rev_payment_methods'  => [],
+                'rev_channels'         => [],
+                'rev_top_customers'    => [],
+                'exp_fixed_monthly'    => 0,
+                'exp_variable_monthly' => 0,
+                'exp_payroll'          => 0,
+                'exp_marketing'        => 0,
+                'exp_loans'            => 0,
+                'hr_full_time'         => 1,
+                'hr_part_time'         => 0,
+                'hr_avg_salary'        => 0,
+                'hr_roles'             => [],
+                'hr_contractors'       => null,
+                'mkt_platforms'        => [],
+                'mkt_followers'        => [],
+                'mkt_budget'           => 0,
+                'mkt_traffic'          => null,
+                'mkt_bounce_rate'      => null,
+                'comp_licenses'        => [],
+                'comp_bookkeeping_type' => null,
+                'comp_accountant_name' => null,
+                'fin_ar_days'          => null,
+                'fin_ap_days'          => null,
+                'fin_bank_balance'     => null,
+                'fin_debt_amount'      => null,
+                'strat_goals'          => [],
+                'strat_investments'    => [],
+                'strat_challenges'     => [],
+                'prefs_insight_freq'   => 'weekly',
+                'prefs_detail_level'   => 'basic',
+                'prefs_report_format'  => 'interactive',
+                'prefs_ai_actions'     => true,
             ]
         );
+
+        // Step 2 — Create BookingSetting (slug auto-generated by boot method)
+        $bookingSetting = BookingSetting::firstOrCreate(
+            ['user_id' => $userId],
+            [
+                'is_booking_enabled' => true,
+                'currency'           => $this->currency,
+                'display_name'       => $this->biz_registered_name,
+            ]
+        );
+
+        // Step 2 — Create AppointmentType
+        $appointmentType = AppointmentType::create([
+            'user_id'           => $userId,
+            'name'              => $this->service_name,
+            'duration_minutes'  => (int) $this->service_duration,
+            'price'             => (float) $this->service_price,
+            'appointment_format' => $this->service_format,
+            'is_active'         => true,
+        ]);
+        // payment_type is not in fillable — set directly
+        $appointmentType->payment_type = $this->service_payment_type;
+        $appointmentType->save();
+
+        // Step 3 — Create Contact (optional)
+        if (filled($this->client_name)) {
+            $contact = Contact::create([
+                'user_id'  => $userId,
+                'name'     => $this->client_name,
+                'email'    => $this->client_email ?: null,
+                'phone'    => $this->client_phone ?: null,
+                'type'     => 'client',
+                'status'   => 'active',
+                'priority' => 'medium',
+            ]);
+
+            if ($this->send_booking_link && filled($this->client_email)) {
+                try {
+                    $bookingUrl   = url('book/' . $bookingSetting->booking_slug);
+                    $businessName = $this->biz_registered_name;
+                    $firstName    = explode(' ', $this->client_name)[0];
+
+                    $subject = "Your booking link from {$businessName}";
+                    $body    = "<p>Hi {$firstName},</p>"
+                        . "<p>{$businessName} has set up an online booking page for you.</p>"
+                        . "<p><a href=\"{$bookingUrl}\">Click here to book your first appointment</a></p>"
+                        . "<p>Looking forward to seeing you!</p>"
+                        . "<p>{$businessName}</p>";
+
+                    app(EmailCampaignService::class)->sendToContact($user, $contact, $subject, $body, [
+                        'email_type' => 'transactional',
+                        'metadata'   => ['trigger' => 'onboarding_booking_link'],
+                    ]);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Failed to send booking link to client during onboarding', [
+                        'user_id'    => $userId,
+                        'contact_id' => $contact->id,
+                        'error'      => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
+
+        // Step 4 — Create/update NotificationPreference
+        $prefs = NotificationPreference::forUser($userId);
+        $prefs->update([
+            'owner_phone'       => $this->owner_phone ?: null,
+            'preferred_channel' => $this->preferred_channel,
+        ]);
 
         // Calculate initial metrics
         $businessProfile->calculateMetrics();
 
-        // Mark as onboarded and redirect based on subscription status
         $this->onboarded();
     }
 
-    protected function onboarded()
+    protected function onboarded(): void
     {
         $this->onboardingManager->onboarded();
 
-        // Redirect based on subscription status (similar to RedirectAwareTrait logic)
         $user = auth()->user();
-        
+
         if ($user && ! $user->isSubscribed()) {
-            // User doesn't have a subscription - redirect to plans/subscriptions page
-            $this->redirect(route('filament.dashboard.resources.subscriptions.index'));
-        } else {
-            // User has subscription or is admin - redirect to dashboard
-            $this->redirect(route('filament.dashboard.pages.dashboard'));
+            $trialPlan = \App\Models\Plan::where('is_active', true)
+                ->where('has_trial', true)
+                ->where('trial_interval_count', '>', 0)
+                ->orderBy('id')
+                ->first();
+
+            if ($trialPlan) {
+                try {
+                    app(\App\Services\CheckoutService::class)
+                        ->initLocalSubscriptionCheckout($trialPlan->slug);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Auto-trial creation failed during onboarding', [
+                        'user_id' => $user->id,
+                        'error'   => $e->getMessage(),
+                    ]);
+                    $this->redirect(route('filament.dashboard.resources.subscriptions.index'));
+                    return;
+                }
+            } else {
+                $this->redirect(route('filament.dashboard.resources.subscriptions.index'));
+                return;
+            }
         }
+
+        $this->redirect(route('filament.dashboard.pages.dashboard'));
     }
 }

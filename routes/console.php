@@ -138,3 +138,9 @@ Schedule::command('whiziq:stale-deal-alerts')
     ->dailyAt('09:00')
     ->name('whiziq-stale-deal-alerts')
     ->withoutOverlapping();
+
+// Cold contact re-engagement — daily at 10 AM
+Schedule::command('contacts:cold-alerts')
+    ->dailyAt('10:00')
+    ->name('send-cold-contact-alerts')
+    ->withoutOverlapping();

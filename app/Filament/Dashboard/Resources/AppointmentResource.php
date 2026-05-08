@@ -470,6 +470,16 @@ class AppointmentResource extends Resource
                     ->visible(fn (Appointment $record) => in_array($record->status, ['scheduled', 'confirmed']))
                     ->requiresConfirmation(false),
 
+                Action::make('no_show')
+                    ->label('No-Show')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('warning')
+                    ->visible(fn (Appointment $record) => in_array($record->status, ['scheduled', 'confirmed']))
+                    ->requiresConfirmation()
+                    ->modalHeading('Mark as No-Show')
+                    ->modalDescription('This will mark the appointment as a no-show and send a chase message to the client.')
+                    ->action(fn (Appointment $record) => $record->markAsNoShow()),
+
                 Action::make('sync_calendar')
                     ->label('Sync to Calendar')
                     ->icon('heroicon-o-arrow-path')

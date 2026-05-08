@@ -70,6 +70,20 @@ class AppointmentObserver
             }
         }
 
+        // Check if status changed to no_show — chase client + flag CRM
+        if ($appointment->wasChanged('status') && $appointment->status === 'no_show') {
+            $originalStatus = $appointment->getOriginal('status');
+
+            if ($originalStatus !== 'no_show') {
+                Log::info('Appointment no-show — triggering chase and CRM flag', [
+                    'appointment_id' => $appointment->id,
+                    'previous_status' => $originalStatus,
+                ]);
+
+                $this->handleNoShow($appointment);
+            }
+        }
+
         // Sync to Google Calendar if relevant fields changed
         if ($appointment->wasChanged(['title', 'description', 'start_datetime', 'end_datetime', 'location', 'venue_id', 'room_name', 'meeting_url', 'status'])) {
             // If status changed to cancelled, delete from calendar
@@ -179,6 +193,103 @@ class AppointmentObserver
             Log::error('Failed to send booking SMS notifications', [
                 'appointment_id' => $appointment->id,
                 'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Chase a no-show client: send a re-book message, log a CRM interaction,
+     * and create a follow-up reminder for the business owner.
+     */
+    protected function handleNoShow(Appointment $appointment): void
+    {
+        try {
+            $appointment->loadMissing(['user.businessProfile']);
+
+            $businessName = $appointment->user?->businessProfile?->biz_trading_name
+                ?? $appointment->user?->businessProfile?->biz_registered_name
+                ?? $appointment->user?->name
+                ?? 'us';
+
+            // Build a rebooking URL from the owner's booking slug
+            $bookingSlug = \App\Models\BookingSetting::where('user_id', $appointment->user_id)
+                ->value('booking_slug');
+
+            $rebookUrl = $bookingSlug
+                ? route('booking.public', ['slug' => $bookingSlug])
+                : null;
+
+            $clientName = $appointment->attendee_name ?? 'there';
+            $message    = "Hi {$clientName}, we missed you for your appointment today with {$businessName}."
+                . ($rebookUrl ? " Rebook at your convenience: {$rebookUrl}" : ' Please get in touch to reschedule.')
+                . "\n\n— {$businessName}";
+
+            // Send chase SMS/WhatsApp to client
+            if ($appointment->attendee_phone) {
+                $this->messaging->notifyClient($appointment->attendee_phone, $message);
+            }
+
+            // Alert the owner
+            if ($appointment->user) {
+                $this->messaging->notifyOwner(
+                    $appointment->user,
+                    "No-show: {$clientName} missed their appointment. A chase message has been sent."
+                );
+            }
+
+            // Log a CRM interaction on the linked contact
+            $contact = null;
+            if ($appointment->contact_id) {
+                $contact = \App\Models\Contact::find($appointment->contact_id);
+            } elseif ($appointment->attendee_email) {
+                $contact = \App\Models\Contact::where('user_id', $appointment->user_id)
+                    ->where('email', $appointment->attendee_email)
+                    ->first();
+            }
+
+            if ($contact) {
+                \App\Models\ContactInteraction::create([
+                    'user_id'          => $appointment->user_id,
+                    'contact_id'       => $contact->id,
+                    'type'             => 'note',
+                    'subject'          => 'Appointment no-show',
+                    'description'      => "Client did not attend their appointment. Chase message sent.",
+                    'interaction_date' => now(),
+                    'outcome'          => 'follow_up_needed',
+                ]);
+
+                // Create a follow-up reminder for the owner to personally follow up in 2 days
+                \App\Models\FollowUpReminder::create([
+                    'user_id'     => $appointment->user_id,
+                    'contact_id'  => $contact->id,
+                    'title'       => "Follow up: {$clientName} missed appointment",
+                    'description' => 'Client was a no-show. Chase message was sent — follow up if no response.',
+                    'remind_at'   => now()->addDays(2),
+                    'status'      => 'pending',
+                    'priority'    => 'medium',
+                ]);
+
+                // Pipeline Flag — flag any open deals for this contact so the board
+                // surfaces them as at-risk before the owner loses the sale.
+                $openDeals = $contact->deals()->open()->get();
+                foreach ($openDeals as $deal) {
+                    \App\Models\FollowUpReminder::create([
+                        'user_id'     => $appointment->user_id,
+                        'contact_id'  => $contact->id,
+                        'deal_id'     => $deal->id,
+                        'title'       => "At-risk deal: {$clientName} was a no-show",
+                        'description' => "Deal \"{$deal->title}\" may be at risk — client missed their appointment. Review the pipeline.",
+                        'remind_at'   => now()->addDay(),
+                        'status'      => 'pending',
+                        'priority'    => 'high',
+                    ]);
+                }
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Failed to handle no-show follow-up', [
+                'appointment_id' => $appointment->id,
+                'error'          => $e->getMessage(),
             ]);
         }
     }

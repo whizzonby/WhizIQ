@@ -4,9 +4,15 @@ namespace App\Filament\Dashboard\Pages;
 
 use App\Filament\Dashboard\Widgets\AttentionDigestWidget;
 use App\Filament\Dashboard\Widgets\BusinessMetricsOverviewWidget;
+use App\Filament\Dashboard\Widgets\BusinessPerformanceTrendWidget;
+use App\Filament\Dashboard\Widgets\CollectionHealthWidget;
+use App\Filament\Dashboard\Widgets\ContactsOverviewWidget;
 use App\Filament\Dashboard\Widgets\DashboardGreetingWidget;
+use App\Filament\Dashboard\Widgets\DealPipelineWidget;
 use App\Filament\Dashboard\Widgets\FinancialAlertBarWidget;
 use App\Filament\Dashboard\Widgets\FinancialSnapshotWidget;
+use App\Filament\Dashboard\Widgets\ProfitabilityRatiosWidget;
+use App\Filament\Dashboard\Widgets\RecentAppointmentsWidget;
 use App\Services\DemoDataService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -91,8 +97,14 @@ class Dashboard extends BaseDashboard
             DashboardGreetingWidget::class,
             FinancialAlertBarWidget::class,
             FinancialSnapshotWidget::class,
+            CollectionHealthWidget::class,
+            DealPipelineWidget::class,
             AttentionDigestWidget::class,
+            ContactsOverviewWidget::class,
+            RecentAppointmentsWidget::class,
             BusinessMetricsOverviewWidget::class,
+            BusinessPerformanceTrendWidget::class,
+            ProfitabilityRatiosWidget::class,
         ];
     }
 

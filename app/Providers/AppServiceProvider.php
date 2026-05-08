@@ -60,5 +60,7 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Appointment::observe(\App\Observers\AppointmentObserver::class);
         \App\Models\ClientInvoice::observe(\App\Observers\ClientInvoiceObserver::class);
         \App\Models\PasswordVault::observe(\App\Observers\PasswordVaultObserver::class);
+        \App\Models\Deal::observe(\App\Observers\DealObserver::class);
+        \App\Models\Contact::observe(\App\Observers\ContactObserver::class);
     }
 }

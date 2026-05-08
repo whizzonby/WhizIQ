@@ -27,7 +27,7 @@ class GetStartedWidget extends Widget
             return false;
         }
 
-        $isNew = $user->created_at?->gt(now()->subDays(7));
+        $isNew = $user->created_at?->gt(now()->subDays(14));
         $hasData = Contact::where('user_id', $user->id)->exists()
             || ClientInvoice::where('user_id', $user->id)->exists()
             || Appointment::where('user_id', $user->id)->exists();

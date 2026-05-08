@@ -156,8 +156,17 @@ class ProcessNewAppointment implements ShouldQueue
                 'invoice_number' => $invoiceNumber,
             ]);
 
-            // TODO: Send invoice email to client
-            // This would be implemented with an InvoiceCreatedNotification
+            // Email invoice PDF to client
+            try {
+                $invoice->loadMissing('client');
+                app(\App\Services\InvoicePDFService::class)->emailToClient($invoice);
+            } catch (\Exception $emailException) {
+                Log::warning('Failed to email invoice to client after appointment booking', [
+                    'invoice_id'     => $invoice->id,
+                    'appointment_id' => $this->appointment->id,
+                    'error'          => $emailException->getMessage(),
+                ]);
+            }
 
         } catch (\Exception $e) {
             Log::error('Failed to create invoice for appointment', [
