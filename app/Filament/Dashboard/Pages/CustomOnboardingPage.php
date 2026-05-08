@@ -350,6 +350,9 @@ class CustomOnboardingPage extends OnboardingPage
         // Calculate initial metrics
         $businessProfile->calculateMetrics();
 
+        // Show the post-onboarding welcome modal on the dashboard
+        session()->put('show_welcome_modal', true);
+
         $this->onboarded();
     }
 

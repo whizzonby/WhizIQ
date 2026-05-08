@@ -87,6 +87,9 @@ class DashboardPanelProvider extends PanelProvider
             ->renderHook('panels::head.start', function () {
                 return view('components.layouts.partials.analytics');
             })
+            ->renderHook('panels::body.end', function () {
+                return Blade::render('<livewire:welcome-modal />');
+            })
             ->renderHook(PanelsRenderHook::BODY_START,
                 fn (): string => Blade::render("@livewire('announcement.view', ['placement' => '".AnnouncementPlacement::USER_DASHBOARD->value."'])")
             )
