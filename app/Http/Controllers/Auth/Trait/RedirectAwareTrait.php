@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth\Trait;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Redirect;
+use Saasykit\FilamentOnboarding\Constants\OnboardingStatus;
+use Saasykit\FilamentOnboarding\Models\Onboarding;
 
 trait RedirectAwareTrait
 {
@@ -26,6 +28,16 @@ trait RedirectAwareTrait
         // Redirect to email verification if not verified (non-admins only)
         if (! $user->hasVerifiedEmail()) {
             return route('verification.notice');
+        }
+
+        // Send users who haven't completed onboarding to the wizard
+        $hasOnboarded = Onboarding::where('onboardable_type', get_class($user))
+            ->where('onboardable_id', $user->id)
+            ->whereIn('status', [OnboardingStatus::DONE, OnboardingStatus::SKIPPED])
+            ->exists();
+
+        if (! $hasOnboarded) {
+            return route('filament.dashboard.pages.onboarding');
         }
 
         if (Redirect::getIntendedUrl() !== null && rtrim(Redirect::getIntendedUrl(), '/') !== rtrim((route('home')), '/')) {
