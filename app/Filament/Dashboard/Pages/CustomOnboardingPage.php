@@ -378,12 +378,7 @@ class CustomOnboardingPage extends OnboardingPage
                         'user_id' => $user->id,
                         'error'   => $e->getMessage(),
                     ]);
-                    $this->redirect(route('filament.dashboard.resources.subscriptions.index'));
-                    return;
                 }
-            } else {
-                $this->redirect(route('filament.dashboard.resources.subscriptions.index'));
-                return;
             }
         }
 

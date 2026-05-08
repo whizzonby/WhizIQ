@@ -28,12 +28,6 @@ trait RedirectAwareTrait
             return route('verification.notice');
         }
 
-        // Check if user has active subscription (only for non-admin users)
-        // If no subscription, redirect to plans page instead of dashboard
-        if (! $user->isSubscribed()) {
-            return route('filament.dashboard.resources.subscriptions.index');
-        }
-
         if (Redirect::getIntendedUrl() !== null && rtrim(Redirect::getIntendedUrl(), '/') !== rtrim((route('home')), '/')) {
             return Redirect::getIntendedUrl();
         }
