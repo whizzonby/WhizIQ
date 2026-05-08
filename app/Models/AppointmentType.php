@@ -26,6 +26,7 @@ class AppointmentType extends Model
         'require_company',
         'custom_questions',
         'sort_order',
+        'payment_type',
         'appointment_format',
         'default_venue_id',
         'requires_location',

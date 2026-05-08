@@ -289,17 +289,15 @@ class CustomOnboardingPage extends OnboardingPage
         );
 
         // Step 2 — Create AppointmentType
-        $appointmentType = AppointmentType::create([
-            'user_id'           => $userId,
-            'name'              => $this->service_name,
-            'duration_minutes'  => (int) $this->service_duration,
-            'price'             => (float) $this->service_price,
+        AppointmentType::create([
+            'user_id'            => $userId,
+            'name'               => $this->service_name,
+            'duration_minutes'   => (int) $this->service_duration,
+            'price'              => (float) $this->service_price,
+            'payment_type'       => $this->service_payment_type,
             'appointment_format' => $this->service_format,
-            'is_active'         => true,
+            'is_active'          => true,
         ]);
-        // payment_type is not in fillable — set directly
-        $appointmentType->payment_type = $this->service_payment_type;
-        $appointmentType->save();
 
         // Step 3 — Create Contact (optional)
         if (filled($this->client_name)) {
