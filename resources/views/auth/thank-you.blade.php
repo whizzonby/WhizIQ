@@ -18,14 +18,11 @@
                     {{ __('Your account is successfully registered. Let\'s complete your onboarding to get started.') }}
 
                     @php
-                        use Saasykit\FilamentOnboarding\Models\Onboarding;
-                        use Saasykit\FilamentOnboarding\Constants\OnboardingStatus;
-
                         $user = auth()->user();
 
-                        $hasOnboarded = $user && Onboarding::where('onboardable_type', get_class($user))
+                        $hasOnboarded = $user && \Saasykit\FilamentOnboarding\Models\Onboarding::where('onboardable_type', get_class($user))
                             ->where('onboardable_id', $user->id)
-                            ->whereIn('status', [OnboardingStatus::DONE, OnboardingStatus::SKIPPED])
+                            ->whereIn('status', ['done', 'skipped'])
                             ->exists();
 
                         $onboardingUrl = $hasOnboarded
