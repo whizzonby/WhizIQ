@@ -7,6 +7,7 @@ use App\Models\BookingSetting;
 use App\Models\Contact;
 use App\Models\ContactInteraction;
 use App\Models\FollowUpReminder;
+use App\Models\InvoiceClient;
 use App\Services\MessagingService;
 use Illuminate\Support\Facades\Log;
 
@@ -14,17 +15,52 @@ class ContactObserver
 {
     public function __construct(protected MessagingService $messaging) {}
 
+    public function created(Contact $contact): void
+    {
+        $this->syncInvoiceClient($contact);
+    }
+
     /**
      * When a contact is tagged VIP, automatically start a personalised
      * nurture sequence (if configured) and alert the owner.
      */
     public function updated(Contact $contact): void
     {
+        if ($contact->wasChanged(['name', 'email', 'phone', 'company', 'address', 'city', 'state', 'zip', 'country'])) {
+            $this->syncInvoiceClient($contact);
+        }
+
         if ($contact->wasChanged('priority')
             && $contact->priority === 'vip'
             && $contact->getOriginal('priority') !== 'vip'
         ) {
             $this->handleVipTagged($contact);
+        }
+    }
+
+    protected function syncInvoiceClient(Contact $contact): void
+    {
+        try {
+            InvoiceClient::updateOrCreate(
+                ['user_id' => $contact->user_id, 'contact_id' => $contact->id],
+                [
+                    'name'      => $contact->name,
+                    'email'     => $contact->email,
+                    'phone'     => $contact->phone,
+                    'company'   => $contact->company,
+                    'address'   => $contact->address,
+                    'city'      => $contact->city,
+                    'state'     => $contact->state,
+                    'zip'       => $contact->zip,
+                    'country'   => $contact->country,
+                    'is_active' => true,
+                ]
+            );
+        } catch (\Exception $e) {
+            Log::error('Failed to sync contact to invoice client', [
+                'contact_id' => $contact->id,
+                'error'      => $e->getMessage(),
+            ]);
         }
     }
 
