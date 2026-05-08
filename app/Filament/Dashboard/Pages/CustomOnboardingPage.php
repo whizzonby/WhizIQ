@@ -8,6 +8,7 @@ use App\Models\BusinessProfile;
 use App\Models\Contact;
 use App\Models\NotificationPreference;
 use App\Services\CountriesService;
+use App\Services\CurrencyService;
 use App\Services\EmailCampaignService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -73,16 +74,13 @@ class CustomOnboardingPage extends OnboardingPage
                                         ->label('Currency')
                                         ->required()
                                         ->default('USD')
-                                        ->options([
-                                            'USD' => 'USD — US Dollar',
-                                            'GBP' => 'GBP — British Pound',
-                                            'EUR' => 'EUR — Euro',
-                                            'GHS' => 'GHS — Ghanaian Cedi',
-                                            'NGN' => 'NGN — Nigerian Naira',
-                                            'ZAR' => 'ZAR — South African Rand',
-                                            'CAD' => 'CAD — Canadian Dollar',
-                                            'AUD' => 'AUD — Australian Dollar',
-                                        ]),
+                                        ->searchable()
+                                        ->options(
+                                            app(CurrencyService::class)
+                                                ->getAllCurrencies()
+                                                ->mapWithKeys(fn ($c) => [$c->code => $c->code . ' — ' . $c->name])
+                                                ->toArray()
+                                        ),
                                 ]),
 
                                 Select::make('comp_tax_cycle')

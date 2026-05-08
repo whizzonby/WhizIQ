@@ -23,6 +23,12 @@ class EnsureEmailIsVerifiedUnlessAdmin
             return $next($request);
         }
 
+        // Allow onboarding page access before email verification so users
+        // can complete setup without getting trapped in a verify loop
+        if ($request->routeIs('filament.dashboard.pages.onboarding')) {
+            return $next($request);
+        }
+
         // For non-admins, check email verification
         if ($user && $user instanceof MustVerifyEmail && ! $user->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');

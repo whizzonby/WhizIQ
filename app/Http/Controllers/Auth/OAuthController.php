@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Auth\Trait\RedirectAwareTrait;
+use App\Mail\User\WelcomeMail;
 use App\Models\OauthLoginProvider;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -115,6 +117,7 @@ class OAuthController extends RegisterController
         });
 
         if ($isRegistration) {
+            Mail::to(Auth::user())->queue(new WelcomeMail(Auth::user()));
             return redirect()->route('registration.thank-you');
         }
 
