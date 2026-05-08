@@ -67,16 +67,8 @@ Route::post('/email/verification-notification', function (\Illuminate\Http\Reque
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 
 Route::get('/registration/thank-you', function () {
-    $user = auth()->user();
-    
-    // If email not verified, redirect to verification
-    if (! $user->hasVerifiedEmail()) {
-        return redirect()->route('verification.notice');
-    }
-    
-    // Mandatory onboarding middleware will handle redirect if not completed
     return view('auth.thank-you');
-})->middleware(['auth', 'verified'])->name('registration.thank-you');
+})->middleware(['auth'])->name('registration.thank-you');
 
 Route::get('/auth/{provider}/redirect', [OAuthController::class, 'redirect'])
     ->where('provider', 'google|github|facebook|twitter-oauth-2|linkedin-openid|bitbucket|gitlab')

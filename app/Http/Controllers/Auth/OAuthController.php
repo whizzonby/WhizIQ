@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Auth\Trait\RedirectAwareTrait;
+use App\Http\Controllers\Controller;
 use App\Mail\User\WelcomeMail;
 use App\Models\OauthLoginProvider;
 use App\Models\User;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
-class OAuthController extends RegisterController
+class OAuthController extends Controller
 {
     use RedirectAwareTrait;
 
@@ -45,9 +46,10 @@ class OAuthController extends RegisterController
         $oauthUser = Socialite::driver($provider)->user();
 
         $isRegistration = false;
+        $resolvedUser   = null;
 
         $password = Str::random();
-        DB::transaction(function () use ($provider, $oauthUser, $password, &$isRegistration) {
+        DB::transaction(function () use ($provider, $oauthUser, $password, &$isRegistration, &$resolvedUser) {
             $user = User::where('email', $oauthUser->email)->first();
 
             if ($user) {
@@ -113,14 +115,18 @@ class OAuthController extends RegisterController
 
             $user->markEmailAsVerified();
 
-            Auth::login($user);
+            $resolvedUser = $user;
         });
 
+        // Login AFTER the transaction commits so the session is tied to a
+        // fully persisted user record
+        Auth::login($resolvedUser);
+
         if ($isRegistration) {
-            Mail::to(Auth::user())->queue(new WelcomeMail(Auth::user()));
-            return redirect()->route('registration.thank-you');
+            Mail::to($resolvedUser)->queue(new WelcomeMail($resolvedUser));
+            return redirect()->route('filament.dashboard.pages.onboarding');
         }
 
-        return redirect($this->getRedirectUrl(Auth::user()));
+        return redirect($this->getRedirectUrl($resolvedUser));
     }
 }

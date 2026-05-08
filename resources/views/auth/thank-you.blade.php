@@ -18,19 +18,19 @@
                     {{ __('Your account is successfully registered. Let\'s complete your onboarding to get started.') }}
 
                     @php
+                        use Saasykit\FilamentOnboarding\Models\Onboarding;
+                        use Saasykit\FilamentOnboarding\Constants\OnboardingStatus;
+
                         $user = auth()->user();
-                        
-                        // Determine redirect URL based on onboarding and subscription status
-                        if ($user && !$user->onboardingData) {
-                            // User hasn't completed onboarding - go to onboarding
-                            $onboardingUrl = route('filament.dashboard.pages.onboarding');
-                        } elseif ($user && !$user->isSubscribed()) {
-                            // User completed onboarding but has no subscription - go to plans page
-                            $onboardingUrl = route('filament.dashboard.resources.subscriptions.index');
-                        } else {
-                            // User has completed onboarding and has subscription - go to dashboard
-                            $onboardingUrl = route('filament.dashboard.pages.dashboard');
-                        }
+
+                        $hasOnboarded = $user && Onboarding::where('onboardable_type', get_class($user))
+                            ->where('onboardable_id', $user->id)
+                            ->whereIn('status', [OnboardingStatus::DONE, OnboardingStatus::SKIPPED])
+                            ->exists();
+
+                        $onboardingUrl = $hasOnboarded
+                            ? route('filament.dashboard.pages.dashboard')
+                            : route('filament.dashboard.pages.onboarding');
                     @endphp
 
                     <x-button-link.primary class="inline-block w-full! mt-6" href="{{ $onboardingUrl }}">
