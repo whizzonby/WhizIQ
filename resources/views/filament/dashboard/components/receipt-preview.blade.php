@@ -161,7 +161,7 @@
     @if($notes)
     <div class="border-t border-dashed border-gray-400 mt-3 pt-2 text-xs text-center text-gray-600">{{ $notes }}</div>
     @endif
-    <div class="text-center text-xs text-gray-500 mt-3">Thank you for your business!</div>
+    <div class="text-center text-xs text-gray-500 mt-3">Thank you for your service!</div>
     <div class="text-center text-xs text-gray-400 mt-1">— Powered by WhizIQ —</div>
 </div>
 
@@ -310,7 +310,7 @@
 
     {{-- Footer --}}
     <div class="px-8 py-4 bg-gray-50 border-t border-gray-200 text-center">
-        <p class="text-xs text-gray-400">Thank you for your business · Powered by WhizIQ</p>
+        <p class="text-xs text-gray-400">Thank you for your service · Powered by WhizIQ</p>
     </div>
 </div>
 @endif

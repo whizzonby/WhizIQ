@@ -264,7 +264,7 @@ class ReceiptBuilderPage extends Page implements HasForms
                         Textarea::make('notes')
                             ->label('Notes / Thank-you message')
                             ->rows(2)
-                            ->placeholder('Thank you for your business!'),
+                            ->placeholder('Thank you for your service!'),
                     ]),
 
             ])
