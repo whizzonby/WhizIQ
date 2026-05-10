@@ -50,6 +50,12 @@
                         @endif
                     </div>
                 </form>
+                <div class="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                <a href="{{ route('filament.dashboard.resources.receipts.index') }}"
+                   class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 inline-flex items-center gap-2 transition-colors">
+                    <x-heroicon-o-arrow-left class="w-4 h-4" />
+                    View All Receipts
+                </a>
             </div>
         </div>
 
