@@ -101,7 +101,11 @@ class QuoteResource extends Resource
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('success')
                     ->action(function (Quote $record) {
-                        return app(QuotePDFService::class)->download($record);
+                        return response()->streamDownload(
+                            fn () => print(app(QuotePDFService::class)->generate($record)),
+                            $record->quote_number . '.pdf',
+                            ['Content-Type' => 'application/pdf']
+                        );
                     }),
 
                 Action::make('convert')
