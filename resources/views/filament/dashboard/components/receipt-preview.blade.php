@@ -72,6 +72,21 @@
             : 0;
     }
 
+    // ── Company profile ──────────────────────────────────────────────────────────
+    $company = isset($receipt) ? $receipt->user?->companyProfile : auth()->user()?->companyProfile;
+    if ($company?->company_name) {
+        $businessName  = $company->company_name;
+        $businessEmail = $company->email ?? $businessEmail;
+    }
+    $companyTagline = $company?->tagline ?? '';
+    $companyAddr1   = $company?->address_line1 ?? '';
+    $companyAddr2   = $company?->address_line2 ?? '';
+    $companyCity    = trim(implode(', ', array_filter([$company?->city, $company?->state, $company?->zip])));
+    $companyCountry = $company?->country ?? '';
+    $companyPhone   = $company?->phone ?? '';
+    $companyWebsite = $company?->website ?? '';
+    $logoUrl        = $company?->logo_url;
+
     // ── Totals ───────────────────────────────────────────────────────────────────
     $subtotal  = collect($items)->sum(fn($i) => (float) ($i['amount'] ?? 0));
     $discounted = $subtotal - $discountAmount;
@@ -94,15 +109,23 @@
 
     {{-- Header --}}
     <div class="text-center mb-4">
-        <div class="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2"
-             style="background-color:{{ $primaryColor }}">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-        </div>
+        @if($logoUrl)
+            <img src="{{ $logoUrl }}" alt="{{ $businessName }}" class="h-10 object-contain mx-auto mb-2">
+        @else
+            <div class="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2"
+                 style="background-color:{{ $primaryColor }}">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+            </div>
+        @endif
         <div class="font-bold text-lg">{{ strtoupper($businessName) }}</div>
+        @if($companyTagline)<div class="text-gray-500 text-xs italic">{{ $companyTagline }}</div>@endif
+        @if($companyAddr1)<div class="text-gray-500 text-xs">{{ $companyAddr1 }}</div>@endif
+        @if($companyCity)<div class="text-gray-500 text-xs">{{ $companyCity }}</div>@endif
         @if($businessEmail)<div class="text-gray-500 text-xs">{{ $businessEmail }}</div>@endif
+        @if($companyPhone)<div class="text-gray-500 text-xs">{{ $companyPhone }}</div>@endif
         <div class="border-t border-dashed border-gray-400 my-3"></div>
         <div class="font-bold text-base">RECEIPT</div>
         <div class="text-gray-600 text-xs">{{ $receiptNumber }}</div>
@@ -175,17 +198,28 @@
     <div class="px-8 py-7" style="background:{{ $primaryColor }}">
         <div class="flex items-center justify-between">
             <div>
-                <div class="flex items-center gap-3 mb-1">
-                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                        </svg>
+                @if($logoUrl)
+                    <img src="{{ $logoUrl }}" alt="{{ $businessName }}"
+                         class="h-12 max-w-xs object-contain mb-3 rounded"
+                         style="filter: brightness(0) invert(1); opacity:.9;">
+                @else
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <h1 class="text-3xl font-bold text-white tracking-wide">RECEIPT</h1>
                     </div>
-                    <h1 class="text-3xl font-bold text-white tracking-wide">RECEIPT</h1>
-                </div>
-                <p class="text-white/80 text-sm">{{ $businessName }}</p>
+                @endif
+                <p class="text-white font-bold text-lg">{{ $businessName }}</p>
+                @if($companyTagline)<p class="text-white/70 text-xs italic">{{ $companyTagline }}</p>@endif
+                @if($companyAddr1)<p class="text-white/70 text-xs">{{ $companyAddr1 }}</p>@endif
+                @if($companyCity)<p class="text-white/70 text-xs">{{ $companyCity }}</p>@endif
                 @if($businessEmail)<p class="text-white/60 text-xs">{{ $businessEmail }}</p>@endif
+                @if($companyPhone)<p class="text-white/60 text-xs">{{ $companyPhone }}</p>@endif
+                @if($logoUrl)<h1 class="text-2xl font-bold text-white tracking-wide mt-2">RECEIPT</h1>@endif
             </div>
             <div class="text-right">
                 <div class="bg-white/20 rounded-lg px-4 py-3">

@@ -21,6 +21,19 @@
         }
     }
 
+    // Load company profile
+    $company = isset($invoice) ? $invoice->user?->companyProfile : auth()->user()?->companyProfile;
+    $companyName    = $company?->company_name ?? auth()->user()?->name ?? 'Your Company';
+    $companyTagline = $company?->tagline ?? '';
+    $companyAddr1   = $company?->address_line1 ?? '';
+    $companyAddr2   = $company?->address_line2 ?? '';
+    $companyCity    = trim(implode(', ', array_filter([$company?->city, $company?->state, $company?->zip])));
+    $companyCountry = $company?->country ?? '';
+    $companyPhone   = $company?->phone ?? '';
+    $companyEmail   = $company?->email ?? '';
+    $companyWebsite = $company?->website ?? '';
+    $logoUrl        = $company?->logo_url;
+
     // Ensure items is an array and has proper structure
     if (!is_array($items)) {
         $items = [];
@@ -69,22 +82,33 @@
         <div class="relative px-8 py-10">
             <div class="flex justify-between items-start">
                 <div>
-                    <div class="flex items-center gap-3 mb-2">
-                        <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="{{ $companyName }}"
+                             class="h-14 max-w-xs object-contain mb-3 rounded"
+                             style="filter: brightness(0) invert(1); opacity:.9;">
+                    @else
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-white font-bold text-xl leading-tight">{{ $companyName }}</p>
+                                @if($companyTagline)<p class="text-white/70 text-xs">{{ $companyTagline }}</p>@endif
+                            </div>
                         </div>
-                        <div>
-                            <h1 class="text-4xl font-bold text-white mb-1">INVOICE</h1>
-                            <p class="text-white/80 text-sm">{{ auth()->user()->name ?? 'Your Company' }}</p>
-                        </div>
-                    </div>
+                    @endif
+                    <h1 class="text-4xl font-bold text-white mt-2">INVOICE</h1>
                 </div>
-                <div class="text-right">
-                    <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/30">
+                <div class="text-right space-y-2">
+                    <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/30 inline-block">
                         <p class="text-white/70 text-xs uppercase tracking-wide mb-1">Invoice No.</p>
                         <p class="text-white font-bold text-xl">#{{ $invoiceNumber }}</p>
+                    </div>
+                    <div class="text-white/80 text-sm space-y-0.5">
+                        <div>Date: <span class="font-semibold">{{ $invoiceDate }}</span></div>
+                        <div>Due: <span class="font-semibold">{{ $dueDate }}</span></div>
                     </div>
                 </div>
             </div>
@@ -92,35 +116,50 @@
     </div>
 
     <div class="px-8 py-8">
-        <!-- Bill To & Invoice Details -->
+        <!-- From / Bill To & Invoice Details -->
         <div class="grid grid-cols-2 gap-8 mb-8">
+            {{-- From (company) --}}
+            <div>
+                <p class="text-xs uppercase tracking-wider text-gray-500 mb-3 font-semibold">From</p>
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 space-y-0.5">
+                    @if($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="{{ $companyName }}" class="h-8 object-contain mb-2">
+                    @endif
+                    <p class="font-bold text-gray-900">{{ $companyName }}</p>
+                    @if($companyTagline)<p class="text-gray-500 text-xs italic">{{ $companyTagline }}</p>@endif
+                    @if($companyAddr1)<p class="text-gray-600 text-sm">{{ $companyAddr1 }}</p>@endif
+                    @if($companyAddr2)<p class="text-gray-600 text-sm">{{ $companyAddr2 }}</p>@endif
+                    @if($companyCity)<p class="text-gray-600 text-sm">{{ $companyCity }}</p>@endif
+                    @if($companyCountry)<p class="text-gray-600 text-sm">{{ $companyCountry }}</p>@endif
+                    @if($companyPhone)<p class="text-gray-600 text-sm">{{ $companyPhone }}</p>@endif
+                    @if($companyEmail)<p class="text-gray-600 text-sm">{{ $companyEmail }}</p>@endif
+                    @if($companyWebsite)<p class="text-gray-600 text-sm">{{ $companyWebsite }}</p>@endif
+                </div>
+            </div>
+
+            {{-- Bill To (client) --}}
             <div>
                 <p class="text-xs uppercase tracking-wider text-gray-500 mb-3 font-semibold">Bill To</p>
                 <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <p class="font-semibold text-gray-900 text-lg mb-1">
-                        {{ $clientName }}
-                    </p>
+                    <p class="font-semibold text-gray-900 text-lg mb-1">{{ $clientName }}</p>
                     <p class="text-gray-600 text-sm">{{ $clientEmail }}</p>
                     @if($clientCompany)
                         <p class="text-gray-600 text-sm">{{ $clientCompany }}</p>
                     @endif
                 </div>
-            </div>
 
-            <div>
-                <p class="text-xs uppercase tracking-wider text-gray-500 mb-3 font-semibold">Invoice Details</p>
-                <div class="space-y-2">
+                <div class="mt-4 space-y-2">
                     <div class="flex justify-between py-2 border-b border-gray-200">
-                        <span class="text-gray-600 font-medium">Invoice Date:</span>
-                        <span class="text-gray-900 font-semibold">{{ $invoiceDate }}</span>
+                        <span class="text-gray-600 font-medium text-sm">Invoice Date:</span>
+                        <span class="text-gray-900 font-semibold text-sm">{{ $invoiceDate }}</span>
                     </div>
                     <div class="flex justify-between py-2 border-b border-gray-200">
-                        <span class="text-gray-600 font-medium">Due Date:</span>
-                        <span class="text-gray-900 font-semibold">{{ $dueDate }}</span>
+                        <span class="text-gray-600 font-medium text-sm">Due Date:</span>
+                        <span class="text-gray-900 font-semibold text-sm">{{ $dueDate }}</span>
                     </div>
                     <div class="flex justify-between py-2">
-                        <span class="text-gray-600 font-medium">Currency:</span>
-                        <span class="text-gray-900 font-semibold">{{ $currency }}</span>
+                        <span class="text-gray-600 font-medium text-sm">Currency:</span>
+                        <span class="text-gray-900 font-semibold text-sm">{{ $currency }}</span>
                     </div>
                 </div>
             </div>

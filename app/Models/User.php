@@ -296,6 +296,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Two
         return $this->hasOne(BusinessProfile::class);
     }
 
+    public function companyProfile(): HasOne
+    {
+        return $this->hasOne(CompanyProfile::class);
+    }
+
     // Tax & Compliance Relationships
     public function taxSetting(): HasOne
     {
