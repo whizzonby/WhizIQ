@@ -95,17 +95,16 @@ class QuotePDFService
             $pdf = $this->generate($quote);
 
             \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($quote, $pdf) {
+                $body = 'Dear ' . $quote->client->name . ",\n\nPlease find your quote attached.\n\nQuote Number: " . $quote->quote_number . "\nTotal: " . $quote->currency . ' ' . number_format($quote->total_amount, 2) . "\n\nThank you for your interest.";
+
                 $message->to($quote->client->email, $quote->client->name)
                     ->subject('Quote ' . $quote->quote_number . ' from ' . ($quote->user->companyProfile?->company_name ?? $quote->user->name))
-                    ->setBody(
-                        'Dear ' . $quote->client->name . ",\n\nPlease find your quote attached.\n\nQuote Number: " . $quote->quote_number . "\nTotal: " . $quote->currency . ' ' . number_format($quote->total_amount, 2) . "\n\nThank you for your interest.",
-                        'text/plain'
-                    )
+                    ->text($body)
                     ->attachData($pdf, $quote->quote_number . '.pdf', ['mime' => 'application/pdf']);
             });
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Quote email error', ['quote_id' => $quote->id, 'error' => $e->getMessage()]);
             return false;
         }
