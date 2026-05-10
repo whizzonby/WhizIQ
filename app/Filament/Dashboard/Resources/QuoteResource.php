@@ -100,13 +100,8 @@ class QuoteResource extends Resource
                     ->label('PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('success')
-                    ->action(function (Quote $record) {
-                        return response()->streamDownload(
-                            fn () => print(app(QuotePDFService::class)->generate($record)),
-                            $record->quote_number . '.pdf',
-                            ['Content-Type' => 'application/pdf']
-                        );
-                    }),
+                    ->url(fn (Quote $record) => route('quote.download-pdf', $record))
+                    ->openUrlInNewTab(),
 
                 Action::make('convert')
                     ->label('→ Invoice')

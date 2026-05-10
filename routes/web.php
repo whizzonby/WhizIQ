@@ -213,6 +213,12 @@ Route::get('/invoice/{invoice}/download-pdf', [
     'downloadClientInvoicePDF',
 ])->name('invoice.download-pdf')->middleware('auth');
 
+// Quote PDF Download
+Route::get('/quote/{quote}/download-pdf', [
+    App\Http\Controllers\QuoteController::class,
+    'downloadPDF',
+])->name('quote.download-pdf')->middleware('auth');
+
 // Expense Export Download
 Route::get('/expenses/export', [
     App\Http\Controllers\ExpenseExportController::class,
