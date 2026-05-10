@@ -83,9 +83,10 @@
             <div class="flex justify-between items-start">
                 <div>
                     @if($logoUrl)
-                        <img src="{{ $logoUrl }}" alt="{{ $companyName }}"
-                             class="h-14 max-w-xs object-contain mb-3 rounded"
-                             style="filter: brightness(0) invert(1); opacity:.9;">
+                        <div class="bg-white/95 rounded-lg px-3 py-2 inline-block mb-3">
+                            <img src="{{ $logoUrl }}" alt="{{ $companyName }}"
+                                 class="h-10 max-w-xs object-contain">
+                        </div>
                     @else
                         <div class="flex items-center gap-3 mb-2">
                             <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">

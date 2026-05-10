@@ -110,7 +110,9 @@
     {{-- Header --}}
     <div class="text-center mb-4">
         @if($logoUrl)
-            <img src="{{ $logoUrl }}" alt="{{ $businessName }}" class="h-10 object-contain mx-auto mb-2">
+            <div class="bg-white/90 rounded-lg px-3 py-1.5 inline-block mb-2">
+                <img src="{{ $logoUrl }}" alt="{{ $businessName }}" class="h-8 object-contain">
+            </div>
         @else
             <div class="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2"
                  style="background-color:{{ $primaryColor }}">
@@ -199,9 +201,10 @@
         <div class="flex items-center justify-between">
             <div>
                 @if($logoUrl)
-                    <img src="{{ $logoUrl }}" alt="{{ $businessName }}"
-                         class="h-12 max-w-xs object-contain mb-3 rounded"
-                         style="filter: brightness(0) invert(1); opacity:.9;">
+                    <div class="bg-white/95 rounded-lg px-3 py-2 inline-block mb-3">
+                        <img src="{{ $logoUrl }}" alt="{{ $businessName }}"
+                             class="h-10 max-w-xs object-contain">
+                    </div>
                 @else
                     <div class="flex items-center gap-3 mb-1">
                         <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">

@@ -49,7 +49,7 @@ class CompanyProfilePage extends Page implements HasForms
             'phone'         => $profile?->phone,
             'email'         => $profile?->email,
             'website'       => $profile?->website,
-            'logo_path'     => $profile?->logo_path ? [$profile->logo_path] : null,
+            'logo_path'     => $profile?->logo_path,
         ]);
     }
 
@@ -152,9 +152,18 @@ class CompanyProfilePage extends Page implements HasForms
     {
         $data = $this->form->getState();
 
-        $logoPath = null;
-        if (!empty($data['logo_path']) && is_array($data['logo_path'])) {
-            $logoPath = reset($data['logo_path']);
+        // FileUpload returns a string path, an array of paths, or null
+        $rawLogo = $data['logo_path'] ?? null;
+        if (is_array($rawLogo)) {
+            $logoPath = !empty($rawLogo) ? reset($rawLogo) : null;
+        } else {
+            $logoPath = $rawLogo ?: null;
+        }
+
+        // Preserve existing logo if no new file was provided
+        if ($logoPath === null) {
+            $existing = auth()->user()->companyProfile;
+            $logoPath = $existing?->logo_path;
         }
 
         $payload = [
