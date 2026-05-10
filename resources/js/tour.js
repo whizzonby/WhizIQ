@@ -177,9 +177,15 @@ function startTour(force = false) {
 // Expose globally so a "Restart Tour" button can call window.startWhizIQTour()
 window.startWhizIQTour = () => startTour(true);
 
+function isOnDashboard() {
+    return window.location.pathname.startsWith('/dashboard');
+}
+
 // Auto-start on first visit — wait for Filament/Livewire to fully render
-document.addEventListener('livewire:navigated', () => startTour(), { once: true });
+document.addEventListener('livewire:navigated', () => {
+    if (isOnDashboard()) startTour();
+}, { once: true });
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Fallback if livewire:navigated doesn't fire
-    setTimeout(() => startTour(), 1500);
+    if (isOnDashboard()) setTimeout(() => startTour(), 1500);
 });
