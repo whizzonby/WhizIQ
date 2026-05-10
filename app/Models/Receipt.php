@@ -70,11 +70,17 @@ class Receipt extends Model
             ->orderByDesc('id')
             ->value('receipt_number');
 
+        $next = 1;
         if ($last && preg_match('/REC-(\d+)$/', $last, $m)) {
-            return 'REC-' . str_pad((int) $m[1] + 1, 5, '0', STR_PAD_LEFT);
+            $next = (int) $m[1] + 1;
         }
 
-        return 'REC-00001';
+        do {
+            $number = 'REC-' . str_pad($next, 5, '0', STR_PAD_LEFT);
+            $next++;
+        } while (static::where('user_id', $userId)->where('receipt_number', $number)->exists());
+
+        return $number;
     }
 
     public function getPaymentMethodLabelAttribute(): string
