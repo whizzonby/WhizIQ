@@ -5,11 +5,13 @@
     style="background:rgba(0,0,0,.55);"
     x-data
     x-show="true"
+    x-init="document.documentElement.style.overflow='hidden'; document.body.style.overflow='hidden';"
     x-transition:enter="transition ease-out duration-200"
     x-transition:enter-start="opacity-0 scale-95"
     x-transition:enter-end="opacity-100 scale-100"
+    @click.self="return false"
 >
-    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col" style="max-height:92vh;">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl flex flex-col ltr" style="max-height:92vh;" @click.stop>
 
         {{-- Header --}}
         <div class="flex items-center gap-3 px-6 pt-5 pb-4 border-b border-gray-100 dark:border-gray-700 shrink-0">
@@ -193,10 +195,12 @@
         {{-- Footer --}}
         <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-gray-700 shrink-0">
             <button wire:click="skip"
+                    @click="document.documentElement.style.overflow=''; document.body.style.overflow='';"
                     class="text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
                 Skip for now
             </button>
             <button wire:click="getStarted"
+                    @click="document.documentElement.style.overflow=''; document.body.style.overflow='';"
                     class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm px-5 py-2.5 transition-colors">
                 Get started
                 <x-filament::icon icon="heroicon-o-arrow-right" class="w-4 h-4" />
