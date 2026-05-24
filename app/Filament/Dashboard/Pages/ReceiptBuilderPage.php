@@ -6,7 +6,6 @@ use App\Models\ClientInvoice;
 use App\Models\Currency;
 use App\Models\InvoiceClient;
 use App\Models\Receipt;
-use App\Services\ReceiptPDFService;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
@@ -22,6 +21,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 use UnitEnum;
@@ -206,8 +206,9 @@ class ReceiptBuilderPage extends Page implements HasForms
                                         ->default(1)
                                         ->minValue(0.001)
                                         ->live(onBlur: true)
-                                        ->afterStateUpdated(fn ($state, $get, $set) =>
-                                            $set('amount', round((float)$state * (float)$get('unit_price'), 2))),
+                                        ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                                            $set('amount', round((float) $state * (float) ($get('unit_price') ?? 0), 2));
+                                        }),
 
                                     TextInput::make('unit_price')
                                         ->label('Price')
@@ -216,8 +217,9 @@ class ReceiptBuilderPage extends Page implements HasForms
                                         ->minValue(0)
                                         ->prefix('$')
                                         ->live(onBlur: true)
-                                        ->afterStateUpdated(fn ($state, $get, $set) =>
-                                            $set('amount', round((float)$get('quantity') * (float)$state, 2))),
+                                        ->afterStateUpdated(function ($state, callable $set, Get $get) {
+                                            $set('amount', round((float) ($get('quantity') ?? 1) * (float) $state, 2));
+                                        }),
                                 ]),
 
                                 TextInput::make('amount')
@@ -348,22 +350,16 @@ class ReceiptBuilderPage extends Page implements HasForms
         Notification::make()->title('Receipt saved')->success()->send();
     }
 
-    public function downloadPdf(): mixed
+    public function downloadPdf(): void
     {
         if (! $this->receiptId) {
             Notification::make()->title('Save first')->warning()->body('Save the receipt before downloading.')->send();
-            return null;
+            return;
         }
 
         $this->save();
 
-        $receipt = Receipt::where('user_id', auth()->id())->findOrFail($this->receiptId);
-
-        return response()->streamDownload(
-            fn () => print(app(ReceiptPDFService::class)->generate($receipt)),
-            $receipt->receipt_number . '.pdf',
-            ['Content-Type' => 'application/pdf']
-        );
+        $this->redirect(route('receipt.download-pdf', $this->receiptId));
     }
 
     // ── Private helpers ──────────────────────────────────────────────────────────

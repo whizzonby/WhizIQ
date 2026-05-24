@@ -219,6 +219,12 @@ Route::get('/quote/{quote}/download-pdf', [
     'downloadPDF',
 ])->name('quote.download-pdf')->middleware('auth');
 
+// Receipt PDF Download
+Route::get('/receipt/{receipt}/download-pdf', [
+    App\Http\Controllers\ReceiptController::class,
+    'downloadPDF',
+])->name('receipt.download-pdf')->middleware('auth');
+
 // Expense Export Download
 Route::get('/expenses/export', [
     App\Http\Controllers\ExpenseExportController::class,
