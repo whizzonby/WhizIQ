@@ -144,13 +144,13 @@
                     </div>
 
                     {{-- Book Now Button --}}
-                    <button
-                        wire:click="bookNow"
-                        class="w-full py-4 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                    <a
+                        href="{{ route('booking.show', ['slug' => $slug, 'service' => $serviceId]) }}"
+                        class="block w-full py-4 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-center"
                         style="background-color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}"
                     >
                         Book Now
-                    </button>
+                    </a>
 
                     {{-- Additional Info --}}
                     <div class="mt-6 pt-6 border-t border-gray-200 text-center">
