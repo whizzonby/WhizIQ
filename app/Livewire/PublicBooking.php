@@ -15,12 +15,10 @@ use Illuminate\Support\Str;
 class PublicBooking extends Component
 {
     public $bookingSlug;
-    public $bookingSetting;
     public $currentStep = 1;
 
     // Step 1: Select appointment type
     public $selectedTypeId;
-    public $selectedType;
 
     // Step 2: Select date and time
     public $selectedDate;
@@ -53,15 +51,27 @@ class PublicBooking extends Component
         $this->availabilityService = $availabilityService;
     }
 
+    protected function getBookingSetting(): BookingSetting
+    {
+        return BookingSetting::where('booking_slug', $this->bookingSlug)
+            ->where('is_booking_enabled', true)
+            ->firstOrFail();
+    }
+
+    protected function getSelectedType(): ?AppointmentType
+    {
+        return $this->selectedTypeId ? AppointmentType::find($this->selectedTypeId) : null;
+    }
+
     public function mount($slug)
     {
         $this->bookingSlug = $slug;
 
-        $this->bookingSetting = BookingSetting::where('booking_slug', $slug)
+        $bookingSetting = BookingSetting::where('booking_slug', $slug)
             ->where('is_booking_enabled', true)
             ->first();
 
-        if (!$this->bookingSetting) {
+        if (!$bookingSetting) {
             abort(404, 'Booking page not found or is currently disabled.');
         }
 
@@ -75,12 +85,11 @@ class PublicBooking extends Component
     public function selectType($typeId)
     {
         $this->selectedTypeId = $typeId;
-        $this->selectedType = AppointmentType::findOrFail($typeId);
+        $bookingSetting = $this->getBookingSetting();
 
-        // Load available dates for the next 30 days
         $this->availableDates = $this->availabilityService->getAvailableDates(
-            $this->bookingSetting->user_id,
-            $this->bookingSetting->max_booking_days_ahead ?? 30
+            $bookingSetting->user_id,
+            $bookingSetting->max_booking_days_ahead ?? 30
         );
 
         $this->currentStep = 2;
@@ -89,14 +98,14 @@ class PublicBooking extends Component
     public function selectDate($date)
     {
         $this->selectedDate = $date;
-
-        // Load available time slots for selected date
-        $minNoticeHours = $this->bookingSetting->min_booking_notice_hours ?? 0;
+        $bookingSetting = $this->getBookingSetting();
+        $selectedType = $this->getSelectedType();
+        $minNoticeHours = $bookingSetting->min_booking_notice_hours ?? 0;
 
         $this->availableSlots = $this->availabilityService->getAvailableSlots(
-            $this->bookingSetting->user_id,
+            $bookingSetting->user_id,
             Carbon::parse($date),
-            $this->selectedType->total_duration_minutes,
+            $selectedType->total_duration_minutes,
             $minNoticeHours
         );
     }
@@ -118,71 +127,66 @@ class PublicBooking extends Component
 
     public function goBack()
     {
-        if ($this->currentStep > 1) {
-            if ($this->currentStep == 3) {
-                // Go back to time selection
-                $this->currentStep = 2;
-                $this->selectedTime = null;
-            } elseif ($this->currentStep === 2) {
-                $this->selectedTime = null;
-                $this->availableSlots = [];
-            } elseif ($this->currentStep === 1) {
-                $this->selectedDate = null;
-                $this->selectedTime = null;
-                $this->availableSlots = [];
-            }
+        if ($this->currentStep === 3) {
+            $this->currentStep = 2;
+            $this->selectedTime = null;
+        } elseif ($this->currentStep === 2) {
+            $this->currentStep = 1;
+            $this->selectedDate = null;
+            $this->selectedTime = null;
+            $this->availableSlots = [];
         }
     }
 
     public function submitBooking()
     {
-        $format = $this->selectedType->appointment_format ?? 'online';
+        $selectedType = $this->getSelectedType();
+        $bookingSetting = $this->getBookingSetting();
+        $format = $selectedType->appointment_format ?? 'online';
         $isInPersonOrHybrid = in_array($format, ['in_person', 'hybrid']);
 
         $this->validate([
             'attendeeName' => 'required|string|max:255',
             'attendeeEmail' => 'required|email|max:255',
-            'attendeePhone' => $this->selectedType->require_phone ? 'required|string|max:20' : 'nullable|string|max:20',
-            'attendeeCompany' => $this->selectedType->require_company ? 'required|string|max:255' : 'nullable|string|max:255',
+            'attendeePhone' => $selectedType->require_phone ? 'required|string|max:20' : 'nullable|string|max:20',
+            'attendeeCompany' => $selectedType->require_company ? 'required|string|max:255' : 'nullable|string|max:255',
             'location' => $isInPersonOrHybrid ? 'required|string|max:500' : 'nullable|string|max:500',
             'notes' => 'nullable|string|max:1000',
         ]);
 
         $startDateTime = Carbon::parse($this->selectedDate . ' ' . $this->selectedTime);
-        $endDateTime = $startDateTime->copy()->addMinutes($this->selectedType->total_duration_minutes);
+        $endDateTime = $startDateTime->copy()->addMinutes($selectedType->total_duration_minutes);
 
-        // Check if slot is still available
-        if ($this->availabilityService->isSlotBooked($this->bookingSetting->user_id, $startDateTime, $endDateTime, null)) {
+        if ($this->availabilityService->isSlotBooked($bookingSetting->user_id, $startDateTime, $endDateTime, null)) {
             session()->flash('error', 'This time slot is no longer available. Please select another time.');
             $this->currentStep = 2;
             $this->selectDate($this->selectedDate);
             return;
         }
 
-        // Create the appointment (FAST - just database insert)
-        $this->createAppointment();
+        $this->createAppointment($selectedType, $bookingSetting);
     }
 
-    protected function createAppointment()
+    protected function createAppointment(AppointmentType $selectedType, BookingSetting $bookingSetting)
     {
         $startDateTime = Carbon::parse($this->selectedDate . ' ' . $this->selectedTime);
-        $endDateTime = $startDateTime->copy()->addMinutes($this->selectedType->total_duration_minutes);
-        $format = $this->selectedType->appointment_format ?? 'online';
+        $endDateTime = $startDateTime->copy()->addMinutes($selectedType->total_duration_minutes);
+        $format = $selectedType->appointment_format ?? 'online';
 
         $this->confirmationToken = Str::random(32);
 
         $appointment = Appointment::create([
-            'user_id' => $this->bookingSetting->user_id,
+            'user_id' => $bookingSetting->user_id,
             'appointment_type_id' => $this->selectedTypeId,
             'venue_id' => $this->selectedVenueId,
             'appointment_format' => $format,
-            'location' => $this->location, // Custom location for in-person appointments
-            'title' => $this->selectedType->name . ' with ' . $this->attendeeName,
-            'description' => $this->selectedType->description,
+            'location' => $this->location,
+            'title' => $selectedType->name . ' with ' . $this->attendeeName,
+            'description' => $selectedType->description,
             'start_datetime' => $startDateTime,
             'end_datetime' => $endDateTime,
-            'timezone' => $this->bookingSetting->timezone,
-            'status' => $this->bookingSetting->require_approval ? 'scheduled' : 'confirmed',
+            'timezone' => $bookingSetting->timezone,
+            'status' => $bookingSetting->require_approval ? 'scheduled' : 'confirmed',
             'attendee_name' => $this->attendeeName,
             'attendee_email' => $this->attendeeEmail,
             'attendee_phone' => $this->attendeePhone,
@@ -192,29 +196,26 @@ class PublicBooking extends Component
             'booked_via' => 'public_form',
         ]);
 
-        // Load relationships for display (FAST - just queries)
         $this->createdAppointment = $appointment->load('venue', 'appointmentType');
         $this->confirmed = true;
         $this->currentStep = 4;
 
-        // PERFORMANCE FIX: Dispatch slow operations to background job
-        // This makes the booking complete instantly for the user
-        \App\Jobs\ProcessNewAppointment::dispatch($appointment, $this->bookingSetting);
-
-        // User sees confirmation page immediately while:
-        // - Meeting link is being created in background
-        // - Emails are being sent in background
-        // These will complete within a few seconds without blocking the user
+        \App\Jobs\ProcessNewAppointment::dispatch($appointment, $bookingSetting);
     }
 
     public function render()
     {
-        $appointmentTypes = AppointmentType::where('user_id', $this->bookingSetting->user_id)
+        $bookingSetting = $this->getBookingSetting();
+        $selectedType = $this->getSelectedType();
+
+        $appointmentTypes = AppointmentType::where('user_id', $bookingSetting->user_id)
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
 
         return view('livewire.public-booking', [
+            'bookingSetting' => $bookingSetting,
+            'selectedType' => $selectedType,
             'appointmentTypes' => $appointmentTypes,
         ])->layout('components.layouts.app');
     }

@@ -19,6 +19,95 @@
         }
     </style>
 
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('bookingCalendar', (availableDates, color, initialSelected) => {
+                const availableSet = new Set(availableDates);
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+
+                function toDateStr(y, m, d) {
+                    return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+                }
+
+                const todayStr = toDateStr(todayObj.getFullYear(), todayObj.getMonth(), todayObj.getDate());
+
+                let initYear = todayObj.getFullYear();
+                let initMonth = todayObj.getMonth();
+                if (availableDates.length > 0) {
+                    const parts = availableDates[0].split('-');
+                    const firstDate = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+                    if (firstDate > todayObj) { initYear = firstDate.getFullYear(); initMonth = firstDate.getMonth(); }
+                }
+
+                let maxYear = initYear, maxMonth = initMonth;
+                if (availableDates.length > 0) {
+                    const lp = availableDates[availableDates.length - 1].split('-');
+                    maxYear = +lp[0]; maxMonth = +lp[1] - 1;
+                }
+
+                return {
+                    year: initYear,
+                    month: initMonth,
+                    color: color,
+                    selectedDate: initialSelected || null,
+
+                    get monthLabel() {
+                        return new Date(this.year, this.month, 1)
+                            .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                    },
+
+                    get canPrev() {
+                        return !(this.year === todayObj.getFullYear() && this.month === todayObj.getMonth());
+                    },
+
+                    get canNext() {
+                        return this.year < maxYear || (this.year === maxYear && this.month < maxMonth);
+                    },
+
+                    prevMonth() {
+                        if (!this.canPrev) return;
+                        if (this.month === 0) { this.year--; this.month = 11; } else this.month--;
+                    },
+
+                    nextMonth() {
+                        if (!this.canNext) return;
+                        if (this.month === 11) { this.year++; this.month = 0; } else this.month++;
+                    },
+
+                    get calendarDays() {
+                        const days = [];
+                        const firstDay = new Date(this.year, this.month, 1).getDay();
+                        const daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
+                        for (let i = 0; i < firstDay; i++) days.push({ empty: true });
+                        for (let d = 1; d <= daysInMonth; d++) {
+                            const ds = toDateStr(this.year, this.month, d);
+                            const isPast = new Date(this.year, this.month, d) < todayObj;
+                            const isAvail = availableSet.has(ds);
+                            days.push({
+                                empty: false,
+                                num: d,
+                                date: ds,
+                                available: isAvail,
+                                past: isPast,
+                                selected: this.selectedDate === ds,
+                                isToday: ds === todayStr,
+                                clickable: isAvail && !isPast,
+                            });
+                        }
+                        return days;
+                    },
+
+                    pick(day) {
+                        if (!day || !day.clickable) return;
+                        this.selectedDate = day.date;
+                        $wire.selectDate(day.date);
+                    },
+                };
+            });
+        });
+    </script>
+
     <div class="max-w-7xl mx-auto">
         {{-- Header --}}
         <div class="text-center mb-6">
@@ -439,59 +528,71 @@
                                 Select Date
                             </h3>
 
-                            <div class="bg-white border border-gray-200 rounded-lg p-4 relative">
-                                {{-- Loading overlay for dates --}}
-                                <div wire:loading wire:target="selectType" class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
-                                    <div class="text-center">
-                                        <svg class="animate-spin h-8 w-8 mx-auto mb-2" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <p class="text-sm font-medium text-gray-700">Loading dates...</p>
-                                    </div>
+                            @php $calendarDates = array_column($availableDates, 'date'); @endphp
+                            <div
+                                x-data="bookingCalendar(@js($calendarDates), '{{ $bookingSetting->brand_color ?? '#3B82F6' }}', @js($selectedDate))"
+                                class="bg-white border border-gray-200 rounded-xl overflow-hidden relative"
+                            >
+                                {{-- Loading overlay --}}
+                                <div wire:loading wire:target="selectType" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                                    <svg class="animate-spin h-7 w-7" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
                                 </div>
 
-                                {{-- Available Dates List --}}
-                                <div class="space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar">
-                                    @forelse($availableDates as $dateInfo)
-                                        <button
-                                            wire:click="selectDate('{{ $dateInfo['date'] }}')"
-                                            wire:loading.attr="disabled"
-                                            wire:target="selectDate"
-                                            type="button"
-                                            class="w-full text-left px-4 py-3 border-2 rounded-lg transition-all duration-200 hover:shadow-sm disabled:opacity-50 disabled:cursor-wait
-                                            {{ $selectedDate === $dateInfo['date'] ? 'ring-2 text-white font-semibold' : 'border-gray-200 hover:border-gray-300' }}"
-                                            style="{{ $selectedDate === $dateInfo['date'] ? 'background-color: ' . ($bookingSetting->brand_color ?? '#3B82F6') . '; border-color: ' . ($bookingSetting->brand_color ?? '#3B82F6') : '' }}"
-                                        >
-                                            <div class="flex items-center justify-between">
-                                                <div>
-                                                    <div class="font-medium {{ $selectedDate === $dateInfo['date'] ? 'text-white' : 'text-gray-900' }}">
-                                                        {{ $dateInfo['day_name'] }}
-                                                    </div>
-                                                    <div class="text-sm {{ $selectedDate === $dateInfo['date'] ? 'text-white opacity-90' : 'text-gray-600' }}">
-                                                        {{ \Carbon\Carbon::parse($dateInfo['date'])->format('F j, Y') }}
-                                                    </div>
-                                                </div>
-                                                @if($selectedDate === $dateInfo['date'])
-                                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                @else
-                                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                                    </svg>
-                                                @endif
-                                            </div>
-                                        </button>
-                                    @empty
-                                        <div class="text-center py-12 text-gray-400">
-                                            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            <p class="text-sm font-medium">No dates available</p>
-                                        </div>
-                                    @endforelse
+                                {{-- Month navigation --}}
+                                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                                    <button @click="prevMonth()" :disabled="!canPrev" type="button"
+                                        class="p-1.5 rounded-lg transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed">
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                    </button>
+                                    <span class="text-sm font-semibold text-gray-900" x-text="monthLabel"></span>
+                                    <button @click="nextMonth()" :disabled="!canNext" type="button"
+                                        class="p-1.5 rounded-lg transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed">
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </button>
                                 </div>
+
+                                {{-- Day-of-week headers --}}
+                                <div class="grid grid-cols-7 px-3 pt-3">
+                                    <template x-for="h in ['Su','Mo','Tu','We','Th','Fr','Sa']">
+                                        <div class="text-center text-xs font-medium text-gray-400 pb-2" x-text="h"></div>
+                                    </template>
+                                </div>
+
+                                {{-- Date grid --}}
+                                <div class="grid grid-cols-7 gap-0.5 px-3 pb-4">
+                                    <template x-for="(day, idx) in calendarDays" :key="idx">
+                                        <div class="flex items-center justify-center">
+                                            <template x-if="day.empty"><div class="w-9 h-9"></div></template>
+                                            <template x-if="!day.empty">
+                                                <button
+                                                    @click="pick(day)"
+                                                    :disabled="!day.clickable"
+                                                    type="button"
+                                                    :style="day.selected ? `background-color:${color};color:white;` : ''"
+                                                    :class="{
+                                                        'hover:bg-gray-100 text-gray-900 font-medium cursor-pointer': day.clickable && !day.selected,
+                                                        'text-white font-bold': day.selected,
+                                                        'opacity-25 cursor-not-allowed text-gray-400': day.past,
+                                                        'text-gray-300 cursor-not-allowed': !day.available && !day.past,
+                                                    }"
+                                                    class="w-9 h-9 rounded-full text-sm transition-all flex items-center justify-center"
+                                                    x-text="day.num"
+                                                ></button>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+
+                                @if(empty($availableDates))
+                                    <p class="text-center pb-4 text-sm text-gray-400">No availability found for this service.</p>
+                                @endif
                             </div>
                         </div>
 
