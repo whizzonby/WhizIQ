@@ -98,11 +98,6 @@
                         return days;
                     },
 
-                    pick(day) {
-                        if (!day || !day.clickable) return;
-                        this.selectedDate = day.date;
-                        $wire.selectDate(day.date);
-                    },
                 };
             });
         });
@@ -420,9 +415,9 @@
                     {{-- Services Grid --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
                         @forelse($appointmentTypes as $type)
-                            <a
-                                href="{{ route('booking.service.detail', ['slug' => $bookingSetting->booking_slug, 'serviceId' => $type->id]) }}"
-                                class="group relative block text-left rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-102 bg-white border border-gray-200"
+                            <div
+                                wire:click="selectType({{ $type->id }})"
+                                class="group relative block text-left rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 bg-white border border-gray-200 cursor-pointer"
                             >
                                 {{-- Service Image --}}
                                 <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
@@ -459,7 +454,8 @@
                                         <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $type->description }}</p>
                                     @endif
 
-                                    <div class="flex items-center gap-4 text-sm text-gray-500 pt-3 border-t border-gray-100">
+                                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                    <div class="flex items-center gap-4 text-sm text-gray-500">
                                         <span class="flex items-center gap-1.5">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -489,8 +485,14 @@
                                             </span>
                                         @endif
                                     </div>
+                                    <a
+                                        href="{{ route('booking.service.detail', ['slug' => $bookingSetting->booking_slug, 'serviceId' => $type->id]) }}"
+                                        onclick="event.stopPropagation()"
+                                        class="text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 ml-2"
+                                    >Details →</a>
                                 </div>
-                            </a>
+                                </div>
+                            </div>
                         @empty
                             <div class="col-span-full text-center py-16 text-gray-500">
                                 <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -572,7 +574,7 @@
                                             <template x-if="day.empty"><div class="w-9 h-9"></div></template>
                                             <template x-if="!day.empty">
                                                 <button
-                                                    @click="pick(day)"
+                                                    @click="if (day.clickable) { selectedDate = day.date; $wire.selectDate(day.date) }"
                                                     :disabled="!day.clickable"
                                                     type="button"
                                                     :style="day.selected ? `background-color:${color};color:white;` : ''"
