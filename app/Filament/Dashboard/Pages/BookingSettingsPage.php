@@ -7,6 +7,7 @@ use App\Models\BookingSetting;
 use App\Models\CalendarConnection;
 use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -15,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Str;
+
 use UnitEnum;
 use BackedEnum;
 
@@ -221,7 +223,7 @@ class BookingSettingsPage extends Page implements HasForms
                         $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                         $rows = [];
                         foreach (range(0, 6) as $day) {
-                            $rows[] = Forms\Components\Grid::make(7)->schema([
+                            $rows[] = Grid::make(7)->schema([
                                 Forms\Components\Placeholder::make("day_{$day}_label")
                                     ->label('')
                                     ->content($dayNames[$day])
