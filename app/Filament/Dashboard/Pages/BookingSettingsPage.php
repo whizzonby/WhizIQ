@@ -2,6 +2,7 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+use App\Models\AvailabilitySchedule;
 use App\Models\BookingSetting;
 use App\Models\CalendarConnection;
 use Filament\Actions\Action;
@@ -54,7 +55,21 @@ class BookingSettingsPage extends Page implements HasForms
             ]
         );
 
-        $this->form->fill([
+        $schedules = AvailabilitySchedule::where('user_id', auth()->id())
+            ->get()
+            ->keyBy('day_of_week');
+
+        $scheduleData = [];
+        for ($day = 0; $day <= 6; $day++) {
+            $schedule = $schedules->get($day);
+            $rawStart = $schedule ? substr($schedule->getRawOriginal('start_time') ?? '09:00:00', 0, 5) : '09:00';
+            $rawEnd   = $schedule ? substr($schedule->getRawOriginal('end_time')   ?? '17:00:00', 0, 5) : '17:00';
+            $scheduleData["sched_{$day}_available"] = $schedule ? (bool) $schedule->is_available : in_array($day, [1, 2, 3, 4, 5]);
+            $scheduleData["sched_{$day}_start"]     = $rawStart;
+            $scheduleData["sched_{$day}_end"]       = $rawEnd;
+        }
+
+        $this->form->fill(array_merge([
             'is_booking_enabled' => $this->settings->is_booking_enabled,
             'booking_slug' => $this->settings->booking_slug,
             'display_name' => $this->settings->display_name,
@@ -75,7 +90,7 @@ class BookingSettingsPage extends Page implements HasForms
             'payment_link' => $this->settings->payment_link,
             'show_payment_in_email' => $this->settings->show_payment_in_email ?? false,
             'google_meet_enabled' => $this->settings->google_meet_enabled ?? false,
-        ]);
+        ], $scheduleData));
     }
 
     public function form(Schema $schema): Schema
@@ -199,6 +214,38 @@ class BookingSettingsPage extends Page implements HasForms
                             ->default(false),
                     ])
                     ->columns(2),
+
+                Section::make('Working Hours')
+                    ->description('Set which days you are available and your hours for each day')
+                    ->schema(function () {
+                        $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                        $rows = [];
+                        foreach (range(0, 6) as $day) {
+                            $rows[] = Forms\Components\Grid::make(7)->schema([
+                                Forms\Components\Placeholder::make("day_{$day}_label")
+                                    ->label('')
+                                    ->content($dayNames[$day])
+                                    ->columnSpan(2),
+                                Forms\Components\Toggle::make("sched_{$day}_available")
+                                    ->label('Open')
+                                    ->inline(true)
+                                    ->live()
+                                    ->columnSpan(1),
+                                Forms\Components\TextInput::make("sched_{$day}_start")
+                                    ->label('Opens at')
+                                    ->type('time')
+                                    ->visible(fn ($get) => $get("sched_{$day}_available"))
+                                    ->columnSpan(2),
+                                Forms\Components\TextInput::make("sched_{$day}_end")
+                                    ->label('Closes at')
+                                    ->type('time')
+                                    ->visible(fn ($get) => $get("sched_{$day}_available"))
+                                    ->columnSpan(2),
+                            ]);
+                        }
+                        return $rows;
+                    })
+                    ->columns(1),
 
                 Section::make('Meeting Platform')
                     ->description('Configure online meeting settings for appointments')
@@ -375,6 +422,20 @@ class BookingSettingsPage extends Page implements HasForms
     public function save(): void
     {
         $data = $this->form->getState();
+
+        // Extract and save working hours schedule
+        for ($day = 0; $day <= 6; $day++) {
+            $isOpen    = $data["sched_{$day}_available"] ?? false;
+            $startTime = $data["sched_{$day}_start"] ?? '09:00';
+            $endTime   = $data["sched_{$day}_end"]   ?? '17:00';
+
+            AvailabilitySchedule::updateOrCreate(
+                ['user_id' => auth()->id(), 'day_of_week' => $day],
+                ['is_available' => $isOpen, 'start_time' => $startTime, 'end_time' => $endTime]
+            );
+
+            unset($data["sched_{$day}_available"], $data["sched_{$day}_start"], $data["sched_{$day}_end"]);
+        }
 
         $this->settings->update($data);
 
