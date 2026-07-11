@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\OAuthController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CampaignDigestActionController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentProviders\PaddleController;
@@ -38,12 +39,10 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 
     $user = $request->user();
     if ($user->hasVerifiedEmail()) {
-        if (! $user->onboardingData) {
+        if (! $user->hasCompletedBusinessSetup()) {
             return redirect()->route('filament.dashboard.pages.onboarding');
         }
-        if (! $user->isSubscribed()) {
-            return redirect()->route('filament.dashboard.resources.subscriptions.index');
-        }
+
         return redirect()->route('filament.dashboard.pages.dashboard');
     }
 
@@ -69,6 +68,18 @@ Route::post('/email/verification-notification', function (\Illuminate\Http\Reque
 Route::get('/registration/thank-you', function () {
     return view('auth.thank-you');
 })->middleware(['auth'])->name('registration.thank-you');
+
+Route::middleware(['auth', 'signed', 'throttle:10,1'])
+    ->prefix('/campaign-digest')
+    ->name('campaign-digest.')
+    ->group(function () {
+        Route::get('/draft/{campaign}/review', [CampaignDigestActionController::class, 'reviewDraft'])
+            ->name('draft.review');
+        Route::get('/draft/{campaign}/segments/{segment}/improve', [CampaignDigestActionController::class, 'improveWeakSegment'])
+            ->name('segment.improve');
+        Route::get('/audiences/{audience}/snooze', [CampaignDigestActionController::class, 'snoozeRecommendation'])
+            ->name('audience.snooze');
+    });
 
 Route::get('/auth/{provider}/redirect', [OAuthController::class, 'redirect'])
     ->where('provider', 'google|github|facebook|twitter-oauth-2|linkedin-openid|bitbucket|gitlab')
@@ -189,6 +200,11 @@ Route::controller(InvoiceController::class)
     ->group(function () {
         Route::get('/generate/{transactionUuid}', 'generate')->name('invoice.generate');
         Route::get('/preview', 'preview')->name('invoice.preview');
+        Route::get('/{invoice}/pay', 'payClientInvoice')->name('invoice.client.pay')->middleware('signed');
+        Route::get('/{invoice}/payment/{status}', 'clientInvoicePaymentStatus')
+            ->whereIn('status', ['success', 'cancelled', 'paid', 'unavailable'])
+            ->name('invoice.client.payment-status')
+            ->middleware('signed');
     });
 
 // Public Booking Page
@@ -197,7 +213,6 @@ Route::controller(InvoiceController::class)
 Route::get('/book/{slug}/service/{serviceId}', \App\Livewire\ServiceDetail::class)->name('booking.service.detail');
 
 Route::get('/book/{slug}', \App\Livewire\PublicBooking::class)->name('booking.public');
-Route::get('/book/{slug}', \App\Livewire\PublicBooking::class)->name('booking.show');
 
 
 // Appointment Calendar Download
@@ -206,6 +221,31 @@ Route::get('/appointment/{token}/calendar.ics', [
     App\Http\Controllers\AppointmentCalendarController::class,
     'downloadICS',
 ])->name('appointment.calendar.download');
+
+Route::get('/appointment/{token}', [
+    App\Http\Controllers\PublicAppointmentController::class,
+    'manage',
+])->name('appointment.manage');
+
+Route::post('/appointment/{token}/cancel', [
+    App\Http\Controllers\PublicAppointmentController::class,
+    'cancel',
+])->name('appointment.cancel');
+
+Route::post('/appointment/{token}/reschedule', [
+    App\Http\Controllers\PublicAppointmentController::class,
+    'reschedule',
+])->name('appointment.reschedule');
+
+Route::get('/review/{token}', [
+    App\Http\Controllers\PublicReviewController::class,
+    'show',
+])->name('review.show');
+
+Route::post('/review/{token}', [
+    App\Http\Controllers\PublicReviewController::class,
+    'store',
+])->name('review.store');
 
 // ClientInvoice PDF Download
 Route::get('/invoice/{invoice}/download-pdf', [

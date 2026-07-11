@@ -137,7 +137,6 @@ class CustomOnboardingPage extends OnboardingPage
                                         ->options([
                                             'none'    => 'No payment required',
                                             'invoice' => 'Invoice after booking (pay later)',
-                                            'upfront' => 'Full payment upfront',
                                         ]),
 
                                     Select::make('service_format')
@@ -289,27 +288,38 @@ class CustomOnboardingPage extends OnboardingPage
         );
 
         // Step 2 — Create AppointmentType
-        AppointmentType::create([
-            'user_id'            => $userId,
-            'name'               => $this->service_name,
-            'duration_minutes'   => (int) $this->service_duration,
-            'price'              => (float) $this->service_price,
-            'payment_type'       => $this->service_payment_type,
-            'appointment_format' => $this->service_format,
-            'is_active'          => true,
-        ]);
+        AppointmentType::updateOrCreate(
+            [
+                'user_id' => $userId,
+                'name' => $this->service_name,
+            ],
+            [
+                'duration_minutes' => (int) $this->service_duration,
+                'price' => (float) $this->service_price,
+                'payment_type' => $this->service_payment_type,
+                'appointment_format' => $this->service_format,
+                'is_active' => true,
+            ]
+        );
 
         // Step 3 — Create Contact (optional)
         if (filled($this->client_name)) {
-            $contact = Contact::create([
-                'user_id'  => $userId,
-                'name'     => $this->client_name,
-                'email'    => $this->client_email ?: null,
-                'phone'    => $this->client_phone ?: null,
-                'type'     => 'client',
-                'status'   => 'active',
-                'priority' => 'medium',
-            ]);
+            $contactLookup = filled($this->client_email)
+                ? ['user_id' => $userId, 'email' => $this->client_email]
+                : ['user_id' => $userId, 'name' => $this->client_name];
+
+            $contact = Contact::updateOrCreate(
+                $contactLookup,
+                [
+                    'name' => $this->client_name,
+                    'email' => $this->client_email ?: null,
+                    'phone' => $this->client_phone ?: null,
+                    'type' => 'client',
+                    'status' => 'active',
+                    'priority' => 'medium',
+                    'source' => 'onboarding',
+                ]
+            );
 
             if ($this->send_booking_link && filled($this->client_email)) {
                 try {

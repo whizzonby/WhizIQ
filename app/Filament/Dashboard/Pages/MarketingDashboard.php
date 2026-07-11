@@ -2,6 +2,7 @@
 
 namespace App\Filament\Dashboard\Pages;
 
+use App\Filament\Dashboard\Widgets\CampaignPerformanceWidget;
 use Filament\Pages\Page;
 use BackedEnum;
 use UnitEnum;
@@ -24,7 +25,9 @@ class MarketingDashboard extends Page
 
     protected function getHeaderWidgets(): array
     {
-        return [];
+        return [
+            CampaignPerformanceWidget::class,
+        ];
     }
 
     protected function getFooterWidgets(): array

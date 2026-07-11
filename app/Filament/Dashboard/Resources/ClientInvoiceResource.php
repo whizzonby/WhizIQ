@@ -5,6 +5,7 @@ namespace App\Filament\Dashboard\Resources;
 use App\Filament\Dashboard\Resources\ClientInvoiceResource\Pages;
 use App\Models\ClientInvoice;
 use App\Models\InvoiceClient;
+use App\Services\ClientInvoicePaymentService;
 use App\Services\InvoiceReminderService;
 use App\Services\InvoicePDFService;
 use Filament\Actions\Action;
@@ -367,6 +368,23 @@ class ClientInvoiceResource extends Resource
                     ->label('Days Overdue')
                     ->formatStateUsing(fn (ClientInvoice $record) => $record->days_overdue > 0 ? $record->days_overdue : '-')
                     ->color('danger'),
+
+                Tables\Columns\TextColumn::make('payment_link_generated_at')
+                    ->label('Pay Link')
+                    ->since()
+                    ->placeholder('Not generated')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('payment_link_emailed_at')
+                    ->label('Link Emailed')
+                    ->since()
+                    ->placeholder('Not emailed')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('payment_link_email_count')
+                    ->label('Link Emails')
+                    ->badge()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('invoice_date', 'desc')
             ->filters([
@@ -486,6 +504,85 @@ class ClientInvoiceResource extends Resource
                     ->color('info')
                     ->url(fn (ClientInvoice $record) => route('invoice.download-pdf', $record))
                     ->openUrlInNewTab(),
+
+                Action::make('stripe_payment_link')
+                    ->label('Open Pay Link')
+                    ->icon('heroicon-o-credit-card')
+                    ->color('success')
+                    ->visible(fn (ClientInvoice $record) => !in_array($record->status, ['paid', 'cancelled']) && (float) $record->balance_due > 0)
+                    ->action(function (ClientInvoice $record) {
+                        $url = app(ClientInvoicePaymentService::class)->signedPaymentUrl($record, true);
+
+                        Notification::make()
+                            ->title('Payment link opened')
+                            ->body('This invoice payment link was recorded as generated.')
+                            ->success()
+                            ->send();
+
+                        return redirect()->away($url);
+                    }),
+
+                Action::make('share_payment_link')
+                    ->label('Share Link')
+                    ->icon('heroicon-o-link')
+                    ->color('gray')
+                    ->visible(fn (ClientInvoice $record) => !in_array($record->status, ['paid', 'cancelled']) && (float) $record->balance_due > 0)
+                    ->modalHeading(fn (ClientInvoice $record) => 'Share payment link for ' . $record->invoice_number)
+                    ->modalDescription('Copy this secure link into SMS, WhatsApp, or a personal email. Opening this modal records the link as generated.')
+                    ->form([
+                        Forms\Components\TextInput::make('payment_link')
+                            ->label('Payment link')
+                            ->default(fn (ClientInvoice $record) => app(ClientInvoicePaymentService::class)->signedPaymentUrl($record, true))
+                            ->readOnly()
+                            ->dehydrated(false)
+                            ->helperText('Select the full URL and copy it. The link is signed and opens Stripe Checkout for this invoice.'),
+
+                        Forms\Components\Textarea::make('message')
+                            ->label('Suggested message')
+                            ->default(fn (ClientInvoice $record) => 'Hi ' . ($record->client?->name ?? 'there') . ', you can pay invoice ' . $record->invoice_number . ' here: ' . app(ClientInvoicePaymentService::class)->signedPaymentUrl($record))
+                            ->readOnly()
+                            ->dehydrated(false)
+                            ->rows(3),
+                    ])
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Done'),
+
+                Action::make('resend_payment_link')
+                    ->label('Resend Pay Link')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('warning')
+                    ->visible(fn (ClientInvoice $record) => !in_array($record->status, ['paid', 'cancelled']) && (float) $record->balance_due > 0 && !empty($record->client->email))
+                    ->form([
+                        Forms\Components\TextInput::make('recipient_email')
+                            ->label('Recipient Email')
+                            ->email()
+                            ->required()
+                            ->default(fn (ClientInvoice $record) => $record->client->email),
+
+                        Forms\Components\Textarea::make('message')
+                            ->label('Message')
+                            ->rows(3)
+                            ->default(fn (ClientInvoice $record) => "You can pay invoice {$record->invoice_number} securely using the link below."),
+                    ])
+                    ->action(function (ClientInvoice $record, array $data) {
+                        $sent = app(InvoiceReminderService::class)->sendPaymentLink(
+                            $record,
+                            $data['recipient_email'],
+                            $data['message'] ?? null
+                        );
+
+                        $notification = Notification::make()
+                            ->title($sent ? 'Payment link sent' : 'Payment link not sent')
+                            ->body($sent ? 'The client received a payment-only link and the invoice link counters were updated.' : 'Check the recipient email and invoice balance before trying again.');
+
+                        if ($sent) {
+                            $notification->success();
+                        } else {
+                            $notification->warning();
+                        }
+
+                        $notification->send();
+                    }),
 
                 Action::make('email_invoice')
                     ->label('Email to Client')

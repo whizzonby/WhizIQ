@@ -370,4 +370,52 @@ class OpenAIService
     {
         return $this->improveEmail($subject, $body, $targetTone);
     }
+
+    public function rewriteCampaignDraft(string $subject, string $body, array $context = []): ?array
+    {
+        $tone = $context['tone'] ?? 'friendly';
+        $offer = $context['offer'] ?? 'none';
+        $serviceFocus = $context['service_focus'] ?? null;
+        $customInstruction = $context['custom_instruction'] ?? null;
+        $extraInstruction = $context['extra_instruction'] ?? null;
+        $campaignPreset = $context['campaign_preset'] ?? 'campaign';
+
+        $response = $this->chat([
+            [
+                'role' => 'system',
+                'content' => 'You are an expert small-business marketing email editor. Rewrite campaign drafts for service businesses. Return only valid JSON with subject and body fields. Keep the body in clean HTML paragraphs. Preserve all merge variables such as {{first_name}} and all existing links/hrefs exactly unless asked to add wording around them. Do not claim an offer exists unless the requested offer angle requires one.',
+            ],
+            [
+                'role' => 'user',
+                'content' => "Campaign type: {$campaignPreset}\nTone: {$tone}\nOffer angle: {$offer}\nService focus: " . ($serviceFocus ?: 'none') . "\nCustom direction: " . ($customInstruction ?: 'none') . "\nExtra instruction: " . ($extraInstruction ?: 'none') . "\n\nCurrent Subject: {$subject}\n\nCurrent Body:\n{$body}\n\nRewrite this draft so it is clearer, more action-oriented, and ready for the owner to review before sending.",
+            ],
+        ], [
+            'feature' => 'email_generation',
+            'action' => 'rewrite_campaign_draft',
+            'temperature' => 0.55,
+            'max_tokens' => 1000,
+        ]);
+
+        if (! $response) {
+            return null;
+        }
+
+        try {
+            $json = trim($response);
+            $json = preg_replace('/^```(?:json)?\s*/i', '', $json);
+            $json = preg_replace('/\s*```$/', '', $json);
+            $decoded = json_decode($json, true);
+
+            if ($decoded && isset($decoded['subject']) && isset($decoded['body'])) {
+                return $decoded;
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to parse campaign draft rewrite response', [
+                'response' => $response,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return null;
+    }
 }

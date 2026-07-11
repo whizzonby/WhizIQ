@@ -20,12 +20,7 @@
                     @php
                         $user = auth()->user();
 
-                        $hasOnboarded = $user && \Saasykit\FilamentOnboarding\Models\Onboarding::where('onboardable_type', get_class($user))
-                            ->where('onboardable_id', $user->id)
-                            ->whereIn('status', ['done', 'skipped'])
-                            ->exists();
-
-                        $onboardingUrl = $hasOnboarded
+                        $onboardingUrl = $user?->hasCompletedBusinessSetup()
                             ? route('filament.dashboard.pages.dashboard')
                             : route('filament.dashboard.pages.onboarding');
                     @endphp

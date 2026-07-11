@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Auth\Trait;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Redirect;
-use Saasykit\FilamentOnboarding\Constants\OnboardingStatus;
-use Saasykit\FilamentOnboarding\Models\Onboarding;
 
 trait RedirectAwareTrait
 {
@@ -30,13 +28,7 @@ trait RedirectAwareTrait
             return route('verification.notice');
         }
 
-        // Send users who haven't completed onboarding to the wizard
-        $hasOnboarded = Onboarding::where('onboardable_type', get_class($user))
-            ->where('onboardable_id', $user->id)
-            ->whereIn('status', [OnboardingStatus::DONE, OnboardingStatus::SKIPPED])
-            ->exists();
-
-        if (! $hasOnboarded) {
+        if (! $user->hasCompletedBusinessSetup()) {
             return route('filament.dashboard.pages.onboarding');
         }
 

@@ -52,6 +52,7 @@ class SendScheduledEmailsCommand extends Command
             } catch (\Exception $e) {
                 $failed++;
                 $emailLog->markAsFailed($e->getMessage());
+                $emailLog->emailCampaign?->incrementFailed();
                 $this->error("✗ Failed to send email to {$emailLog->recipient_email}: {$e->getMessage()}");
 
                 Log::error('Failed to send scheduled email', [
@@ -111,6 +112,11 @@ class SendScheduledEmailsCommand extends Command
 
         // Mark as sent
         $emailLog->markAsSent();
+        $emailLog->emailCampaign?->incrementSent();
+
+        if ($emailLog->emailCampaign && ! $emailLog->emailCampaign->emailLogs()->scheduled()->exists()) {
+            $emailLog->emailCampaign->markAsSent();
+        }
 
         // Log interaction with contact if linked
         if ($emailLog->contact) {

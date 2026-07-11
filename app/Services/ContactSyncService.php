@@ -97,7 +97,7 @@ class ContactSyncService
             'email' => $appointment->attendee_email,
             'phone' => $appointment->attendee_phone,
             'company' => $appointment->attendee_company,
-            'type' => 'lead', // New appointments start as leads
+            'type' => 'client',
             'status' => 'active',
             'priority' => 'medium',
             'source' => 'appointment_booking',
@@ -125,6 +125,10 @@ class ContactSyncService
 
         if (empty($contact->company) && !empty($appointment->attendee_company)) {
             $updates['company'] = $appointment->attendee_company;
+        }
+
+        if ($contact->type === 'lead') {
+            $updates['type'] = 'client';
         }
 
         // Always update last contact date
@@ -237,6 +241,7 @@ class ContactSyncService
 
         return [
             // Basic Contact Info
+            'contact_id' => $contact->id,
             'name' => $contact->name,
             'first_name' => $nameParts['first_name'],
             'last_name' => $nameParts['last_name'],
@@ -270,6 +275,7 @@ class ContactSyncService
             'owner_company' => $owner->businessProfile?->biz_name ?? '',
 
             // System
+            'booking_link' => $owner->bookingSetting?->booking_url ?? url('/'),
             'current_date' => now()->format('F j, Y'),
             'current_year' => now()->format('Y'),
         ];

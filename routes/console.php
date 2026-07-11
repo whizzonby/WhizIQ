@@ -45,6 +45,12 @@ Schedule::command('invoices:send-reminders')
     ->name('send-invoice-reminders')
     ->withoutOverlapping();
 
+// Recover failed client invoice payments quickly after provider webhooks record them
+Schedule::command('payments:recover-failed-client-payments')
+    ->hourly()
+    ->name('recover-failed-client-payments')
+    ->withoutOverlapping();
+
 // Send contact follow-up reminders daily at 8 AM
 Schedule::command('contacts:send-reminders')
     ->dailyAt('08:00')
@@ -143,4 +149,16 @@ Schedule::command('whiziq:stale-deal-alerts')
 Schedule::command('contacts:cold-alerts')
     ->dailyAt('10:00')
     ->name('send-cold-contact-alerts')
+    ->withoutOverlapping();
+
+// Prepare next-best campaign drafts for owner approval after cadence windows reopen
+Schedule::command('campaigns:prepare-recommendation-drafts')
+    ->dailyAt('10:15')
+    ->name('prepare-campaign-recommendation-drafts')
+    ->withoutOverlapping();
+
+// Weekly marketing digest with recommendations, drafts, segment learning, and impact
+Schedule::command('campaigns:weekly-marketing-digest')
+    ->weeklyOn(1, '10:30')
+    ->name('weekly-marketing-digest')
     ->withoutOverlapping();

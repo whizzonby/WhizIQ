@@ -116,7 +116,7 @@ class ContactReminderService
                 $query->where('last_contact_date', '<', now()->subDays($daysThreshold))
                     ->orWhereNull('last_contact_date');
             })
-            ->whereIn('type', ['client', 'partner', 'investor']) // Important relationships
+            ->whereIn('type', ['partner', 'investor']) // Clients are handled by appointment-based rebooking.
             ->orderBy('last_contact_date', 'asc')
             ->limit(10)
             ->get();
@@ -127,6 +127,29 @@ class ContactReminderService
         }
 
         return $coldContacts;
+    }
+
+    /**
+     * Find clients who had an appointment, have not returned, and have no future booking.
+     */
+    public function getClientsDueToRebook(User $user, int $daysThreshold = 45, int $cooldownDays = 7): Collection
+    {
+        return Contact::forUser($user->id)
+            ->active()
+            ->clients()
+            ->whereNotNull('last_appointment_at')
+            ->where('last_appointment_at', '<=', now()->subDays($daysThreshold))
+            ->where(function ($query) use ($cooldownDays) {
+                $query->whereNull('last_contact_date')
+                    ->orWhere('last_contact_date', '<=', now()->subDays($cooldownDays));
+            })
+            ->whereDoesntHave('appointments', function ($query) {
+                $query->whereIn('status', ['scheduled', 'confirmed'])
+                    ->where('start_datetime', '>=', now());
+            })
+            ->orderBy('last_appointment_at')
+            ->limit(25)
+            ->get();
     }
 
     /**

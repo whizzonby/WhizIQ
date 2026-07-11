@@ -92,6 +92,14 @@ class ClientPayment extends Model
             // Update invoice payment status when payment is created
             if ($payment->invoice) {
                 $payment->invoice->updatePaymentStatus();
+
+                ClientPaymentAttempt::where('client_invoice_id', $payment->client_invoice_id)
+                    ->failed()
+                    ->unrecovered()
+                    ->update([
+                        'status' => 'recovered',
+                        'recovered_at' => now(),
+                    ]);
             }
         });
 

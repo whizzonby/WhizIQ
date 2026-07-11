@@ -148,6 +148,23 @@ class MessagingService
         return $this->notifyOwner($user, $message);
     }
 
+    public function sendCampaignDraftPreparedAlert(User $user, string $campaignName, int $recipientCount): bool
+    {
+        $prefs = NotificationPreference::forUser($user->id);
+
+        if (! $prefs->alert_campaign_draft_prepared) {
+            return false;
+        }
+
+        $message = $this->formatOwnerMessage(
+            "Campaign draft ready\n"
+            . "{$campaignName}\n"
+            . $recipientCount . ' ' . ($recipientCount === 1 ? 'recipient' : 'recipients') . ' prepared for review.'
+        );
+
+        return $this->notifyOwner($user, $message);
+    }
+
     // ---------------------------------------------------------------
     // Convenience message builders — Client-facing
     // ---------------------------------------------------------------

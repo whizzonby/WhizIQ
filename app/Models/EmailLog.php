@@ -17,6 +17,7 @@ class EmailLog extends Model
         'body',
         'status',
         'sent_at',
+        'scheduled_at',
         'error_message',
         'message_id',
         'opened_at',
@@ -31,6 +32,7 @@ class EmailLog extends Model
 
     protected $casts = [
         'sent_at' => 'datetime',
+        'scheduled_at' => 'datetime',
         'opened_at' => 'datetime',
         'clicked_at' => 'datetime',
         'open_count' => 'integer',

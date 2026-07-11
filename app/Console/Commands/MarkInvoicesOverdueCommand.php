@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\ClientInvoice;
+use App\Services\InvoiceReminderService;
 use App\Services\MessagingService;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -13,10 +14,11 @@ class MarkInvoicesOverdueCommand extends Command
     protected $signature   = 'invoices:mark-overdue';
     protected $description = 'Mark past-due invoices as overdue and alert owners';
 
-    public function handle(MessagingService $messaging): int
+    public function handle(MessagingService $messaging, InvoiceReminderService $invoiceReminderService): int
     {
         $updated = ClientInvoice::whereIn('status', ['sent', 'partial'])
             ->whereDate('due_date', '<', now()->toDateString())
+            ->with(['client.contact'])
             ->get();
 
         $count = 0;
@@ -38,6 +40,8 @@ class MarkInvoicesOverdueCommand extends Command
                     now()->diffInDays($invoice->due_date)
                 );
             }
+
+            $invoiceReminderService->createCollectionFollowUp($invoice, 'overdue');
         }
 
         Log::info("MarkInvoicesOverdue: marked {$count} invoices as overdue");

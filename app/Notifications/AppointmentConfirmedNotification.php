@@ -160,9 +160,14 @@ class AppointmentConfirmedNotification extends Notification implements ShouldQue
         // Add calendar download link
         if ($this->appointment->confirmation_token) {
             $calendarUrl = route('appointment.calendar.download', ['token' => $this->appointment->confirmation_token]);
+            $manageUrl = route('appointment.manage', ['token' => $this->appointment->confirmation_token]);
+
             $mail->line('')
                 ->line('**Add to Your Calendar:**')
-                ->action('Add to Calendar', $calendarUrl);
+                ->action('Add to Calendar', $calendarUrl)
+                ->line('')
+                ->line('Need to cancel or reschedule?')
+                ->action('Manage Appointment', $manageUrl);
         }
 
         $mail->line('')
@@ -172,7 +177,7 @@ class AppointmentConfirmedNotification extends Notification implements ShouldQue
             ->when($requiresApproval, fn ($m) =>
                 $m->line('You will receive a confirmation email once your request is approved.')
             )
-            ->line('If you need to make any changes, please contact us directly.')
+            ->line('If you need help, please contact us directly.')
             ->salutation('Regards, ' . $senderName);
 
         return $mail;

@@ -485,6 +485,11 @@ class BookingSettingsPage extends Page implements HasForms
                 ->color('primary')
                 ->url(fn () => $this->getBookingUrl(), shouldOpenInNewTab: true)
                 ->visible(fn () => $this->settings && $this->settings->is_booking_enabled),
+            Action::make('manageTimeOff')
+                ->label('Manage Time Off')
+                ->icon('heroicon-o-no-symbol')
+                ->color('gray')
+                ->url(fn () => route('filament.dashboard.resources.availability-exceptions.index')),
         ];
     }
 }

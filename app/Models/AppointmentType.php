@@ -59,6 +59,16 @@ class AppointmentType extends Model
         return $this->hasMany(Appointment::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(BusinessReview::class);
+    }
+
+    public function approvedReviews(): HasMany
+    {
+        return $this->reviews()->approved();
+    }
+
     public function defaultVenue(): BelongsTo
     {
         return $this->belongsTo(Venue::class, 'default_venue_id');
@@ -140,5 +150,15 @@ class AppointmentType extends Model
     public function requiresVenue(): bool
     {
         return in_array($this->appointment_format, ['in_person', 'hybrid']) || $this->requires_location;
+    }
+
+    public function getReviewCountAttribute(): int
+    {
+        return $this->approvedReviews()->count();
+    }
+
+    public function getAverageRatingAttribute(): float
+    {
+        return (float) ($this->approvedReviews()->avg('rating') ?? 0);
     }
 }

@@ -33,9 +33,9 @@ class ServiceDetail extends Component
     public function bookNow()
     {
         // Redirect to the booking page with service ID as query parameter
-        return redirect()->route('booking.show', [
+        return redirect()->route('booking.public', [
             'slug' => $this->slug,
-            'service' => $this->serviceId
+            'service' => $this->serviceId,
         ]);
     }
 

@@ -39,6 +39,9 @@ class ClientInvoice extends Model
         'pdf_path',
         'last_reminder_sent_at',
         'reminder_count',
+        'payment_link_generated_at',
+        'payment_link_emailed_at',
+        'payment_link_email_count',
     ];
 
     protected $casts = [
@@ -54,6 +57,9 @@ class ClientInvoice extends Model
         'balance_due' => 'decimal:2',
         'last_reminder_sent_at' => 'datetime',
         'reminder_count' => 'integer',
+        'payment_link_generated_at' => 'datetime',
+        'payment_link_emailed_at' => 'datetime',
+        'payment_link_email_count' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -78,6 +84,11 @@ class ClientInvoice extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(ClientPayment::class)->orderBy('payment_date', 'desc');
+    }
+
+    public function paymentAttempts(): HasMany
+    {
+        return $this->hasMany(ClientPaymentAttempt::class)->orderBy('failed_at', 'desc');
     }
 
     // Scopes
@@ -290,6 +301,22 @@ class ClientInvoice extends Model
         $this->last_reminder_sent_at = now();
         $this->reminder_count++;
         $this->save();
+    }
+
+    public function markPaymentLinkGenerated(): void
+    {
+        $this->forceFill([
+            'payment_link_generated_at' => now(),
+        ])->save();
+    }
+
+    public function markPaymentLinkEmailed(): void
+    {
+        $this->forceFill([
+            'payment_link_generated_at' => $this->payment_link_generated_at ?? now(),
+            'payment_link_emailed_at' => now(),
+            'payment_link_email_count' => (int) $this->payment_link_email_count + 1,
+        ])->save();
     }
 
     // Static Methods

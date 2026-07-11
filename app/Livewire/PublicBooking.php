@@ -5,6 +5,8 @@ namespace App\Livewire;
 use App\Models\Appointment;
 use App\Models\AppointmentType;
 use App\Models\BookingSetting;
+use App\Models\CampaignAudience;
+use App\Models\Contact;
 use App\Models\Venue;
 use App\Services\AvailabilityService;
 use App\Services\MeetingPlatform\MeetingPlatformService;
@@ -42,6 +44,10 @@ class PublicBooking extends Component
     public $confirmationToken;
     public $confirmed = false;
     public $createdAppointment = null;
+    public $sourceCampaign;
+    public $sourceContactId;
+    public $sourceAudienceId;
+    public $rescheduleToken;
 
     // PERFORMANCE FIX: Inject service once instead of creating multiple instances
     protected AvailabilityService $availabilityService;
@@ -80,6 +86,11 @@ class PublicBooking extends Component
             $preselectedId = request()->get('service');
             $this->selectType($preselectedId);
         }
+
+        $this->sourceCampaign = request()->string('campaign')->trim()->value() ?: null;
+        $this->sourceContactId = request()->integer('contact') ?: null;
+        $this->sourceAudienceId = request()->integer('audience') ?: null;
+        $this->rescheduleToken = request()->string('reschedule')->trim()->value() ?: null;
     }
 
     public function selectType($typeId)
@@ -174,9 +185,12 @@ class PublicBooking extends Component
         $format = $selectedType->appointment_format ?? 'online';
 
         $this->confirmationToken = Str::random(32);
+        $linkedContactId = $this->resolveSourceContactId($bookingSetting);
 
         $appointment = Appointment::create([
             'user_id' => $bookingSetting->user_id,
+            'contact_id' => $linkedContactId,
+            'campaign_audience_id' => $this->resolveSourceAudienceId($bookingSetting),
             'appointment_type_id' => $this->selectedTypeId,
             'venue_id' => $this->selectedVenueId,
             'appointment_format' => $format,
@@ -193,14 +207,52 @@ class PublicBooking extends Component
             'attendee_company' => $this->attendeeCompany,
             'notes' => $this->notes,
             'confirmation_token' => $this->confirmationToken,
-            'booked_via' => 'public_form',
+            'booked_via' => $this->sourceCampaign ? 'campaign_' . $this->sourceCampaign : 'public_form',
         ]);
 
         $this->createdAppointment = $appointment->load('venue', 'appointmentType');
         $this->confirmed = true;
         $this->currentStep = 4;
 
+        $this->cancelRescheduledAppointment($bookingSetting);
+
         \App\Jobs\ProcessNewAppointment::dispatch($appointment, $bookingSetting);
+    }
+
+    protected function cancelRescheduledAppointment(BookingSetting $bookingSetting): void
+    {
+        if (! $this->rescheduleToken) {
+            return;
+        }
+
+        $original = Appointment::where('user_id', $bookingSetting->user_id)
+            ->where('confirmation_token', $this->rescheduleToken)
+            ->whereIn('status', ['scheduled', 'confirmed'])
+            ->first();
+
+        $original?->cancel('Client rescheduled to a new time');
+    }
+
+    protected function resolveSourceContactId(BookingSetting $bookingSetting): ?int
+    {
+        if (! $this->sourceContactId) {
+            return null;
+        }
+
+        return Contact::where('user_id', $bookingSetting->user_id)
+            ->where('id', $this->sourceContactId)
+            ->value('id');
+    }
+
+    protected function resolveSourceAudienceId(BookingSetting $bookingSetting): ?int
+    {
+        if (! $this->sourceAudienceId) {
+            return null;
+        }
+
+        return CampaignAudience::where('user_id', $bookingSetting->user_id)
+            ->where('id', $this->sourceAudienceId)
+            ->value('id');
     }
 
     public function render()
@@ -210,13 +262,23 @@ class PublicBooking extends Component
 
         $appointmentTypes = AppointmentType::where('user_id', $bookingSetting->user_id)
             ->where('is_active', true)
+            ->withCount(['approvedReviews as review_count'])
+            ->withAvg(['approvedReviews as approved_reviews_avg_rating'], 'rating')
             ->orderBy('sort_order')
+            ->get();
+
+        $recentReviews = \App\Models\BusinessReview::where('user_id', $bookingSetting->user_id)
+            ->approved()
+            ->with('appointmentType')
+            ->latest()
+            ->limit(3)
             ->get();
 
         return view('livewire.public-booking', [
             'bookingSetting' => $bookingSetting,
             'selectedType' => $selectedType,
             'appointmentTypes' => $appointmentTypes,
+            'recentReviews' => $recentReviews,
         ])->layout('components.layouts.app');
     }
 }

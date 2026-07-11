@@ -7,10 +7,12 @@ use App\Constants\PaymentProviderConstants;
 use App\Constants\SubscriptionStatus;
 use App\Constants\SubscriptionType;
 use App\Constants\TransactionStatus;
+use App\Models\ClientInvoice;
 use App\Models\Currency;
 use App\Models\PaymentProvider;
 use App\Models\Subscription;
 use App\Models\UserStripeData;
+use App\Services\ClientPaymentRecoveryService;
 use App\Services\OrderService;
 use App\Services\SubscriptionService;
 use App\Services\TransactionService;
@@ -155,7 +157,11 @@ class StripeWebhookHandler
                 'stripe_payment_method_id' => $defaultPaymentMethodId,
             ]);
 
-        } elseif ($event->type == 'payment_intent.succeeded' || $event->type == 'payment_intent.payment_failed') { // order event
+        } elseif ($event->type == 'payment_intent.succeeded' || $event->type == 'payment_intent.payment_failed') { // order or client invoice event
+            if ($this->handleClientInvoicePaymentIntent($event)) {
+                return response()->json();
+            }
+
             $paymentIntentId = $event->data->object->id;
             $orderUuid = $event->data->object->metadata?->order_uuid;
 
@@ -342,6 +348,100 @@ class StripeWebhookHandler
         ]);
 
         return $paymentIntent?->latest_charge?->balance_transaction?->fee ?? 0;
+    }
+
+    private function handleClientInvoicePaymentIntent(Event $event): bool
+    {
+        $paymentIntent = $event->data->object;
+        $invoice = $this->findClientInvoiceFromPaymentIntent($paymentIntent);
+
+        if (! $invoice) {
+            return false;
+        }
+
+        $paymentIntentId = $paymentIntent->id;
+        $amount = $this->stripeAmount($paymentIntent->amount_received ?? $paymentIntent->amount ?? null);
+
+        if ($event->type === 'payment_intent.succeeded') {
+            if ($invoice->payments()->where('transaction_id', $paymentIntentId)->exists()) {
+                return true;
+            }
+
+            $invoice->recordPayment(
+                $amount > 0 ? $amount : (float) $invoice->balance_due,
+                'stripe',
+                $paymentIntentId,
+                'Recorded automatically from Stripe payment intent.',
+                isset($paymentIntent->created) ? Carbon::createFromTimestampUTC($paymentIntent->created) : now()
+            );
+
+            return true;
+        }
+
+        app(ClientPaymentRecoveryService::class)->recordFailedAttempt($invoice, [
+            'provider' => 'stripe',
+            'provider_attempt_id' => $paymentIntentId,
+            'amount' => $this->stripeAmount($paymentIntent->amount ?? null) ?: (float) $invoice->balance_due,
+            'currency' => strtoupper($paymentIntent->currency ?? $invoice->currency ?? 'USD'),
+            'failure_message' => $paymentIntent->last_payment_error?->message ?? 'Stripe payment failed.',
+            'failed_at' => isset($paymentIntent->created) ? Carbon::createFromTimestampUTC($paymentIntent->created) : now(),
+            'metadata' => [
+                'stripe_event_id' => $event->id,
+                'stripe_event_type' => $event->type,
+                'stripe_payment_intent_id' => $paymentIntentId,
+                'stripe_latest_charge_id' => $paymentIntent->latest_charge ?? null,
+            ],
+        ]);
+
+        return true;
+    }
+
+    private function stripeAmount($amount): float
+    {
+        return ((int) ($amount ?? 0)) / 100;
+    }
+
+    private function findClientInvoiceFromPaymentIntent($paymentIntent): ?ClientInvoice
+    {
+        $clientInvoiceId = $this->metadataValue($paymentIntent, 'client_invoice_id')
+            ?? $this->metadataValue($paymentIntent, 'invoice_id')
+            ?? $this->metadataValue($paymentIntent, 'whiziq_client_invoice_id');
+
+        if ($clientInvoiceId) {
+            return ClientInvoice::find($clientInvoiceId);
+        }
+
+        $invoiceNumber = $this->metadataValue($paymentIntent, 'client_invoice_number')
+            ?? $this->metadataValue($paymentIntent, 'invoice_number');
+
+        if (! $invoiceNumber) {
+            return null;
+        }
+
+        $query = ClientInvoice::where('invoice_number', $invoiceNumber);
+        $userId = $this->metadataValue($paymentIntent, 'user_id')
+            ?? $this->metadataValue($paymentIntent, 'owner_user_id');
+
+        if ($userId) {
+            $query->where('user_id', $userId);
+        }
+
+        return $query->latest('id')->first();
+    }
+
+    private function metadataValue($paymentIntent, string $key): ?string
+    {
+        $metadata = $paymentIntent->metadata ?? null;
+
+        if (! $metadata) {
+            return null;
+        }
+
+        if (is_array($metadata)) {
+            return isset($metadata[$key]) && $metadata[$key] !== '' ? (string) $metadata[$key] : null;
+        }
+
+        return isset($metadata->{$key}) && $metadata->{$key} !== '' ? (string) $metadata->{$key} : null;
     }
 
     private function isSuperfluousEvent(Subscription $subscription, string $eventType): bool

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,6 +15,7 @@ class EmailCampaign extends Model
     protected $fillable = [
         'user_id',
         'email_template_id',
+        'campaign_audience_id',
         'name',
         'description',
         'subject',
@@ -33,14 +35,32 @@ class EmailCampaign extends Model
         'from_name',
         'from_email',
         'reply_to',
+        'automation_source',
+        'prepared_at',
+        'reviewed_at',
+        'expires_at',
+        'dismissed_at',
+        'dismissal_reason',
+        'rescued_at',
+        'rescue_reason',
+        'outcome_feedback',
+        'outcome_feedback_at',
+        'segment_variants',
     ];
 
     protected $casts = [
         'recipient_filters' => 'array',
         'recipient_ids' => 'array',
         'attachments' => 'array',
+        'segment_variants' => 'array',
         'scheduled_at' => 'datetime',
         'sent_at' => 'datetime',
+        'prepared_at' => 'datetime',
+        'reviewed_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'dismissed_at' => 'datetime',
+        'rescued_at' => 'datetime',
+        'outcome_feedback_at' => 'datetime',
         'total_recipients' => 'integer',
         'emails_sent' => 'integer',
         'emails_failed' => 'integer',
@@ -48,7 +68,6 @@ class EmailCampaign extends Model
         'emails_clicked' => 'integer',
     ];
 
-    // Relationships
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -59,42 +78,57 @@ class EmailCampaign extends Model
         return $this->belongsTo(EmailTemplate::class);
     }
 
+    public function campaignAudience(): BelongsTo
+    {
+        return $this->belongsTo(CampaignAudience::class);
+    }
+
     public function emailLogs(): HasMany
     {
         return $this->hasMany(EmailLog::class);
     }
 
-    // Scopes
-    public function scopeForUser($query, $userId)
+    public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->where('user_id', $userId);
     }
 
-    public function scopeDraft($query)
+    public function scopeDraft(Builder $query): Builder
     {
         return $query->where('status', 'draft');
     }
 
-    public function scopeScheduled($query)
+    public function scopeScheduled(Builder $query): Builder
     {
         return $query->where('status', 'scheduled');
     }
 
-    public function scopeSent($query)
+    public function scopeSent(Builder $query): Builder
     {
         return $query->where('status', 'sent');
     }
 
-    public function scopePendingSend($query)
+    public function scopePendingSend(Builder $query): Builder
     {
         return $query->where('status', 'scheduled')
             ->where('scheduled_at', '<=', now());
     }
 
-    // Accessors
+    public function scopeActivePreparedDraft(Builder $query): Builder
+    {
+        return $query->where('status', 'draft')
+            ->whereNotNull('prepared_at')
+            ->whereNull('reviewed_at')
+            ->whereNull('dismissed_at')
+            ->where(function (Builder $query): void {
+                $query->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
+    }
+
     public function getOpenRateAttribute(): float
     {
-        if ($this->emails_sent == 0) {
+        if ($this->emails_sent === 0) {
             return 0;
         }
 
@@ -103,7 +137,7 @@ class EmailCampaign extends Model
 
     public function getClickRateAttribute(): float
     {
-        if ($this->emails_sent == 0) {
+        if ($this->emails_sent === 0) {
             return 0;
         }
 
@@ -112,7 +146,7 @@ class EmailCampaign extends Model
 
     public function getSuccessRateAttribute(): float
     {
-        if ($this->total_recipients == 0) {
+        if ($this->total_recipients === 0) {
             return 0;
         }
 
@@ -131,7 +165,6 @@ class EmailCampaign extends Model
         };
     }
 
-    // Business Logic
     public function markAsSending(): void
     {
         $this->update(['status' => 'sending']);

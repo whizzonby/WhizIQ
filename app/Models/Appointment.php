@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -15,6 +16,8 @@ class Appointment extends Model
     protected $fillable = [
         'user_id',
         'contact_id',
+        'client_invoice_id',
+        'campaign_audience_id',
         'appointment_type_id',
         'venue_id',
         'title',
@@ -77,9 +80,24 @@ class Appointment extends Model
         return $this->belongsTo(AppointmentType::class);
     }
 
+    public function clientInvoice(): BelongsTo
+    {
+        return $this->belongsTo(ClientInvoice::class);
+    }
+
+    public function campaignAudience(): BelongsTo
+    {
+        return $this->belongsTo(CampaignAudience::class);
+    }
+
     public function venue(): BelongsTo
     {
         return $this->belongsTo(Venue::class);
+    }
+
+    public function businessReview(): HasOne
+    {
+        return $this->hasOne(BusinessReview::class);
     }
 
     public function recurringParent(): BelongsTo

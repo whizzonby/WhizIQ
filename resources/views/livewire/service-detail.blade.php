@@ -12,7 +12,7 @@
 
         {{-- Back Button --}}
         <div class="mb-6">
-            <a href="{{ route('booking.show', ['slug' => $slug]) }}" class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
+            <a href="{{ route('booking.public', ['slug' => $slug]) }}" class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
@@ -145,7 +145,7 @@
 
                     {{-- Book Now Button --}}
                     <a
-                        href="{{ route('booking.show', ['slug' => $slug, 'service' => $serviceId]) }}"
+                        href="{{ route('booking.public', ['slug' => $slug, 'service' => $serviceId]) }}"
                         class="block w-full py-4 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-center"
                         style="background-color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}"
                     >

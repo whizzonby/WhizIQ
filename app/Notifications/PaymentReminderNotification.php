@@ -32,6 +32,7 @@ class PaymentReminderNotification extends Notification implements ShouldQueue
             'first' => "Reminder: Invoice #{$this->invoice->invoice_number} Due Soon",
             'second' => "Second Reminder: Invoice #{$this->invoice->invoice_number} Payment Due",
             'final' => "Final Reminder: Invoice #{$this->invoice->invoice_number} Payment Overdue",
+            'payment_failed' => "Payment Issue: Invoice #{$this->invoice->invoice_number}",
             default => "Payment Reminder: Invoice #{$this->invoice->invoice_number}",
         };
 
@@ -41,6 +42,7 @@ class PaymentReminderNotification extends Notification implements ShouldQueue
             'first' => "This is a friendly reminder that invoice #{$this->invoice->invoice_number} is due soon.",
             'second' => "This is a second reminder regarding invoice #{$this->invoice->invoice_number}.",
             'final' => "This is a final reminder that invoice #{$this->invoice->invoice_number} is now overdue.",
+            'payment_failed' => "We tried to process payment for invoice #{$this->invoice->invoice_number}, but the payment did not go through.",
             default => "This is a payment reminder for invoice #{$this->invoice->invoice_number}.",
         };
 

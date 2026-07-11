@@ -116,63 +116,28 @@ class AppointmentTypeResource extends Resource
                     ->columns(2),
 
                 Section::make('Payment Settings')
-                    ->description('Configure payment collection for this service')
+                    ->description('Choose whether clients can book for free or receive an invoice after booking')
                     ->icon('heroicon-o-credit-card')
                     ->schema([
-                        Forms\Components\Toggle::make('require_payment')
-                            ->label('Require Payment')
-                            ->default(false)
-                            ->live()
-                            ->helperText('Collect payment from clients for this service'),
-
                         Forms\Components\Select::make('payment_type')
                             ->label('Payment Type')
                             ->options([
                                 'none' => 'No Payment Required',
-                                'upfront' => 'Full Payment Upfront (Before Booking)',
-                                'deposit' => 'Deposit Payment (Partial Upfront)',
                                 'invoice' => 'Invoice Later (Book Now, Pay Later)',
                             ])
-                            ->default('none')
+                            ->default('invoice')
                             ->required()
                             ->native(false)
                             ->live()
-                            ->visible(fn ($get) => $get('require_payment'))
-                            ->helperText('Choose when and how clients should pay'),
-
-                        Forms\Components\TextInput::make('deposit_amount')
-                            ->label('Deposit Amount')
-                            ->numeric()
-                            ->prefix('$')
-                            ->minValue(0)
-                            ->visible(fn ($get) => $get('require_payment') && $get('payment_type') === 'deposit')
-                            ->helperText('Amount to collect upfront (remaining balance will be invoiced)')
-                            ->live()
-                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                $price = $get('price') ?? 0;
-                                if ($state > $price) {
-                                    $set('deposit_amount', $price);
-                                }
-                            }),
+                            ->helperText('Use booking settings to include payment instructions or a payment link in confirmation emails.'),
 
                         Forms\Components\Placeholder::make('payment_summary')
                             ->label('Payment Summary')
                             ->content(function ($get) {
                                 $price = $get('price') ?? 0;
                                 $paymentType = $get('payment_type');
-                                $depositAmount = $get('deposit_amount') ?? 0;
-
-                                if (!$get('require_payment') || $paymentType === 'none') {
+                                if ($paymentType === 'none') {
                                     return 'No payment required for this service.';
-                                }
-
-                                if ($paymentType === 'upfront') {
-                                    return "Clients will pay **$" . number_format($price, 2) . "** before booking.";
-                                }
-
-                                if ($paymentType === 'deposit') {
-                                    $remaining = max(0, $price - $depositAmount);
-                                    return "Clients will pay **$" . number_format($depositAmount, 2) . "** upfront, and **$" . number_format($remaining, 2) . "** later.";
                                 }
 
                                 if ($paymentType === 'invoice') {
@@ -181,20 +146,12 @@ class AppointmentTypeResource extends Resource
 
                                 return '';
                             })
-                            ->visible(fn ($get) => $get('require_payment') && $get('payment_type') !== 'none'),
+                            ->visible(fn ($get) => $get('payment_type') !== 'none'),
 
                         Forms\Components\Placeholder::make('payment_info')
                             ->label('How it works')
                             ->content(function ($get) {
                                 $paymentType = $get('payment_type');
-
-                                if ($paymentType === 'upfront') {
-                                    return '💳 Clients must complete payment via Stripe before their booking is confirmed. This reduces no-shows and ensures guaranteed payment.';
-                                }
-
-                                if ($paymentType === 'deposit') {
-                                    return '💳 Clients pay a deposit via Stripe to secure their booking. You can invoice them for the remaining balance later.';
-                                }
 
                                 if ($paymentType === 'invoice') {
                                     return '📧 Clients can book immediately. An invoice with a payment link will be sent to them automatically. You can track payment status in the dashboard.';
@@ -202,7 +159,7 @@ class AppointmentTypeResource extends Resource
 
                                 return '';
                             })
-                            ->visible(fn ($get) => $get('require_payment') && $get('payment_type') !== 'none'),
+                            ->visible(fn ($get) => $get('payment_type') !== 'none'),
                     ])
                     ->columns(2)
                     ->collapsed(),

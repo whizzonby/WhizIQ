@@ -116,6 +116,14 @@
                 <p class="mt-2 text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">{{ $bookingSetting->welcome_message }}</p>
             @endif
 
+            @if($bookingSetting->review_count > 0)
+                <div class="mt-4 flex items-center justify-center gap-2 text-sm text-gray-700">
+                    <span class="font-semibold">{{ number_format($bookingSetting->average_rating, 1) }}</span>
+                    <span class="tracking-wide text-yellow-500">{{ str_repeat('*', (int) round($bookingSetting->average_rating)) }}</span>
+                    <span>from {{ $bookingSetting->review_count }} {{ Str::plural('review', $bookingSetting->review_count) }}</span>
+                </div>
+            @endif
+
             {{-- Location Display --}}
             @if($bookingSetting->business_address || $bookingSetting->business_city || $bookingSetting->business_country)
                 <div class="mt-3 flex items-center justify-center gap-2 text-gray-600">
@@ -454,6 +462,14 @@
                                         <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $type->description }}</p>
                                     @endif
 
+                                    @if($type->review_count > 0)
+                                        <div class="mb-4 flex items-center gap-2 text-xs text-gray-600">
+                                            <span class="font-semibold text-gray-900">{{ number_format($type->approved_reviews_avg_rating, 1) }}</span>
+                                            <span class="tracking-wide text-yellow-500">{{ str_repeat('*', (int) round($type->approved_reviews_avg_rating)) }}</span>
+                                            <span>({{ $type->review_count }})</span>
+                                        </div>
+                                    @endif
+
                                     <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <div class="flex items-center gap-4 text-sm text-gray-500">
                                         <span class="flex items-center gap-1.5">
@@ -502,6 +518,28 @@
                             </div>
                         @endforelse
                     </div>
+
+                    @if($recentReviews->isNotEmpty())
+                        <div class="mt-10 border-t border-gray-200 pt-8">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Recent reviews</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                @foreach($recentReviews as $review)
+                                    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div class="font-semibold text-gray-900">{{ $review->display_name }}</div>
+                                            <div class="text-sm text-yellow-500">{{ str_repeat('*', $review->rating) }}</div>
+                                        </div>
+                                        @if($review->appointmentType)
+                                            <div class="mt-1 text-xs text-gray-500">{{ $review->appointmentType->name }}</div>
+                                        @endif
+                                        @if($review->comment)
+                                            <p class="mt-3 text-sm text-gray-700">{{ Str::limit($review->comment, 150) }}</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
 
                 @elseif($currentStep === 2)
                     {{-- Step 2: Select Date and Time --}}

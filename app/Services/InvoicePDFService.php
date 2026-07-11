@@ -342,10 +342,13 @@ class InvoicePDFService
             }
 
             // Send email
+            $paymentUrl = app(ClientInvoicePaymentService::class)->signedPaymentUrl($invoice, true);
+
             \Mail::send('invoices.email', [
                 'invoice' => $invoice,
                 'client' => $invoice->client,
                 'emailMessage' => $message,
+                'paymentUrl' => $paymentUrl,
             ], function ($mail) use ($invoice, $pdfContent, $filename) {
                 $mail->to($invoice->client->email, $invoice->client->name)
                     ->subject("Invoice {$invoice->invoice_number} from {$invoice->user->name}")
@@ -353,6 +356,10 @@ class InvoicePDFService
                         'mime' => 'application/pdf',
                     ]);
             });
+
+            if ($invoice->status !== 'paid' && (float) $invoice->balance_due > 0) {
+                $invoice->markPaymentLinkEmailed();
+            }
 
             // Mark invoice as sent if it was draft
             if ($invoice->status === 'draft') {

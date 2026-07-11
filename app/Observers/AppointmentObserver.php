@@ -58,14 +58,15 @@ class AppointmentObserver
 
                 $appointment->scheduleAftercareMessage();
 
-                // Update contact's last appointment timestamp
-                if ($appointment->contact_id) {
-                    \App\Models\Contact::where('id', $appointment->contact_id)
-                        ->update(['last_appointment_at' => now()]);
-                } elseif ($appointment->attendee_email) {
-                    \App\Models\Contact::where('user_id', $appointment->user_id)
-                        ->where('email', $appointment->attendee_email)
-                        ->update(['last_appointment_at' => now()]);
+                $contact = $this->findAppointmentContact($appointment);
+
+                if ($contact) {
+                    $contact->update([
+                        'last_appointment_at' => now(),
+                        'type' => 'client',
+                    ]);
+
+                    $this->createCompletedAppointmentFollowUp($appointment, $contact);
                 }
             }
         }
@@ -195,6 +196,93 @@ class AppointmentObserver
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Log completed work and remind the owner to request a review or rebooking.
+     */
+    protected function createCompletedAppointmentFollowUp(Appointment $appointment, \App\Models\Contact $contact): void
+    {
+        try {
+            $appointment->loadMissing(['appointmentType']);
+
+            $clientName = $appointment->attendee_name ?? $contact->name ?? 'Client';
+            $serviceName = $appointment->appointmentType?->name ?? $appointment->title ?? 'appointment';
+
+            $bookingSlug = \App\Models\BookingSetting::where('user_id', $appointment->user_id)
+                ->value('booking_slug');
+
+            $rebookUrl = $bookingSlug
+                ? route('booking.public', [
+                    'slug' => $bookingSlug,
+                    'service' => $appointment->appointment_type_id,
+                ])
+                : null;
+
+            $description = "Appointment completed for {$serviceName}. Ask {$clientName} for a review";
+            $description .= $rebookUrl
+                ? " and invite them to rebook: {$rebookUrl}"
+                : ' and invite them to book again.';
+
+            $reviewUrl = $appointment->confirmation_token
+                ? route('review.show', ['token' => $appointment->confirmation_token])
+                : null;
+
+            if ($reviewUrl) {
+                $description .= " Review link: {$reviewUrl}";
+            }
+
+            $contact->logInteraction(
+                type: 'meeting',
+                description: "Completed appointment: {$serviceName}.",
+                interactionDate: now(),
+                subject: 'Appointment completed',
+                outcome: 'positive'
+            );
+
+            \App\Models\FollowUpReminder::firstOrCreate(
+                [
+                    'user_id' => $appointment->user_id,
+                    'contact_id' => $contact->id,
+                    'title' => "Review or rebook: {$clientName}",
+                    'status' => 'pending',
+                ],
+                [
+                    'description' => $description,
+                    'remind_at' => now()->addDay(),
+                    'priority' => 'medium',
+                ]
+            );
+
+            if ($appointment->attendee_email && $appointment->confirmation_token && ! $appointment->businessReview) {
+                \Illuminate\Support\Facades\Notification::route('mail', $appointment->attendee_email)
+                    ->notify(new \App\Notifications\ReviewRequestNotification($appointment));
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to create completed appointment follow-up', [
+                'appointment_id' => $appointment->id,
+                'contact_id' => $contact->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Find the CRM contact connected to an appointment.
+     */
+    protected function findAppointmentContact(Appointment $appointment): ?\App\Models\Contact
+    {
+        if ($appointment->contact_id) {
+            return \App\Models\Contact::find($appointment->contact_id);
+        }
+
+        if ($appointment->attendee_email) {
+            return \App\Models\Contact::where('user_id', $appointment->user_id)
+                ->where('email', $appointment->attendee_email)
+                ->first();
+        }
+
+        return null;
     }
 
     /**

@@ -5,7 +5,7 @@
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
                         <h3 class="text-sm font-semibold text-primary-900 dark:text-primary-100">
-                            Your Booking Page is Live!
+                            Your booking page is live
                         </h3>
                         <p class="mt-1 text-sm text-primary-700 dark:text-primary-300">
                             Share this link with your clients to let them book appointments:
@@ -69,15 +69,15 @@
             <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <li class="flex items-start">
                     <span class="mr-2">1.</span>
-                    <span>Create appointment types in the <a href="{{ route('filament.dashboard.resources.appointment-types.index') }}" class="text-primary-600 hover:underline">Appointment Types</a> section</span>
+                    <span>Create or update your services in <a href="{{ route('filament.dashboard.resources.appointment-types.index') }}" class="text-primary-600 hover:underline">Appointment Types</a></span>
                 </li>
                 <li class="flex items-start">
                     <span class="mr-2">2.</span>
-                    <span>Set your availability schedule (coming soon)</span>
+                    <span>Review your working hours below and add time off from <a href="{{ route('filament.dashboard.resources.availability-exceptions.index') }}" class="text-primary-600 hover:underline">Time Off</a></span>
                 </li>
                 <li class="flex items-start">
                     <span class="mr-2">3.</span>
-                    <span>Test your booking page before sharing with clients</span>
+                    <span>Open your booking page, choose a service, and make a test booking before sharing it with clients</span>
                 </li>
             </ul>
         </div>

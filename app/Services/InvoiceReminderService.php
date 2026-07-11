@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ClientInvoice;
+use App\Models\FollowUpReminder;
 use App\Models\NotificationPreference;
 use App\Models\User;
 use App\Notifications\OverdueInvoiceNotification;
@@ -63,6 +64,8 @@ class InvoiceReminderService
                     );
                 }
 
+                $this->createCollectionFollowUp($invoice, 'overdue');
+
                 $sent++;
                 Log::info("Overdue notification sent for invoice #{$invoice->invoice_number}");
             } catch (\Exception $e) {
@@ -115,6 +118,7 @@ class InvoiceReminderService
                 try {
                     $this->sendReminderToClient($invoice, $reminderType);
                     $invoice->recordReminderSent();
+                    $this->createCollectionFollowUp($invoice, $reminderType);
                     $sent++;
 
                     Log::info("Payment reminder ({$reminderType}) sent for invoice #{$invoice->invoice_number}");
@@ -194,9 +198,49 @@ class InvoiceReminderService
 
         if ($result) {
             $invoice->recordReminderSent();
+            $this->createCollectionFollowUp($invoice, $reminderType);
         }
 
         return $result;
+    }
+
+    public function sendPaymentLink(ClientInvoice $invoice, ?string $recipientEmail = null, ?string $message = null): bool
+    {
+        $invoice->loadMissing(['client', 'user']);
+
+        if ($invoice->status === 'paid' || (float) $invoice->balance_due <= 0) {
+            return false;
+        }
+
+        $recipientEmail = $recipientEmail ?: $invoice->client?->email;
+
+        if (! $recipientEmail || ! filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        try {
+            $paymentUrl = app(ClientInvoicePaymentService::class)->signedPaymentUrl($invoice, true);
+            $message = $message ?: "You can pay invoice {$invoice->invoice_number} securely using the link below.";
+
+            \Mail::send('invoices.payment-link-email', [
+                'invoice' => $invoice,
+                'client' => $invoice->client,
+                'paymentUrl' => $paymentUrl,
+                'emailMessage' => $message,
+            ], function ($mail) use ($invoice, $recipientEmail) {
+                $mail->to($recipientEmail, $invoice->client?->name)
+                    ->subject("Payment link for invoice {$invoice->invoice_number}");
+            });
+
+            $invoice->markPaymentLinkEmailed();
+            $this->createCollectionFollowUp($invoice, 'payment_link');
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Failed to send payment link for invoice #{$invoice->invoice_number}: {$e->getMessage()}");
+
+            return false;
+        }
     }
 
     /**
@@ -217,5 +261,63 @@ class InvoiceReminderService
             })
             ->orderBy('due_date', 'asc')
             ->get();
+    }
+
+    /**
+     * Create an owner follow-up task so unpaid invoices do not disappear after reminders.
+     */
+    public function createCollectionFollowUp(ClientInvoice $invoice, string $reminderType = 'standard'): ?FollowUpReminder
+    {
+        $invoice->loadMissing(['client.contact']);
+
+        $contact = $invoice->client?->contact;
+
+        if (! $contact) {
+            return null;
+        }
+
+        $priority = match($reminderType) {
+            'final', 'overdue', 'payment_failed', 'payment_link' => 'high',
+            default => 'medium',
+        };
+
+        $remindAt = match($reminderType) {
+            'payment_failed', 'payment_link' => now()->addHours(4),
+            'final' => now()->addDay(),
+            'overdue', 'second' => now()->addDays(2),
+            default => now()->addDays(4),
+        };
+
+        $title = "Collect invoice {$invoice->invoice_number}";
+
+        $existingReminder = FollowUpReminder::where('user_id', $invoice->user_id)
+            ->where('contact_id', $contact->id)
+            ->where('title', $title)
+            ->whereIn('status', ['pending', 'sent'])
+            ->first();
+
+        if ($existingReminder) {
+            return $existingReminder;
+        }
+
+        $reminder = FollowUpReminder::create([
+            'user_id' => $invoice->user_id,
+            'contact_id' => $contact->id,
+            'title' => $title,
+            'description' => "Invoice {$invoice->invoice_number} has a balance due of {$invoice->currency} {$invoice->balance_due}. Follow up if the client has not paid.",
+            'remind_at' => $remindAt,
+            'priority' => $priority,
+            'status' => 'pending',
+        ]);
+
+        $contact->logInteraction(
+            type: 'task',
+            description: "Payment follow-up created for invoice {$invoice->invoice_number}.",
+            interactionDate: now(),
+            subject: 'Invoice collection follow-up',
+            outcome: 'follow_up_needed'
+        );
+
+        return $reminder;
     }
 }

@@ -12,7 +12,7 @@
                 <x-heroicon-o-check-circle style="width:1.25rem;height:1.25rem;color:#22c55e;" />
             </div>
             <p class="text-gray-800 dark:text-gray-200" style="font-size:.9rem;font-weight:600;margin-bottom:.25rem;">You're on top of everything</p>
-            <p class="text-gray-400 dark:text-gray-500" style="font-size:.8rem;">No overdue invoices, cold deals, or appointments right now.</p>
+            <p class="text-gray-400 dark:text-gray-500" style="font-size:.8rem;">No overdue invoices, follow-ups, tasks, calendar gaps, or appointments right now.</p>
         </div>
     @else
         <div style="display:flex;flex-direction:column;gap:.625rem;">
@@ -27,11 +27,33 @@
                         {{ $item['subtitle'] }}
                     </p>
                 </div>
-                <a href="{{ $item['action_url'] }}"
-                   style="flex-shrink:0;display:inline-block;padding:.375rem .875rem;border-radius:.5rem;font-size:.78rem;font-weight:600;background:{{ $item['action_color'] }};color:{{ $item['action_text'] }};text-decoration:none;white-space:nowrap;transition:opacity .15s;"
-                   onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
-                    {{ $item['action_label'] }}
-                </a>
+                <div style="flex-shrink:0;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;justify-content:flex-end;">
+                    @if(isset($item['action_method'], $item['action_id']))
+                        <button type="button"
+                                wire:click="{{ $item['action_method'] }}({{ $item['action_id'] }}{{ isset($item['action_value']) ? ", '" . $item['action_value'] . "'" : '' }})"
+                                wire:loading.attr="disabled"
+                                style="display:inline-block;padding:.375rem .875rem;border-radius:.5rem;font-size:.78rem;font-weight:600;background:{{ $item['action_color'] }};color:{{ $item['action_text'] }};text-decoration:none;white-space:nowrap;transition:opacity .15s;border:0;cursor:pointer;"
+                                onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+                            {{ $item['action_label'] }}
+                        </button>
+                    @else
+                        <a href="{{ $item['action_url'] }}"
+                           style="display:inline-block;padding:.375rem .875rem;border-radius:.5rem;font-size:.78rem;font-weight:600;background:{{ $item['action_color'] }};color:{{ $item['action_text'] }};text-decoration:none;white-space:nowrap;transition:opacity .15s;"
+                           onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+                            {{ $item['action_label'] }}
+                        </a>
+                    @endif
+
+                    @foreach($item['secondary_actions'] ?? [] as $secondaryAction)
+                        <button type="button"
+                                wire:click="{{ $secondaryAction['method'] }}({{ $secondaryAction['id'] }}{{ isset($secondaryAction['value']) ? ", '" . $secondaryAction['value'] . "'" : '' }})"
+                                wire:loading.attr="disabled"
+                                style="display:inline-block;padding:.375rem .6rem;border-radius:.5rem;font-size:.76rem;font-weight:600;background:#f8fafc;color:#475569;text-decoration:none;white-space:nowrap;transition:opacity .15s;border:1px solid #e2e8f0;cursor:pointer;"
+                                onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'">
+                            {{ $secondaryAction['label'] }}
+                        </button>
+                    @endforeach
+                </div>
             </div>
             @endforeach
         </div>

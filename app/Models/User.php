@@ -301,6 +301,12 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Two
         return $this->hasOne(CompanyProfile::class);
     }
 
+    public function hasCompletedBusinessSetup(): bool
+    {
+        return $this->businessProfile()->exists()
+            && $this->bookingSetting()->exists();
+    }
+
     // Tax & Compliance Relationships
     public function taxSetting(): HasOne
     {
@@ -326,6 +332,11 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail, Two
     public function emailCampaigns(): HasMany
     {
         return $this->hasMany(EmailCampaign::class);
+    }
+
+    public function campaignAudiences(): HasMany
+    {
+        return $this->hasMany(CampaignAudience::class);
     }
 
     public function emailLogs(): HasMany

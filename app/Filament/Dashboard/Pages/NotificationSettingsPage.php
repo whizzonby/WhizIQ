@@ -43,6 +43,7 @@ class NotificationSettingsPage extends Page implements HasForms
             'owner_phone', 'preferred_channel', 'digest_enabled', 'digest_time',
             'alert_payment_received', 'alert_overdue_invoice', 'alert_stale_deals',
             'alert_follow_up_due', 'alert_new_booking', 'alert_task_due',
+            'alert_campaign_draft_prepared',
             'client_appointment_reminders', 'client_invoice_reminders',
             'client_aftercare_enabled', 'client_booking_confirmation',
         ]));
@@ -123,6 +124,10 @@ class NotificationSettingsPage extends Page implements HasForms
                             Toggle::make('alert_task_due')
                                 ->label('Task reminders')
                                 ->helperText('Notify me when a task with a reminder is due'),
+
+                            Toggle::make('alert_campaign_draft_prepared')
+                                ->label('Campaign drafts ready')
+                                ->helperText('Notify me when WhizIQ prepares a campaign draft for review'),
                         ]),
                     ]),
 

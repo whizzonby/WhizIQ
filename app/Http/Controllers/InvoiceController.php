@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Models\ClientInvoice;
+use App\Services\ClientInvoicePaymentService;
 use App\Services\InvoiceService;
 use App\Services\InvoicePDFService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use LaravelDaily\Invoices\Classes\Buyer;
 use LaravelDaily\Invoices\Classes\InvoiceItem;
 use LaravelDaily\Invoices\Classes\Seller;
 use LaravelDaily\Invoices\Invoice;
+use Throwable;
 
 class InvoiceController extends Controller
 {
@@ -95,5 +98,37 @@ class InvoiceController extends Controller
 
             abort(500, 'Failed to generate PDF. Please try again.');
         }
+    }
+
+    public function payClientInvoice(ClientInvoice $invoice, ClientInvoicePaymentService $paymentService)
+    {
+        if ($invoice->status === 'paid' || (float) $invoice->balance_due <= 0) {
+            return view('invoices.payment-status', [
+                'invoice' => $invoice,
+                'status' => 'paid',
+            ]);
+        }
+
+        try {
+            return redirect()->away($paymentService->createStripeCheckoutUrl($invoice));
+        } catch (Throwable $e) {
+            Log::error('Client invoice Stripe checkout creation failed', [
+                'invoice_id' => $invoice->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return view('invoices.payment-status', [
+                'invoice' => $invoice,
+                'status' => 'unavailable',
+            ]);
+        }
+    }
+
+    public function clientInvoicePaymentStatus(ClientInvoice $invoice, string $status)
+    {
+        return view('invoices.payment-status', [
+            'invoice' => $invoice->fresh(),
+            'status' => $status,
+        ]);
     }
 }

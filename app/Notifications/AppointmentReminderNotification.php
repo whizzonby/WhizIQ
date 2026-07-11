@@ -123,11 +123,16 @@ class AppointmentReminderNotification extends Notification implements ShouldQueu
             }
         }
 
+        if ($this->appointment->confirmation_token) {
+            $mail->line('')
+                ->action('Manage Appointment', route('appointment.manage', ['token' => $this->appointment->confirmation_token]));
+        }
+
         $mail->line('')
             ->line('Your appointment is in **' . $timeText . '**.')
             ->line('We look forward to seeing you!')
             ->line('')
-            ->line('If you need to make any changes, please contact us as soon as possible.');
+            ->line('If you need help, please contact us as soon as possible.');
 
         return $mail;
     }

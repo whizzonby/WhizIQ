@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class BookingSetting extends Model
@@ -62,10 +63,30 @@ class BookingSetting extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(BusinessReview::class, 'user_id', 'user_id');
+    }
+
+    public function approvedReviews(): HasMany
+    {
+        return $this->reviews()->approved();
+    }
+
     // Helper Methods
     public function getBookingUrlAttribute(): string
     {
         return url('book/' . $this->booking_slug);
+    }
+
+    public function getReviewCountAttribute(): int
+    {
+        return $this->approvedReviews()->count();
+    }
+
+    public function getAverageRatingAttribute(): float
+    {
+        return (float) ($this->approvedReviews()->avg('rating') ?? 0);
     }
 
     public function isWithinBookingWindow(\Carbon\Carbon $date): bool

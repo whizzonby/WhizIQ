@@ -271,7 +271,7 @@ class AdvancedOnboardingPage extends OnboardingPage
             }
         }
 
-        // Mark as onboarded and redirect based on subscription status
+        // Mark as onboarded and send users straight to the dashboard.
         $this->onboarded();
     }
 
@@ -279,15 +279,6 @@ class AdvancedOnboardingPage extends OnboardingPage
     {
         $this->onboardingManager->onboarded();
 
-        // Redirect based on subscription status (similar to RedirectAwareTrait logic)
-        $user = auth()->user();
-        
-        if ($user && ! $user->isSubscribed()) {
-            // User doesn't have a subscription - redirect to plans/subscriptions page
-            $this->redirect(route('filament.dashboard.resources.subscriptions.index'));
-        } else {
-            // User has subscription or is admin - redirect to dashboard
-            $this->redirect(route('filament.dashboard.pages.dashboard'));
-        }
+        $this->redirect(route('filament.dashboard.pages.dashboard'));
     }
 }

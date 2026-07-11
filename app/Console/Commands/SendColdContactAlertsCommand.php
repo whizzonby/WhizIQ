@@ -13,106 +13,159 @@ use Illuminate\Support\Facades\Log;
 
 class SendColdContactAlertsCommand extends Command
 {
-    protected $signature   = 'contacts:cold-alerts {--days=30 : Days without contact before treating as cold}';
-    protected $description = 'Send re-engagement emails to cold contacts and alert business owners';
+    protected $signature = 'contacts:cold-alerts
+        {--days=45 : Days since last appointment before inviting a client to rebook}
+        {--contact-days=30 : Days without contact before treating non-client relationships as cold}
+        {--cooldown=7 : Minimum days before sending another automated re-engagement email}';
+
+    protected $description = 'Send rebooking prompts to past clients and re-engagement emails to cold contacts';
 
     public function handle(
         ContactReminderService $reminderService,
-        EmailCampaignService   $emailService
+        EmailCampaignService $emailService
     ): int {
         $days = (int) $this->option('days');
+        $contactDays = (int) $this->option('contact-days');
+        $cooldownDays = (int) $this->option('cooldown');
 
-        $this->info("Scanning for contacts with no interaction in {$days}+ days...");
+        $this->info("Scanning for clients {$days}+ days after their last appointment...");
 
-        $users = User::whereHas('subscriptions', fn ($q) => $q->where('status', 'active'))
+        $users = User::whereHas('bookingSetting', fn ($query) => $query->where('is_booking_enabled', true))
             ->get();
 
         $totalContacts = 0;
-        $totalEmailed  = 0;
+        $totalEmailed = 0;
+        $totalRebooking = 0;
 
         foreach ($users as $user) {
-            $coldContacts = $reminderService->alertColdContacts($user, $days);
+            $rebookingContacts = $reminderService->getClientsDueToRebook($user, $days, $cooldownDays);
+            $coldContacts = $reminderService->alertColdContacts($user, $contactDays);
+            $contacts = $rebookingContacts
+                ->merge($coldContacts)
+                ->unique('id')
+                ->values();
 
-            if ($coldContacts->isEmpty()) {
+            if ($contacts->isEmpty()) {
                 continue;
             }
 
             $bookingSlug = BookingSetting::where('user_id', $user->id)->value('booking_slug');
-            $rebookUrl   = $bookingSlug ? route('booking.public', ['slug' => $bookingSlug]) : null;
+            $rebookUrl = $bookingSlug ? route('booking.public', ['slug' => $bookingSlug]) : null;
 
             $businessName = $user->businessProfile?->biz_trading_name
                 ?? $user->businessProfile?->biz_registered_name
                 ?? $user->name;
 
-            foreach ($coldContacts as $contact) {
+            foreach ($contacts as $contact) {
                 if (empty($contact->email)) {
                     continue;
                 }
 
                 $totalContacts++;
 
-                $firstName = $contact->first_name ?? explode(' ', $contact->name)[0];
-                $subject = "We miss you, {$firstName} — let's reconnect";
-                $body    = $this->buildReEngagementBody($contact, $businessName, $rebookUrl);
+                $firstName = $this->firstName($contact);
+                $isRebookingCandidate = $rebookingContacts->contains('id', $contact->id);
+                $subject = $isRebookingCandidate
+                    ? "Ready to book your next visit, {$firstName}?"
+                    : "We miss you, {$firstName} - let's reconnect";
+                $body = $isRebookingCandidate
+                    ? $this->buildRebookingBody($contact, $businessName, $rebookUrl)
+                    : $this->buildReEngagementBody($contact, $businessName, $rebookUrl);
 
                 try {
                     $emailService->sendToContact($user, $contact, $subject, $body, [
                         'email_type' => 'campaign',
-                        'metadata'   => ['trigger' => 'cold_contact_auto_reengagement'],
+                        'metadata' => [
+                            'trigger' => $isRebookingCandidate
+                                ? 'client_auto_rebooking'
+                                : 'cold_contact_auto_reengagement',
+                            'days_since_last_appointment' => $contact->last_appointment_at
+                                ? $contact->last_appointment_at->diffInDays(now())
+                                : null,
+                        ],
                     ]);
 
-                    // Prevent re-sending next run until a new interaction updates this
                     $contact->last_contact_date = now()->toDateString();
                     $contact->saveQuietly();
 
-                    // Create a follow-up reminder for the owner to check in if no reply
                     FollowUpReminder::create([
-                        'user_id'     => $user->id,
-                        'contact_id'  => $contact->id,
-                        'title'       => "Re-engagement sent to {$contact->name} — check for reply",
-                        'description' => "Auto re-engagement email sent after {$days}+ days of no contact.",
-                        'remind_at'   => now()->addDays(3),
-                        'status'      => 'pending',
-                        'priority'    => 'medium',
+                        'user_id' => $user->id,
+                        'contact_id' => $contact->id,
+                        'title' => $isRebookingCandidate
+                            ? "Rebooking invite sent to {$contact->name}"
+                            : "Re-engagement sent to {$contact->name} - check for reply",
+                        'description' => $isRebookingCandidate
+                            ? "Auto rebooking email sent {$days}+ days after their last appointment."
+                            : "Auto re-engagement email sent after {$contactDays}+ days of no contact.",
+                        'remind_at' => now()->addDays(3),
+                        'status' => 'pending',
+                        'priority' => 'medium',
                     ]);
 
                     $totalEmailed++;
+                    $totalRebooking += $isRebookingCandidate ? 1 : 0;
 
-                    Log::info('Cold contact re-engagement email sent', [
-                        'user_id'    => $user->id,
+                    Log::info('Automated rebooking/re-engagement email sent', [
+                        'user_id' => $user->id,
                         'contact_id' => $contact->id,
+                        'trigger' => $isRebookingCandidate
+                            ? 'client_auto_rebooking'
+                            : 'cold_contact_auto_reengagement',
                     ]);
-
                 } catch (\Exception $e) {
-                    Log::warning('Failed to send cold contact re-engagement email', [
-                        'user_id'    => $user->id,
+                    Log::warning('Failed to send automated rebooking/re-engagement email', [
+                        'user_id' => $user->id,
                         'contact_id' => $contact->id,
-                        'error'      => $e->getMessage(),
+                        'error' => $e->getMessage(),
                     ]);
                 }
             }
         }
 
-        $this->info("Done. Processed {$totalContacts} cold contacts, emailed {$totalEmailed}.");
+        $this->info("Done. Processed {$totalContacts} contacts, emailed {$totalEmailed}, rebooking prompts {$totalRebooking}.");
 
         return self::SUCCESS;
     }
 
+    private function buildRebookingBody(Contact $contact, string $businessName, ?string $rebookUrl): string
+    {
+        $firstName = $this->firstName($contact);
+        $lastVisit = $contact->last_appointment_at?->format('F j');
+
+        $body = "<p>Hi {$firstName},</p>";
+        $body .= $lastVisit
+            ? "<p>It has been a little while since your last visit on {$lastVisit}, and we would love to see you again.</p>"
+            : "<p>It has been a little while since your last visit, and we would love to see you again.</p>";
+        $body .= '<p>If now is a good time, you can choose a slot that works for you.</p>';
+
+        if ($rebookUrl) {
+            $body .= "<p><a href=\"{$rebookUrl}\">Book your next appointment</a></p>";
+        }
+
+        $body .= "<p>Warm regards,<br>{$businessName}</p>";
+
+        return $body;
+    }
+
     private function buildReEngagementBody(Contact $contact, string $businessName, ?string $rebookUrl): string
     {
-        $firstName = $contact->first_name ?? explode(' ', $contact->name)[0];
+        $firstName = $this->firstName($contact);
 
-        $body  = "<p>Hi {$firstName},</p>";
-        $body .= "<p>It's been a while since we last connected, and we wanted to check in and say hello!</p>";
-        $body .= "<p>We'd love to see you again — whether you have a question, need our services, or just want to catch up.</p>";
+        $body = "<p>Hi {$firstName},</p>";
+        $body .= "<p>It's been a while since we last connected, and we wanted to check in and say hello.</p>";
+        $body .= "<p>We'd love to see you again, whether you have a question, need our services, or just want to catch up.</p>";
 
         if ($rebookUrl) {
             $body .= "<p><a href=\"{$rebookUrl}\">Click here to book an appointment</a> at a time that suits you.</p>";
         }
 
-        $body .= "<p>Looking forward to hearing from you.</p>";
         $body .= "<p>Warm regards,<br>{$businessName}</p>";
 
         return $body;
+    }
+
+    private function firstName(Contact $contact): string
+    {
+        return explode(' ', trim($contact->name))[0] ?: 'there';
     }
 }

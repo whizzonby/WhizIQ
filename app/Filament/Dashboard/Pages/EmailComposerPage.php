@@ -3,8 +3,11 @@
 namespace App\Filament\Dashboard\Pages;
 
 use App\Filament\Dashboard\Resources\Subscriptions\SubscriptionResource;
+use App\Models\CampaignAudience;
 use App\Models\Contact;
+use App\Models\EmailCampaign;
 use App\Models\EmailTemplate;
+use App\Services\CampaignAudienceService;
 use App\Services\EmailCampaignService;
 use App\Services\OpenAIService;
 use Filament\Forms;
@@ -51,14 +54,133 @@ class EmailComposerPage extends Page implements HasForms
     public ?string $previewSubject = null;
     public ?string $previewBody = null;
     public bool $showPreviewModal = false;
+    public ?string $campaignPreset = null;
+    public ?int $campaignAudienceId = null;
+    public ?int $campaignDraftId = null;
+    public array $draftSegmentVariants = [];
 
     public function mount(): void
     {
-        $this->form->fill([
+        $draft = $this->currentDraft();
+        $audience = $draft?->campaignAudience ?? $this->currentAudience();
+        $this->campaignDraftId = $draft?->id;
+        $this->draftSegmentVariants = $draft?->segment_variants ?? [];
+        $this->campaignAudienceId = $audience?->id;
+        $this->campaignPreset = $audience?->campaign_preset ?? request()->query('campaign');
+
+        $this->form->fill(array_merge([
             'from_name' => auth()->user()->name,
             'from_email' => auth()->user()->email,
             'send_now' => true,
-        ]);
+        ], $draft ? $this->draftPrefill($draft) : $this->getCampaignPrefill()));
+    }
+
+    protected function getCampaignPrefill(): array
+    {
+        if ($audience = $this->currentAudience()) {
+            return app(CampaignAudienceService::class)->prefill($audience);
+        }
+
+        return match (request()->query('campaign')) {
+            'calendar_gap' => $this->calendarGapPrefill(),
+            'rebooking' => $this->rebookingPrefill(),
+            default => [],
+        };
+    }
+
+    protected function calendarGapPrefill(): array
+    {
+        $date = request()->query('date')
+            ? \Carbon\Carbon::parse(request()->query('date'))
+            : now()->addDay();
+
+        $contactIds = Contact::where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->where('type', 'client')
+            ->whereNotNull('email')
+            ->latest('last_appointment_at')
+            ->limit(25)
+            ->pluck('id')
+            ->all();
+
+        return [
+            'contact_ids' => $contactIds,
+            'subject' => 'Open appointments available on ' . $date->format('l'),
+            'body' => '<p>Hi {{first_name}},</p><p>We have a few appointment times available on ' . $date->format('l, F j') . '.</p><p>If you would like to book in, you can choose a time here: <a href="' . e($this->campaignBookingUrl('calendar_gap')) . '">Book an appointment</a>.</p><p>Warm regards,<br>' . e(auth()->user()?->name) . '</p>',
+            'send_now' => true,
+        ];
+    }
+
+    protected function rebookingPrefill(): array
+    {
+        $contactIds = Contact::where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->where('type', 'client')
+            ->whereNotNull('email')
+            ->whereNotNull('last_appointment_at')
+            ->where('last_appointment_at', '<=', now()->subDays(45))
+            ->whereDoesntHave('appointments', function ($query) {
+                $query->whereIn('status', ['scheduled', 'confirmed'])
+                    ->where('start_datetime', '>=', now());
+            })
+            ->orderBy('last_appointment_at')
+            ->limit(50)
+            ->pluck('id')
+            ->all();
+
+        return [
+            'contact_ids' => $contactIds,
+            'subject' => 'Ready to book your next visit?',
+            'body' => '<p>Hi {{first_name}},</p><p>It has been a little while since your last visit, and we would love to see you again.</p><p>You can book your next appointment here: <a href="' . e($this->campaignBookingUrl('rebooking')) . '">Book your next appointment</a>.</p><p>Warm regards,<br>' . e(auth()->user()?->name) . '</p>',
+            'send_now' => true,
+        ];
+    }
+
+    protected function campaignBookingUrl(string $campaign): string
+    {
+        $bookingUrl = auth()->user()?->bookingSetting?->booking_url ?? url('/');
+        $separator = str_contains($bookingUrl, '?') ? '&' : '?';
+
+        return $bookingUrl . $separator . 'campaign=' . urlencode($campaign) . '&contact={{contact_id}}';
+    }
+
+    protected function currentAudience(): ?CampaignAudience
+    {
+        $slug = request()->query('audience');
+
+        if (! $slug || ! auth()->user()) {
+            return null;
+        }
+
+        return app(CampaignAudienceService::class)->findForUser(auth()->user(), $slug);
+    }
+
+    protected function currentDraft(): ?EmailCampaign
+    {
+        $draftId = request()->query('draft');
+
+        if (! $draftId || ! auth()->user()) {
+            return null;
+        }
+
+        return EmailCampaign::where('user_id', auth()->id())
+            ->activePreparedDraft()
+            ->with('campaignAudience')
+            ->find($draftId);
+    }
+
+    protected function draftPrefill(EmailCampaign $draft): array
+    {
+        return [
+            'send_to_all' => $draft->recipient_type === 'all_contacts',
+            'contact_ids' => $draft->recipient_ids ?? [],
+            'subject' => $draft->subject,
+            'body' => $draft->body,
+            'from_name' => $draft->from_name ?: auth()->user()->name,
+            'from_email' => $draft->from_email ?: auth()->user()->email,
+            'reply_to' => $draft->reply_to,
+            'send_now' => true,
+        ];
     }
 
     public function form(Schema $schema): Schema
@@ -135,6 +257,93 @@ class EmailComposerPage extends Page implements HasForms
                     ->description($hasAIEmailFeatures
                         ? 'Use AI to generate email content automatically'
                         : '✨ AI Features - Premium Plan Required'),
+
+                Section::make('Draft Improvement')
+                    ->schema([
+                        Placeholder::make('segment_variants')
+                            ->label('Prepared Segments')
+                            ->content(function (): string {
+                                if (empty($this->draftSegmentVariants)) {
+                                    return 'WhizIQ will use the same message for every selected recipient.';
+                                }
+
+                                return collect($this->draftSegmentVariants)
+                                    ->map(fn (array $variant): string => $variant['label'] ?? 'Segment')
+                                    ->unique()
+                                    ->join(', ');
+                            })
+                            ->columnSpanFull(),
+
+                        Select::make('draft_tone')
+                            ->label('Rewrite Tone')
+                            ->options([
+                                'friendly' => 'Friendly',
+                                'professional' => 'Professional',
+                                'premium' => 'Premium',
+                                'urgent' => 'Urgent',
+                                'casual' => 'Casual',
+                            ])
+                            ->default('friendly')
+                            ->disabled(!$hasAIEmailFeatures),
+
+                        Select::make('draft_offer')
+                            ->label('Offer Angle')
+                            ->options([
+                                'none' => 'No offer',
+                                'limited_slots' => 'Limited slots',
+                                'discount' => 'Discount',
+                                'loyalty_reward' => 'Loyalty reward',
+                                'seasonal' => 'Seasonal reminder',
+                            ])
+                            ->default('none')
+                            ->disabled(!$hasAIEmailFeatures),
+
+                        TextInput::make('draft_service_focus')
+                            ->label('Service Focus')
+                            ->placeholder('e.g., haircut, consultation, deep clean')
+                            ->disabled(!$hasAIEmailFeatures),
+
+                        Textarea::make('draft_custom_instruction')
+                            ->label('Custom Direction')
+                            ->placeholder('e.g., make this warmer, mention weekend availability, remove discount language')
+                            ->rows(2)
+                            ->disabled(!$hasAIEmailFeatures)
+                            ->columnSpanFull(),
+
+                        Actions::make([
+                            Action::make('rewrite_prepared_draft')
+                                ->label('Rewrite Draft')
+                                ->icon('heroicon-o-pencil-square')
+                                ->color('primary')
+                                ->disabled(!$hasAIEmailFeatures)
+                                ->tooltip(!$hasAIEmailFeatures ? 'Upgrade to Premium for AI draft rewrites' : null)
+                                ->action(function (Set $set, Get $get) {
+                                    $this->rewritePreparedDraft($set, $get);
+                                }),
+
+                            Action::make('stronger_subject')
+                                ->label('Stronger Subject')
+                                ->icon('heroicon-o-bolt')
+                                ->disabled(!$hasAIEmailFeatures)
+                                ->tooltip(!$hasAIEmailFeatures ? 'Upgrade to Premium for AI draft rewrites' : null)
+                                ->action(function (Set $set, Get $get) {
+                                    $this->rewritePreparedDraft($set, $get, 'Create a stronger subject line while keeping the body mostly unchanged.');
+                                }),
+
+                            Action::make('clearer_cta')
+                                ->label('Clearer CTA')
+                                ->icon('heroicon-o-cursor-arrow-rays')
+                                ->disabled(!$hasAIEmailFeatures)
+                                ->tooltip(!$hasAIEmailFeatures ? 'Upgrade to Premium for AI draft rewrites' : null)
+                                ->action(function (Set $set, Get $get) {
+                                    $this->rewritePreparedDraft($set, $get, 'Make the call to action clearer and easier to act on.');
+                                }),
+                        ]),
+                    ])
+                    ->columns(3)
+                    ->collapsed(! $this->campaignDraftId)
+                    ->visible(fn (): bool => (bool) $this->campaignDraftId)
+                    ->description('Tune WhizIQ prepared drafts before sending.'),
 
 Section::make('Recipients')
                     ->schema([
@@ -497,16 +706,24 @@ TextInput::make('reply_to')
 
         foreach ($contactsWithEmail as $contact) {
             try {
+                $personalized = $this->personalizedDraftContentForContact($contact, $data['subject'], $data['body']);
+
                 $emailLog = $service->sendToContact(
                     user: auth()->user(),
                     contact: $contact,
-                    subject: $data['subject'],
-                    body: $data['body'],
+                    subject: $personalized['subject'],
+                    body: $personalized['body'],
                     options: [
                         'from_name' => $data['from_name'] ?? null,
                         'from_email' => $data['from_email'] ?? null,
                         'reply_to' => $data['reply_to'] ?? null,
                         'attachments' => $data['attachments'] ?? null,
+                        'email_campaign_id' => $this->campaignDraftId,
+                        'metadata' => [
+                            'campaign_preset' => $this->campaignPreset,
+                            'campaign_audience_id' => $this->campaignAudienceId,
+                            'campaign_segment' => $personalized['segment'],
+                        ],
                     ]
                 );
 
@@ -534,6 +751,16 @@ TextInput::make('reply_to')
                 ->send();
         }
 
+        if ($sent > 0) {
+            $this->markCampaignAudienceLaunched();
+            $this->markCampaignDraftReviewed('sent', [
+                'sent_at' => now(),
+                'total_recipients' => $contactsWithEmail->count(),
+                'emails_sent' => $sent,
+                'emails_failed' => $failed,
+            ]);
+        }
+
         // Reset form
         $this->form->fill([
             'send_to_all' => false,
@@ -558,13 +785,16 @@ TextInput::make('reply_to')
 
         foreach ($contacts as $contact) {
             try {
+                $personalized = $this->personalizedDraftContentForContact($contact, $data['subject'], $data['body']);
+
                 \App\Models\EmailLog::create([
                     'user_id' => auth()->id(),
                     'contact_id' => $contact->id,
                     'recipient_email' => $contact->email,
                     'recipient_name' => $contact->name,
-                    'subject' => $data['subject'],
-                    'body' => $data['body'],
+                    'email_campaign_id' => $this->campaignDraftId,
+                    'subject' => $personalized['subject'],
+                    'body' => $personalized['body'],
                     'status' => 'scheduled',
                     'scheduled_at' => $data['scheduled_at'],
                     'email_type' => 'manual',
@@ -573,6 +803,9 @@ TextInput::make('reply_to')
                         'from_name' => $data['from_name'] ?? null,
                         'from_email' => $data['from_email'] ?? null,
                         'reply_to' => $data['reply_to'] ?? null,
+                        'campaign_preset' => $this->campaignPreset,
+                        'campaign_audience_id' => $this->campaignAudienceId,
+                        'campaign_segment' => $personalized['segment'],
                     ],
                 ]);
 
@@ -590,6 +823,14 @@ TextInput::make('reply_to')
             ->body("Scheduled {$scheduled} email(s) for " . \Carbon\Carbon::parse($data['scheduled_at'])->format('M d, Y \a\t g:i A'))
             ->success()
             ->send();
+
+        if ($scheduled > 0) {
+            $this->markCampaignAudienceLaunched();
+            $this->markCampaignDraftReviewed('scheduled', [
+                'scheduled_at' => $data['scheduled_at'],
+                'total_recipients' => $scheduled,
+            ]);
+        }
 
         // Reset form
         $this->form->fill([
@@ -657,6 +898,195 @@ TextInput::make('reply_to')
         $this->showPreviewModal = true;
 
         $this->dispatch('open-modal', id: 'email-preview');
+    }
+
+    protected function markCampaignAudienceLaunched(): void
+    {
+        if (! $this->campaignAudienceId) {
+            return;
+        }
+
+        $audience = CampaignAudience::where('user_id', auth()->id())->find($this->campaignAudienceId);
+
+        if ($audience) {
+            app(CampaignAudienceService::class)->markLaunched($audience);
+        }
+    }
+
+    protected function personalizedDraftContentForContact(Contact $contact, string $subject, string $body): array
+    {
+        $segment = app(CampaignAudienceService::class)->segmentForContact($contact);
+        $variant = $this->draftSegmentVariants[$segment] ?? $this->draftSegmentVariants['standard'] ?? null;
+
+        if (! $variant) {
+            return [
+                'segment' => $segment,
+                'subject' => $subject,
+                'body' => $body,
+            ];
+        }
+
+        return [
+            'segment' => $segment,
+            'subject' => $variant['subject'] ?? $subject,
+            'body' => $variant['body'] ?? $body,
+        ];
+    }
+
+    public function rewritePreparedDraft(Set $set, Get $get, ?string $extraInstruction = null): void
+    {
+        if (! $this->campaignDraftId) {
+            Notification::make()
+                ->title('No Prepared Draft')
+                ->body('Open a WhizIQ prepared draft before using draft rewrite prompts.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        $subject = $get('subject');
+        $body = $get('body');
+
+        if (empty($subject) || empty($body)) {
+            Notification::make()
+                ->title('Content Required')
+                ->body('Add subject and body before rewriting this draft.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        Notification::make()
+            ->title('Rewriting Draft...')
+            ->body('WhizIQ is tuning your prepared campaign draft.')
+            ->info()
+            ->send();
+
+        try {
+            $context = [
+                'tone' => $get('draft_tone') ?: 'friendly',
+                'offer' => $get('draft_offer') ?: 'none',
+                'service_focus' => $get('draft_service_focus'),
+                'custom_instruction' => $get('draft_custom_instruction'),
+                'extra_instruction' => $extraInstruction,
+                'campaign_preset' => $this->campaignPreset,
+            ];
+
+            $result = app(OpenAIService::class)->rewriteCampaignDraft($subject, $body, $context);
+
+            if ($result && isset($result['subject']) && isset($result['body'])) {
+                $set('subject', $result['subject']);
+                $set('body', $result['body']);
+
+                $this->refreshDraftSegmentVariants($result['subject'], $result['body']);
+                $this->recordDraftRewrite($context);
+
+                Notification::make()
+                    ->title('Draft Rewritten')
+                    ->body('Review the updated subject and message before sending.')
+                    ->success()
+                    ->send();
+
+                return;
+            }
+
+            throw new \Exception('Failed to rewrite draft');
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Rewrite Failed')
+                ->body('Could not rewrite this draft. Please check your OpenAI configuration.')
+                ->danger()
+                ->send();
+        }
+    }
+
+    protected function markCampaignDraftReviewed(string $status, array $updates = []): void
+    {
+        if (! $this->campaignDraftId) {
+            return;
+        }
+
+        EmailCampaign::where('user_id', auth()->id())
+            ->where('id', $this->campaignDraftId)
+            ->update(array_merge($updates, [
+                'status' => $status,
+                'reviewed_at' => now(),
+            ]));
+    }
+
+    protected function recordDraftRewrite(array $context): void
+    {
+        if (! $this->campaignDraftId) {
+            return;
+        }
+
+        $draft = EmailCampaign::where('user_id', auth()->id())
+            ->where('id', $this->campaignDraftId)
+            ->with('campaignAudience')
+            ->first();
+
+        if (! $draft?->campaignAudience) {
+            return;
+        }
+
+        $history = collect($draft->campaignAudience->recommendation_history ?? [])
+            ->prepend([
+                'event' => 'draft_rewritten',
+                'label' => 'Draft Rewritten',
+                'at' => now()->toIso8601String(),
+                'metadata' => [
+                    'campaign_id' => $draft->id,
+                    'tone' => $context['tone'] ?? null,
+                    'offer' => $context['offer'] ?? null,
+                    'service_focus' => $context['service_focus'] ?? null,
+                ],
+            ])
+            ->take(10)
+            ->values()
+            ->all();
+
+        $draft->campaignAudience->forceFill([
+            'recommendation_history' => $history,
+        ])->save();
+    }
+
+    protected function refreshDraftSegmentVariants(string $subject, string $body): void
+    {
+        if (! $this->campaignDraftId) {
+            return;
+        }
+
+        $draft = EmailCampaign::where('user_id', auth()->id())
+            ->where('id', $this->campaignDraftId)
+            ->with('campaignAudience')
+            ->first();
+
+        if (! $draft?->campaignAudience) {
+            return;
+        }
+
+        $contacts = Contact::whereIn('id', $this->data['contact_ids'] ?? $draft->recipient_ids ?? [])
+            ->where('user_id', auth()->id())
+            ->get();
+
+        if ($contacts->isEmpty()) {
+            return;
+        }
+
+        $variants = app(CampaignAudienceService::class)->segmentVariantsForContacts(
+            $draft->campaignAudience,
+            $contacts,
+            $subject,
+            $body
+        );
+
+        $this->draftSegmentVariants = $variants;
+
+        $draft->forceFill([
+            'segment_variants' => $variants,
+        ])->save();
     }
 
     protected function getHeaderActions(): array

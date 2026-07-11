@@ -48,6 +48,15 @@
             </table>
         </div>
 
+        @if(($paymentUrl ?? null) && $invoice->status !== 'paid' && $invoice->balance_due > 0)
+            <div style="text-align: center; margin: 24px 0;">
+                <a href="{{ $paymentUrl }}"
+                   style="display: inline-block; background-color: #0066cc; color: #ffffff; text-decoration: none; padding: 12px 22px; border-radius: 8px; font-weight: bold; font-size: 14px;">
+                    Pay {{ $invoice->currency }} {{ number_format($invoice->balance_due, 2) }}
+                </a>
+            </div>
+        @endif
+
         <p style="font-size: 14px;">
             The complete invoice is attached as a PDF document. If you have any questions regarding this invoice, please don't hesitate to contact us.
         </p>

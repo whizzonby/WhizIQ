@@ -4,62 +4,50 @@ namespace App\Jobs;
 
 use App\Models\Appointment;
 use App\Models\BookingSetting;
+use App\Models\ClientInvoice;
+use App\Models\ClientInvoiceItem;
+use App\Models\InvoiceClient;
 use App\Models\User;
-use App\Services\MeetingPlatform\MeetingPlatformService;
-use App\Services\ReceiptService;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Notification;
 use App\Notifications\AppointmentConfirmedNotification;
 use App\Notifications\NewAppointmentBookedNotification;
+use App\Services\InvoicePDFService;
+use App\Services\MeetingPlatform\MeetingPlatformService;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class ProcessNewAppointment implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public Appointment $appointment,
         public BookingSetting $bookingSetting
     ) {}
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         try {
-            // Create meeting link if platform is configured (slow operation)
             $meetingService = new MeetingPlatformService();
             $this->appointment = $meetingService->createMeetingForAppointment(
                 $this->appointment,
                 $this->bookingSetting
             );
 
-            $paymentType = $this->appointment->appointmentType?->payment_type ?? 'none';
+            $appointmentType = $this->appointment->appointmentType;
+            $paymentType = $appointmentType?->payment_type ?? 'none';
+            $appointmentPrice = (float) ($appointmentType?->price ?? 0);
 
-            // Invoice type: create invoice (book now, pay later — no receipt yet)
-            if ($this->appointment->payment_required && $paymentType === 'invoice') {
+            if ($appointmentPrice > 0 && $paymentType === 'invoice') {
                 $this->createInvoiceForAppointment();
             }
 
-            // Upfront / deposit type: payment already collected — issue receipt immediately
-            if ($this->appointment->payment_required
-                && in_array($paymentType, ['upfront', 'deposit'])
-                && $this->appointment->attendee_email) {
-                ReceiptService::createFromAppointment($this->appointment);
-            }
-
-            // Send confirmation email to attendee (slow operation)
             if ($this->appointment->attendee_email) {
                 Notification::route('mail', $this->appointment->attendee_email)
                     ->notify(new AppointmentConfirmedNotification($this->appointment));
             }
 
-            // Send notification to appointment owner (slow operation)
             $owner = User::find($this->bookingSetting->user_id);
             if ($owner) {
                 $owner->notify(new NewAppointmentBookedNotification($this->appointment));
@@ -68,67 +56,66 @@ class ProcessNewAppointment implements ShouldQueue
             Log::info('Appointment processed successfully', [
                 'appointment_id' => $this->appointment->id,
             ]);
-
         } catch (\Exception $e) {
             Log::error('Failed to process appointment', [
                 'appointment_id' => $this->appointment->id,
                 'error' => $e->getMessage(),
             ]);
-
-            // Don't fail the job - appointment is already created
-            // Just log the error so admin can follow up
         }
     }
 
-    /**
-     * Create invoice for appointments with invoice payment type
-     */
     protected function createInvoiceForAppointment(): void
     {
         try {
-            // Load appointment type if not loaded
-            if (!$this->appointment->relationLoaded('appointmentType')) {
+            if (! $this->appointment->relationLoaded('appointmentType')) {
                 $this->appointment->load('appointmentType');
             }
 
             $appointmentType = $this->appointment->appointmentType;
-            if (!$appointmentType) {
-                Log::warning('Cannot create invoice - appointment type not found', [
+            if (! $appointmentType) {
+                Log::warning('Cannot create invoice because appointment type was not found', [
                     'appointment_id' => $this->appointment->id,
                 ]);
+
                 return;
             }
 
-            // Get or create invoice client from appointment attendee
-            $invoiceClient = \App\Models\InvoiceClient::firstOrCreate(
-                [
+            $invoiceClientLookup = $this->appointment->contact_id
+                ? [
+                    'user_id' => $this->appointment->user_id,
+                    'contact_id' => $this->appointment->contact_id,
+                ]
+                : [
                     'user_id' => $this->appointment->user_id,
                     'email' => $this->appointment->attendee_email,
-                ],
+                ];
+
+            $invoiceClient = InvoiceClient::firstOrCreate(
+                $invoiceClientLookup,
                 [
                     'name' => $this->appointment->attendee_name,
-                    'company_name' => $this->appointment->attendee_company,
+                    'email' => $this->appointment->attendee_email,
                     'phone' => $this->appointment->attendee_phone,
+                    'company' => $this->appointment->attendee_company,
+                    'is_active' => true,
                 ]
             );
 
-            // Generate unique invoice number
-            $lastInvoice = \App\Models\ClientInvoice::where('user_id', $this->appointment->user_id)
+            $lastInvoice = ClientInvoice::where('user_id', $this->appointment->user_id)
                 ->orderBy('id', 'desc')
                 ->first();
 
             $invoiceNumber = $lastInvoice
-                ? 'INV-' . str_pad((int)substr($lastInvoice->invoice_number, 4) + 1, 5, '0', STR_PAD_LEFT)
+                ? 'INV-' . str_pad((int) substr($lastInvoice->invoice_number, 4) + 1, 5, '0', STR_PAD_LEFT)
                 : 'INV-00001';
 
-            // Create the invoice
-            $invoice = \App\Models\ClientInvoice::create([
+            $invoice = ClientInvoice::create([
                 'user_id' => $this->appointment->user_id,
                 'invoice_client_id' => $invoiceClient->id,
                 'invoice_number' => $invoiceNumber,
                 'status' => 'sent',
                 'invoice_date' => now(),
-                'due_date' => now()->addDays(7), // 7 days payment term
+                'due_date' => now()->addDays(7),
                 'subtotal' => $appointmentType->price,
                 'tax_rate' => 0,
                 'tax_amount' => 0,
@@ -136,12 +123,11 @@ class ProcessNewAppointment implements ShouldQueue
                 'total_amount' => $appointmentType->price,
                 'amount_paid' => 0,
                 'balance_due' => $appointmentType->price,
-                'currency' => \App\Models\BookingSetting::where('user_id', $this->appointment->user_id)->value('currency') ?? 'USD',
-                'notes' => 'Invoice for appointment: ' . $appointmentType->name,
+                'currency' => BookingSetting::where('user_id', $this->appointment->user_id)->value('currency') ?? 'USD',
+                'notes' => "Invoice for appointment: {$appointmentType->name}",
             ]);
 
-            // Create invoice item
-            \App\Models\ClientInvoiceItem::create([
+            ClientInvoiceItem::create([
                 'client_invoice_id' => $invoice->id,
                 'description' => $appointmentType->name,
                 'quantity' => 1,
@@ -156,18 +142,20 @@ class ProcessNewAppointment implements ShouldQueue
                 'invoice_number' => $invoiceNumber,
             ]);
 
-            // Email invoice PDF to client
+            $this->appointment->forceFill([
+                'client_invoice_id' => $invoice->id,
+            ])->save();
+
             try {
                 $invoice->loadMissing('client');
-                app(\App\Services\InvoicePDFService::class)->emailToClient($invoice);
+                app(InvoicePDFService::class)->emailToClient($invoice);
             } catch (\Exception $emailException) {
                 Log::warning('Failed to email invoice to client after appointment booking', [
-                    'invoice_id'     => $invoice->id,
+                    'invoice_id' => $invoice->id,
                     'appointment_id' => $this->appointment->id,
-                    'error'          => $emailException->getMessage(),
+                    'error' => $emailException->getMessage(),
                 ]);
             }
-
         } catch (\Exception $e) {
             Log::error('Failed to create invoice for appointment', [
                 'appointment_id' => $this->appointment->id,
