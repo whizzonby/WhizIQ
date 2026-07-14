@@ -38,15 +38,11 @@ class Subscription extends Model
         'extra_payment_provider_data',
         'type',
         'comments',
-        'first_reminder_sent_at',
-        'second_reminder_sent_at',
     ];
 
     protected $casts = [
         'price_tiers' => 'array',
         'extra_payment_provider_data' => 'array',
-        'first_reminder_sent_at' => 'datetime',
-        'second_reminder_sent_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

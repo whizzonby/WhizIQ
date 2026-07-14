@@ -22,11 +22,7 @@ class CreateTask extends CreateRecord
                 ->send();
 
             $this->redirect(SubscriptionResource::getUrl('index'));
-
-            return;
         }
-
-        parent::mount();
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

@@ -41,22 +41,20 @@ class LocalSubscriptionExpiringSoonReminder extends Command
         $secondReminderEnabled = config('app.trial_without_payment.second_reminder_enabled');
 
         if ($firstReminderEnabled) {
-            $subscriptions = $this->subscriptionService->getLocalSubscriptionsDueForReminder('first_reminder_sent_at', $firstReminderDays);
+            $subscriptions = $this->subscriptionService->getLocalSubscriptionExpiringIn($firstReminderDays);
 
             foreach ($subscriptions as $subscription) {
                 $user = User::find($subscription->user_id);
                 Mail::to($user->email)->send(new LocalSubscriptionExpiringSoon($subscription));
-                $subscription->update(['first_reminder_sent_at' => now()]);
             }
         }
 
         if ($secondReminderEnabled) {
-            $subscriptions = $this->subscriptionService->getLocalSubscriptionsDueForReminder('second_reminder_sent_at', $secondReminderDays);
+            $subscriptions = $this->subscriptionService->getLocalSubscriptionExpiringIn($secondReminderDays);
 
             foreach ($subscriptions as $subscription) {
                 $user = User::find($subscription->user_id);
                 Mail::to($user->email)->send(new LocalSubscriptionExpiringSoon($subscription));
-                $subscription->update(['second_reminder_sent_at' => now()]);
             }
         }
     }

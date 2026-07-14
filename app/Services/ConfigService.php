@@ -21,26 +21,10 @@ class ConfigService
 
         $configs = cache()->many(ConfigConstants::OVERRIDABLE_CONFIGS);
 
-        $missingKeys = array_keys(array_filter($configs, fn ($value) => is_null($value)));
+        if ($this->allAreNull($configs)) {  // this is to re-cache the configs if they were cleared from the cache for any reason
+            $this->exportAllConfigs();
 
-        // Re-sync from the database whenever ANY overridable config is
-        // missing from cache - not only when every key is missing. A
-        // partial cache eviction (e.g. just one key expiring/getting
-        // cleared) previously made the app silently ignore an admin-set
-        // value for that one key and fall back to the deploy-time config
-        // default instead, even though every other setting still worked.
-        if (! empty($missingKeys)) {
-            $dbConfigs = Config::getAll();
-
-            foreach ($missingKeys as $key) {
-                $dbValue = $dbConfigs[$key] ?? null;
-
-                if (! is_null($dbValue)) {
-                    cache()->forever($key, $dbValue);
-                }
-
-                $configs[$key] = $dbValue;
-            }
+            $configs = cache()->many(ConfigConstants::OVERRIDABLE_CONFIGS);
         }
 
         config($this->toKeyValueArray($configs));
@@ -106,5 +90,16 @@ class ConfigService
         }
 
         return $result;
+    }
+
+    private function allAreNull(array $configs): bool
+    {
+        foreach ($configs as $key => $value) {
+            if (! is_null($value)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
