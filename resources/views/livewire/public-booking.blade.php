@@ -1,34 +1,22 @@
-<div
-    class="wiq-landing min-h-screen"
-    wire:loading.class="opacity-50"
-    style="
-        --wiq-bg: #F7F6F3;
-        --wiq-ink: #211F1C;
-        --wiq-muted: #6B6559;
-        --wiq-border: #E4E0D8;
-        background: var(--wiq-bg);
-        color: var(--wiq-ink);
-    "
->
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8" wire:loading.class="opacity-50">
     <style>
-        .wiq-landing .wiq-serif { font-family: 'Fraunces', ui-serif, Georgia, serif; }
-
-        .wiq-landing .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .wiq-landing .custom-scrollbar::-webkit-scrollbar-track { background: var(--wiq-border); border-radius: 10px; }
-        .wiq-landing .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbb; border-radius: 10px; }
-
-        .wiq-landing .wiq-btn-primary {
-            background-color: var(--wiq-accent);
-            color: #fff;
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
         }
-        .wiq-landing .wiq-btn-primary:hover { opacity: .92; }
-        .wiq-landing .wiq-accent-text { color: var(--wiq-accent); }
-        .wiq-landing .wiq-accent-ring { box-shadow: 0 0 0 2px var(--wiq-accent); border-color: var(--wiq-accent); }
 
-        .wiq-landing .wiq-gallery-item { break-inside: avoid; }
-        .wiq-landing .wiq-gallery-grid { columns: 1; column-gap: 1rem; }
-        @media (min-width: 640px) { .wiq-landing .wiq-gallery-grid { columns: 2; } }
-        @media (min-width: 1024px) { .wiq-landing .wiq-gallery-grid { columns: 3; } }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
     </style>
 
     <script>
@@ -112,545 +100,512 @@
 
                 };
             });
-
-            Alpine.data('wiqLightbox', () => ({
-                open: false,
-                src: null,
-                show(src) { this.src = src; this.open = true; },
-                close() { this.open = false; },
-            }));
         });
     </script>
 
-    @if($confirmed)
-        {{-- Confirmation --}}
-        <div class="max-w-2xl mx-auto px-4 py-16">
-            <div class="text-center">
-                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full mb-6" style="background-color: color-mix(in srgb, var(--wiq-accent) 15%, transparent)">
-                    <svg class="h-9 w-9 wiq-accent-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                    </svg>
+    <div class="max-w-7xl mx-auto">
+        {{-- Header --}}
+        <div class="text-center mb-6">
+            @if($bookingSetting->logo_url)
+                <img src="{{ $bookingSetting->logo_url }}" alt="Logo" class="h-16 mx-auto mb-4">
+            @endif
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-2" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}">
+                {{ $bookingSetting->display_name }}
+            </h1>
+            @if($bookingSetting->welcome_message)
+                <p class="mt-2 text-gray-600 text-base sm:text-lg max-w-2xl mx-auto">{{ $bookingSetting->welcome_message }}</p>
+            @endif
+
+            @if($bookingSetting->review_count > 0)
+                <div class="mt-4 flex items-center justify-center gap-2 text-sm text-gray-700">
+                    <span class="font-semibold">{{ number_format($bookingSetting->average_rating, 1) }}</span>
+                    <span class="tracking-wide text-yellow-500">{{ str_repeat('*', (int) round($bookingSetting->average_rating)) }}</span>
+                    <span>from {{ $bookingSetting->review_count }} {{ Str::plural('review', $bookingSetting->review_count) }}</span>
                 </div>
+            @endif
 
-                <h1 class="wiq-serif text-3xl sm:text-4xl font-medium mb-3">
-                    @if($bookingSetting->require_approval)
-                        Request submitted
-                    @else
-                        You're all set
-                    @endif
-                </h1>
-
-                <p class="text-[var(--wiq-muted)] text-base sm:text-lg mb-10 max-w-lg mx-auto">
-                    @if($bookingSetting->require_approval)
-                        Your booking request has been submitted and is pending approval. You'll receive a confirmation email once it's approved.
-                    @else
-                        Your appointment is confirmed. A confirmation email with all the details will be sent to <strong>{{ $attendeeEmail }}</strong> shortly.
-                    @endif
-                </p>
-            </div>
-
-            <div class="bg-white rounded-2xl p-6 sm:p-8 text-left border border-[var(--wiq-border)]">
-                <h2 class="wiq-serif text-lg font-medium mb-6">Appointment details</h2>
-
-                <dl class="space-y-4 text-sm">
-                    <div class="flex items-start gap-4">
-                        <dt class="text-[var(--wiq-muted)] min-w-[110px]">Service</dt>
-                        <dd class="font-medium flex-1">{{ $selectedType->name }}</dd>
-                    </div>
-                    <div class="h-px bg-[var(--wiq-border)]"></div>
-                    <div class="flex items-start gap-4">
-                        <dt class="text-[var(--wiq-muted)] min-w-[110px]">Date</dt>
-                        <dd class="font-medium flex-1">{{ \Carbon\Carbon::parse($selectedDate)->format('l, F j, Y') }}</dd>
-                    </div>
-                    <div class="h-px bg-[var(--wiq-border)]"></div>
-                    <div class="flex items-start gap-4">
-                        <dt class="text-[var(--wiq-muted)] min-w-[110px]">Time</dt>
-                        <dd class="font-medium flex-1">{{ \Carbon\Carbon::createFromFormat('H:i', $selectedTime)->format('g:i A') }}</dd>
-                    </div>
-                    <div class="h-px bg-[var(--wiq-border)]"></div>
-                    <div class="flex items-start gap-4">
-                        <dt class="text-[var(--wiq-muted)] min-w-[110px]">Duration</dt>
-                        <dd class="font-medium flex-1">{{ $selectedType->duration_minutes }} minutes</dd>
-                    </div>
-                    <div class="h-px bg-[var(--wiq-border)]"></div>
-                    <div class="flex items-start gap-4">
-                        <dt class="text-[var(--wiq-muted)] min-w-[110px]">Attendee</dt>
-                        <dd class="font-medium flex-1">
-                            {{ $attendeeName }}<br>
-                            <span class="text-[var(--wiq-muted)] font-normal">{{ $attendeeEmail }}</span>
-                        </dd>
-                    </div>
-
-                    @if($createdAppointment && ($createdAppointment->venue || $createdAppointment->location))
-                        <div class="h-px bg-[var(--wiq-border)]"></div>
-                        <div class="flex items-start gap-4">
-                            <dt class="text-[var(--wiq-muted)] min-w-[110px]">Location</dt>
-                            <dd class="flex-1">
-                                @if($createdAppointment->venue)
-                                    @php($venue = $createdAppointment->venue)
-                                    <div class="font-medium mb-1">{{ $venue->name }}</div>
-                                    @if($venue->full_address)
-                                        <div class="text-[var(--wiq-muted)] mb-2">{{ $venue->full_address }}</div>
-                                    @endif
-                                    @if($createdAppointment->room_name)
-                                        <div class="text-[var(--wiq-muted)] mb-2">Room: {{ $createdAppointment->room_name }}</div>
-                                    @endif
-                                    @if($venue->google_maps_url)
-                                        <a href="{{ $venue->google_maps_url }}" target="_blank" class="inline-flex items-center gap-1 wiq-accent-text font-medium">
-                                            View on map →
-                                        </a>
-                                    @endif
-                                @elseif($createdAppointment->location)
-                                    {{ $createdAppointment->location }}
-                                @endif
-                            </dd>
-                        </div>
-                    @endif
-
-                    @if($createdAppointment && $createdAppointment->meeting_url)
-                        <div class="h-px bg-[var(--wiq-border)]"></div>
-                        <div class="flex items-start gap-4">
-                            <dt class="text-[var(--wiq-muted)] min-w-[110px]">Meeting</dt>
-                            <dd class="flex-1">
-                                <div class="flex items-center gap-2 mb-2 text-[var(--wiq-muted)]">
-                                    @if($createdAppointment->meeting_platform === 'zoom')
-                                        Zoom Meeting
-                                    @elseif($createdAppointment->meeting_platform === 'google_meet')
-                                        Google Meet
-                                    @endif
-                                </div>
-                                <a href="{{ $createdAppointment->meeting_url }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 wiq-btn-primary rounded-lg text-sm font-medium">
-                                    Join meeting
-                                </a>
-                                @if($createdAppointment->meeting_password)
-                                    <div class="mt-2 text-[var(--wiq-muted)]">Password: <code class="bg-[var(--wiq-bg)] px-2 py-0.5 rounded">{{ $createdAppointment->meeting_password }}</code></div>
-                                @endif
-                                @if($createdAppointment->meeting_id)
-                                    <div class="mt-1 text-[var(--wiq-muted)]">Meeting ID: <code class="bg-[var(--wiq-bg)] px-2 py-0.5 rounded">{{ $createdAppointment->meeting_id }}</code></div>
-                                @endif
-                            </dd>
-                        </div>
-                    @elseif($createdAppointment && $createdAppointment->appointment_format === 'online')
-                        <div class="h-px bg-[var(--wiq-border)]"></div>
-                        <div class="flex items-start gap-4">
-                            <dt class="text-[var(--wiq-muted)] min-w-[110px]">Meeting</dt>
-                            <dd class="flex-1 text-[var(--wiq-muted)]">Meeting link is being generated — you'll receive it by email shortly.</dd>
-                        </div>
-                    @endif
-                </dl>
-            </div>
-
-            <div class="mt-8 rounded-xl border border-[var(--wiq-border)] bg-white p-5 text-sm text-[var(--wiq-muted)]">
-                <p class="font-medium text-[var(--wiq-ink)] mb-2">What's next?</p>
-                <ul class="space-y-1 list-disc list-inside">
-                    <li>Full appointment confirmation by email</li>
-                    @if($createdAppointment && $createdAppointment->appointment_format === 'online')
-                        <li>Meeting link to join at the scheduled time</li>
-                    @endif
-                    <li>A calendar invite you can add to your schedule</li>
-                </ul>
-                <p class="mt-3">Need to make changes? Just contact us directly.</p>
-            </div>
-
-            <div class="mt-8 text-center">
-                <a href="{{ route('booking.public', ['slug' => $bookingSetting->booking_slug]) }}" class="inline-flex px-6 py-3 border border-[var(--wiq-border)] rounded-lg font-medium hover:bg-white transition-colors">
-                    Back to {{ $bookingSetting->display_name }}
-                </a>
-            </div>
+            {{-- Location Display --}}
+            @if($bookingSetting->business_address || $bookingSetting->business_city || $bookingSetting->business_country)
+                <div class="mt-3 flex items-center justify-center gap-2 text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span class="text-sm">
+                        @if($bookingSetting->business_address){{ $bookingSetting->business_address }}@endif
+                        @if($bookingSetting->business_address && ($bookingSetting->business_city || $bookingSetting->business_country)), @endif
+                        @if($bookingSetting->business_city){{ $bookingSetting->business_city }}@endif
+                        @if($bookingSetting->business_city && $bookingSetting->business_country), @endif
+                        @if($bookingSetting->business_country){{ $bookingSetting->business_country }}@endif
+                    </span>
+                </div>
+            @endif
         </div>
 
-    @elseif($currentStep === 1)
-        {{-- ============ LANDING PAGE ============ --}}
-
-        {{-- Hero --}}
-        <section class="relative overflow-hidden">
-            <div class="absolute inset-0">
-                @if($bookingSetting->cover_image_url)
-                    <img src="{{ Storage::url($bookingSetting->cover_image_url) }}" alt="" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10"></div>
-                @else
-                    <div class="w-full h-full" style="background: linear-gradient(160deg, var(--wiq-accent) 0%, color-mix(in srgb, var(--wiq-accent) 60%, #211F1C) 100%)"></div>
-                @endif
-            </div>
-
-            @php($onDark = (bool) $bookingSetting->cover_image_url)
-
-            <div class="relative max-w-5xl mx-auto px-6 pt-16 pb-24 sm:pt-24 sm:pb-32 text-center {{ $onDark ? 'text-white' : 'text-white' }}">
-                @if($bookingSetting->logo_url)
-                    <img src="{{ Storage::url($bookingSetting->logo_url) }}" alt="{{ $bookingSetting->display_name }}" class="h-14 w-14 rounded-full mx-auto mb-6 object-cover ring-2 ring-white/40">
-                @endif
-
-                <h1 class="wiq-serif text-4xl sm:text-6xl font-medium tracking-tight">
-                    {{ $bookingSetting->display_name }}
-                </h1>
-
-                @if($bookingSetting->welcome_message)
-                    <p class="mt-4 text-base sm:text-xl max-w-2xl mx-auto text-white/85">{{ $bookingSetting->welcome_message }}</p>
-                @endif
-
-                <div class="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/85">
-                    @if($bookingSetting->review_count > 0)
-                        <div class="flex items-center gap-2">
-                            @include('livewire.partials.star-rating', ['rating' => $bookingSetting->average_rating, 'color' => 'text-amber-300'])
-                            <span>{{ number_format($bookingSetting->average_rating, 1) }} · {{ $bookingSetting->review_count }} {{ Str::plural('review', $bookingSetting->review_count) }}</span>
-                        </div>
-                    @endif
-
-                    @if($bookingSetting->business_city || $bookingSetting->business_country)
-                        <div class="flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span>{{ collect([$bookingSetting->business_city, $bookingSetting->business_country])->filter()->implode(', ') }}</span>
-                        </div>
-                    @endif
-                </div>
-
-                @if($nextAvailableSlot)
-                    <div class="mt-8 inline-flex items-center gap-2.5 rounded-full bg-white/95 backdrop-blur px-5 py-2.5 shadow-lg">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style="background-color: var(--wiq-accent)"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2" style="background-color: var(--wiq-accent)"></span>
-                        </span>
-                        <span class="text-sm font-medium text-[var(--wiq-ink)]">
-                            Next available: {{ $nextAvailableSlot['date']->isToday() ? 'Today' : ($nextAvailableSlot['date']->isTomorrow() ? 'Tomorrow' : $nextAvailableSlot['date']->format('D, M j')) }} at {{ $nextAvailableSlot['time'] }}
-                        </span>
+        {{-- Progress Steps (only show after step 1) --}}
+        @if(!$confirmed && $currentStep > 1)
+            <div class="mb-6">
+                <div class="bg-white rounded-xl shadow-sm p-4">
+                    <div class="flex items-center justify-between max-w-2xl mx-auto">
+                        @php
+                            $steps = ['Select Service', 'Choose Time', 'Your Info'];
+                        @endphp
+                        @foreach($steps as $index => $label)
+                            <div class="flex items-center {{ $index < count($steps) - 1 ? 'flex-1' : '' }}">
+                                <div class="flex items-center">
+                                    <div class="
+                                        flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm transition-all
+                                        {{ $currentStep > ($index + 1) ? 'bg-green-500 text-white' : ($currentStep === ($index + 1) ? 'text-white shadow-lg scale-110' : 'bg-gray-200 text-gray-600') }}
+                                    " style="{{ $currentStep === ($index + 1) ? 'background-color: ' . ($bookingSetting->brand_color ?? '#3B82F6') : '' }}">
+                                        @if($currentStep > ($index + 1))
+                                            ✓
+                                        @else
+                                            {{ $index + 1 }}
+                                        @endif
+                                    </div>
+                                    <span class="ml-2 text-xs sm:text-sm font-medium {{ $currentStep === ($index + 1) ? 'text-gray-900' : 'text-gray-500' }} hidden sm:inline">
+                                        {{ $label }}
+                                    </span>
+                                </div>
+                                @if($index < count($steps) - 1)
+                                    <div class="flex-1 h-0.5 mx-2 sm:mx-4 transition-all {{ $currentStep > ($index + 1) ? 'bg-green-500' : 'bg-gray-200' }}"></div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
-                @endif
-
-                <div class="mt-10">
-                    <a href="#services" class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full font-semibold wiq-btn-primary shadow-lg transition-transform hover:scale-[1.02]">
-                        Book an appointment
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-                    </a>
                 </div>
-            </div>
-        </section>
-
-        @if(session()->has('error'))
-            <div class="max-w-3xl mx-auto px-6 mt-6">
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">{{ session('error') }}</div>
             </div>
         @endif
 
-        {{-- Services --}}
-        <section id="services" class="max-w-6xl mx-auto px-6 py-16 sm:py-20 scroll-mt-8">
-            <div class="text-center mb-12">
-                <p class="text-xs font-semibold tracking-widest uppercase wiq-accent-text mb-3">Services</p>
-                <h2 class="wiq-serif text-3xl sm:text-4xl font-medium">Choose what you need</h2>
-                <p class="mt-3 text-[var(--wiq-muted)] max-w-xl mx-auto">Pick a service to see availability and book instantly.</p>
-            </div>
+        {{-- Main Content Card --}}
+        <div class="bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+            @if(session()->has('error'))
+                <div class="m-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                    {{ session('error') }}
+                </div>
+            @endif
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @forelse($appointmentTypes as $type)
-                    <div
-                        wire:click="selectType({{ $type->id }})"
-                        wire:key="service-{{ $type->id }}"
-                        class="group relative text-left rounded-2xl overflow-hidden bg-white border border-[var(--wiq-border)] cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
-                    >
-                        <div class="relative h-44 bg-[var(--wiq-bg)] overflow-hidden">
-                            @if($type->image_url)
-                                <img src="{{ Storage::url($type->image_url) }}" alt="{{ $type->name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <div class="p-6 sm:p-8">
+                @if($confirmed)
+                    {{-- Step 4: Confirmation --}}
+                    <div class="text-center py-12 max-w-2xl mx-auto">
+                        {{-- Success Animation --}}
+                        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full mb-6 animate-bounce" style="background-color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}15">
+                            <svg class="h-12 w-12" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+
+                        <h2 class="text-3xl font-bold text-gray-900 mb-3">
+                            @if($bookingSetting->require_approval)
+                                Request Submitted!
                             @else
-                                <div class="w-full h-full flex items-center justify-center" style="background: linear-gradient(135deg, {{ $type->color }}12 0%, {{ $type->color }}28 100%)">
-                                    <svg class="w-14 h-14 opacity-25" style="color: {{ $type->color }}" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                You're All Set!
+                            @endif
+                        </h2>
+
+                        <p class="text-gray-600 text-lg mb-8 max-w-lg mx-auto">
+                            @if($bookingSetting->require_approval)
+                                Your booking request has been submitted and is pending approval. You'll receive a confirmation email once it's approved.
+                            @else
+                                Your appointment has been confirmed! A confirmation email with all details will be sent to <strong>{{ $attendeeEmail }}</strong> within the next few minutes.
+                            @endif
+                        </p>
+
+                        {{-- Appointment Details Card --}}
+                        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 text-left shadow-inner border border-gray-200">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                     </svg>
                                 </div>
-                            @endif
-
-                            @if($type->price > 0)
-                                <div class="absolute bottom-3 right-3 bg-white px-3 py-1 rounded-full shadow-sm">
-                                    <span class="text-sm font-semibold wiq-accent-text">${{ number_format($type->price, 2) }}</span>
-                                </div>
-                            @else
-                                <div class="absolute bottom-3 right-3 bg-[var(--wiq-ink)] px-3 py-1 rounded-full shadow-sm">
-                                    <span class="text-sm font-semibold text-white">Free</span>
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="p-5">
-                            <div class="flex items-center gap-2 mb-1.5">
-                                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background-color: {{ $type->color }}"></span>
-                                <h3 class="wiq-serif text-lg font-medium line-clamp-1">{{ $type->name }}</h3>
+                                <h3 class="text-xl font-bold text-gray-900">Appointment Details</h3>
                             </div>
 
-                            @if($type->description)
-                                <p class="text-[var(--wiq-muted)] text-sm mb-3 line-clamp-2">{{ $type->description }}</p>
-                            @endif
-
-                            @if($type->review_count > 0)
-                                <div class="mb-3 flex items-center gap-1.5 text-xs text-[var(--wiq-muted)]">
-                                    @include('livewire.partials.star-rating', ['rating' => $type->approved_reviews_avg_rating, 'size' => 'w-3.5 h-3.5'])
-                                    <span>{{ number_format($type->approved_reviews_avg_rating, 1) }} ({{ $type->review_count }})</span>
+                            <dl class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <dt class="text-gray-500 font-medium min-w-[100px]">Service</dt>
+                                    <dd class="text-gray-900 font-semibold flex-1">{{ $selectedType->name }}</dd>
                                 </div>
-                            @endif
+                                <div class="h-px bg-gray-300"></div>
+                                <div class="flex items-start gap-4">
+                                    <dt class="text-gray-500 font-medium min-w-[100px]">Date</dt>
+                                    <dd class="text-gray-900 font-semibold flex-1">
+                                        {{ \Carbon\Carbon::parse($selectedDate)->format('l, F j, Y') }}
+                                    </dd>
+                                </div>
+                                <div class="h-px bg-gray-300"></div>
+                                <div class="flex items-start gap-4">
+                                    <dt class="text-gray-500 font-medium min-w-[100px]">Time</dt>
+                                    <dd class="text-gray-900 font-semibold flex-1">
+                                        {{ \Carbon\Carbon::createFromFormat('H:i', $selectedTime)->format('g:i A') }}
+                                    </dd>
+                                </div>
+                                <div class="h-px bg-gray-300"></div>
+                                <div class="flex items-start gap-4">
+                                    <dt class="text-gray-500 font-medium min-w-[100px]">Duration</dt>
+                                    <dd class="text-gray-900 font-semibold flex-1">{{ $selectedType->duration_minutes }} minutes</dd>
+                                </div>
+                                <div class="h-px bg-gray-300"></div>
+                                <div class="flex items-start gap-4">
+                                    <dt class="text-gray-500 font-medium min-w-[100px]">Attendee</dt>
+                                    <dd class="text-gray-900 font-semibold flex-1">
+                                        {{ $attendeeName }}<br>
+                                        <span class="text-sm font-normal text-gray-600">{{ $attendeeEmail }}</span>
+                                    </dd>
+                                </div>
 
-                            <div class="flex items-center justify-between pt-3 border-t border-[var(--wiq-border)] text-xs text-[var(--wiq-muted)]">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex items-center gap-1">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        {{ $type->duration_minutes }} min
-                                    </span>
-                                    @if($type->appointment_format)
-                                        <span class="flex items-center gap-1">
-                                            @if($type->appointment_format === 'online')
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                                Online
-                                            @elseif($type->appointment_format === 'in_person')
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                                In person
-                                            @elseif($type->appointment_format === 'hybrid')
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
-                                                Hybrid
+                                @if($createdAppointment && ($createdAppointment->venue || $createdAppointment->location))
+                                    <div class="h-px bg-gray-300"></div>
+                                    <div class="flex items-start gap-4">
+                                        <dt class="text-gray-500 font-medium min-w-[100px]">Location</dt>
+                                        <dd class="text-gray-900 flex-1">
+                                            @if($createdAppointment->venue)
+                                                @php
+                                                    $venue = $createdAppointment->venue;
+                                                @endphp
+                                                <div class="font-semibold mb-1">{{ $venue->name }}</div>
+                                                @if($venue->full_address)
+                                                    <div class="text-sm text-gray-600 mb-2">{{ $venue->full_address }}</div>
+                                                @endif
+                                                @if($createdAppointment->room_name)
+                                                    <div class="text-sm text-gray-600 mb-2">
+                                                        <span class="font-medium">Room:</span> {{ $createdAppointment->room_name }}
+                                                    </div>
+                                                @endif
+                                                @if($venue->google_maps_url)
+                                                    <a href="{{ $venue->google_maps_url }}" target="_blank"
+                                                       class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium mt-1">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                        </svg>
+                                                        View on Map
+                                                    </a>
+                                                @endif
+                                            @elseif($createdAppointment->location)
+                                                <div class="flex items-start gap-2">
+                                                    <svg class="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    </svg>
+                                                    <div class="font-semibold">{{ $createdAppointment->location }}</div>
+                                                </div>
                                             @endif
-                                        </span>
-                                    @endif
-                                </div>
-                                <a
-                                    href="{{ route('booking.service.detail', ['slug' => $bookingSetting->booking_slug, 'serviceId' => $type->id]) }}"
-                                    onclick="event.stopPropagation()"
-                                    class="text-[var(--wiq-muted)] hover:text-[var(--wiq-ink)] transition-colors flex-shrink-0 ml-2"
-                                >Details →</a>
-                            </div>
+                                        </dd>
+                                    </div>
+                                @endif
+
+                                @if($createdAppointment && $createdAppointment->meeting_url)
+                                    <div class="h-px bg-gray-300"></div>
+                                    <div class="flex items-start gap-4">
+                                        <dt class="text-gray-500 font-medium min-w-[100px]">Meeting</dt>
+                                        <dd class="text-gray-900 flex-1">
+                                @elseif($createdAppointment && $createdAppointment->appointment_format === 'online')
+                                    <div class="h-px bg-gray-300"></div>
+                                    <div class="flex items-start gap-4">
+                                        <dt class="text-gray-500 font-medium min-w-[100px]">Meeting</dt>
+                                        <dd class="text-gray-900 flex-1">
+                                            <div class="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                                <svg class="w-5 h-5 text-blue-600 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span class="text-sm text-blue-800">
+                                                    <strong>Meeting link is being generated...</strong><br>
+                                                    <span class="text-xs">You'll receive it via email shortly</span>
+                                                </span>
+                                            </div>
+                                        </dd>
+                                    </div>
+                                @endif
+
+                                @if($createdAppointment && $createdAppointment->meeting_url)
+                                    <div style="display:none"></div> {{-- Close the previous dd tag --}}
+                                    <div class="flex items-start gap-4" style="display:none">
+                                        <dt></dt>
+                                        <dd>
+                                            <div class="flex items-center gap-2 mb-2">
+                                                @if($createdAppointment->meeting_platform === 'zoom')
+                                                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M7.5 9V15L14.5 12L7.5 9M2 3H22C23.1 3 24 3.9 24 5V19C24 20.1 23.1 21 22 21H2C0.9 21 0 20.1 0 19V5C0 3.9 0.9 3 2 3M9 6C7.9 6 7 6.9 7 8V16C7 17.1 7.9 18 9 18H19C20.1 18 21 17.1 21 16V8C21 6.9 20.1 6 19 6H9Z" />
+                                                    </svg>
+                                                    <span class="font-semibold text-blue-600">Zoom Meeting</span>
+                                                @elseif($createdAppointment->meeting_platform === 'google_meet')
+                                                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M15,6H9v6H15M20,5V19A1,1 0 0,1 19,20H5A1,1 0 0,1 4,19V5A1,1 0 0,1 5,4H19A1,1 0 0,1 20,5M18,14H16V12H18M18,11H16V9H18V11Z" />
+                                                    </svg>
+                                                    <span class="font-semibold text-green-600">Google Meet</span>
+                                                @endif
+                                            </div>
+                                            <a href="{{ $createdAppointment->meeting_url }}" target="_blank"
+                                               class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                                </svg>
+                                                Join Meeting
+                                            </a>
+                                            @if($createdAppointment->meeting_password)
+                                                <div class="mt-2 text-sm text-gray-600">
+                                                    <span class="font-medium">Password:</span> <code class="bg-gray-100 px-2 py-1 rounded">{{ $createdAppointment->meeting_password }}</code>
+                                                </div>
+                                            @endif
+                                            @if($createdAppointment->meeting_id)
+                                                <div class="mt-1 text-sm text-gray-600">
+                                                    <span class="font-medium">Meeting ID:</span> <code class="bg-gray-100 px-2 py-1 rounded">{{ $createdAppointment->meeting_id }}</code>
+                                                </div>
+                                            @endif
+                                        </dd>
+                                    </div>
+                                @endif
+                            </dl>
                         </div>
-                    </div>
-                @empty
-                    <div class="col-span-full text-center py-16 text-[var(--wiq-muted)]">
-                        <svg class="w-14 h-14 mx-auto mb-4 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
-                        <p>No services available for booking right now.</p>
-                    </div>
-                @endforelse
-            </div>
-        </section>
 
-        {{-- About --}}
-        @if($bookingSetting->about_text || $bookingSetting->about_title)
-            @php($aboutHasImage = (bool) ($bookingSetting->cover_image_url || $bookingSetting->logo_url))
-            <section class="border-t border-[var(--wiq-border)]">
-                <div class="max-w-6xl mx-auto px-6 py-16 sm:py-20 {{ $aboutHasImage ? 'grid md:grid-cols-2 gap-12 items-center' : '' }}">
-                    <div class="{{ $aboutHasImage ? 'order-2 md:order-1' : 'max-w-2xl mx-auto' }}">
-                        <p class="text-xs font-semibold tracking-widest uppercase wiq-accent-text mb-3 {{ $aboutHasImage ? '' : 'text-center' }}">About</p>
-                        <h2 class="wiq-serif text-3xl sm:text-4xl font-medium mb-5 {{ $aboutHasImage ? '' : 'text-center' }}">{{ $bookingSetting->about_title ?: 'About us' }}</h2>
-                        @if($bookingSetting->about_text)
-                            <p class="text-[var(--wiq-muted)] leading-relaxed whitespace-pre-line">{{ $bookingSetting->about_text }}</p>
-                        @endif
-
-                        @php($openDays = $businessHours->filter(fn ($s) => $s->is_available))
-                        @if($openDays->isNotEmpty() || $bookingSetting->business_address)
-                            <div class="mt-8 grid sm:grid-cols-2 gap-6 text-sm text-left">
-                                @if($bookingSetting->business_address || $bookingSetting->business_city)
-                                    <div>
-                                        <p class="font-medium mb-1.5">Location</p>
-                                        <p class="text-[var(--wiq-muted)]">
-                                            {{ collect([$bookingSetting->business_address, $bookingSetting->business_city, $bookingSetting->business_country])->filter()->implode(', ') }}
-                                        </p>
-                                    </div>
-                                @endif
-                                @if($openDays->isNotEmpty())
-                                    @php($dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'])
-                                    <div>
-                                        <p class="font-medium mb-1.5">Hours</p>
-                                        <ul class="text-[var(--wiq-muted)] space-y-0.5">
-                                            @foreach($openDays->sortKeys() as $day => $schedule)
-                                                <li>{{ $dayNames[$day] }}: {{ $schedule->start_time->format('g:i A') }} – {{ $schedule->end_time->format('g:i A') }}</li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-                    </div>
-
-                    @if($bookingSetting->cover_image_url || $bookingSetting->logo_url)
-                        <div class="order-1 md:order-2">
-                            <img
-                                src="{{ Storage::url($bookingSetting->cover_image_url ?: $bookingSetting->logo_url) }}"
-                                alt="{{ $bookingSetting->display_name }}"
-                                class="w-full aspect-[4/3] object-cover rounded-2xl"
+                        {{-- Action Buttons --}}
+                        <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+                            <a
+                                href="{{ url('/') }}"
+                                class="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all"
                             >
+                                Return Home
+                            </a>
                         </div>
-                    @endif
-                </div>
-            </section>
-        @endif
 
-        {{-- Portfolio / Gallery --}}
-        @if(!empty($bookingSetting->gallery_images))
-            <section class="border-t border-[var(--wiq-border)] bg-white" x-data="wiqLightbox">
-                <div class="max-w-6xl mx-auto px-6 py-16 sm:py-20">
-                    <div class="text-center mb-12">
-                        <p class="text-xs font-semibold tracking-widest uppercase wiq-accent-text mb-3">Portfolio</p>
-                        <h2 class="wiq-serif text-3xl sm:text-4xl font-medium">Our work</h2>
-                    </div>
-
-                    <div class="wiq-gallery-grid">
-                        @foreach($bookingSetting->gallery_images as $image)
-                            <button type="button" @click="show('{{ Storage::url($image) }}')" class="wiq-gallery-item block w-full mb-4 rounded-xl overflow-hidden">
-                                <img src="{{ Storage::url($image) }}" alt="" class="w-full h-auto object-cover hover:scale-[1.02] transition-transform duration-300">
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-
-                <div
-                    x-show="open"
-                    x-cloak
-                    @click="close()"
-                    @keydown.escape.window="close()"
-                    class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6"
-                    x-transition.opacity
-                >
-                    <img :src="src" class="max-w-full max-h-full rounded-lg" @click.stop>
-                    <button @click="close()" class="absolute top-5 right-5 text-white/80 hover:text-white">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                </div>
-            </section>
-        @endif
-
-        {{-- Testimonials --}}
-        @if($recentReviews->isNotEmpty())
-            <section class="border-t border-[var(--wiq-border)]">
-                <div class="max-w-6xl mx-auto px-6 py-16 sm:py-20">
-                    <div class="text-center mb-12">
-                        <p class="text-xs font-semibold tracking-widest uppercase wiq-accent-text mb-3">Testimonials</p>
-                        <h2 class="wiq-serif text-3xl sm:text-4xl font-medium">What clients say</h2>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        @foreach($recentReviews as $review)
-                            <div class="rounded-2xl border border-[var(--wiq-border)] bg-white p-5">
-                                @include('livewire.partials.star-rating', ['rating' => $review->rating, 'size' => 'w-3.5 h-3.5'])
-                                @if($review->comment)
-                                    <p class="mt-3 text-sm leading-relaxed">&ldquo;{{ Str::limit($review->comment, 160) }}&rdquo;</p>
+                        {{-- Additional Info --}}
+                        <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-sm text-blue-800">
+                                <strong>What's next?</strong> Check your email inbox within the next few minutes for:
+                            </p>
+                            <ul class="text-sm text-blue-800 mt-2 ml-4 list-disc space-y-1">
+                                <li>Full appointment details and confirmation</li>
+                                @if($createdAppointment && $createdAppointment->appointment_format === 'online')
+                                <li>Meeting link (Zoom/Google Meet) to join the appointment</li>
                                 @endif
-                                <div class="mt-4 flex items-center justify-between text-xs text-[var(--wiq-muted)]">
-                                    <span class="font-medium text-[var(--wiq-ink)]">{{ $review->display_name }}</span>
-                                    @if($review->appointmentType)
-                                        <span>{{ $review->appointmentType->name }}</span>
+                                <li>Calendar invitation to add to your schedule</li>
+                            </ul>
+                            <p class="text-sm text-blue-800 mt-3">
+                                If you need to make changes, please contact us directly.
+                            </p>
+                        </div>
+                    </div>
+
+                @elseif($currentStep === 1)
+                    {{-- Step 1: Select Appointment Type --}}
+
+                    {{-- Hero Section --}}
+                    <div class="text-center mb-10 pb-8 border-b border-gray-200">
+                        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Choose Your Service</h2>
+                        <p class="text-gray-600 text-lg mb-6 max-w-2xl mx-auto">Select from our range of professional services tailored to meet your needs</p>
+
+                        {{-- Trust Elements --}}
+                        <div class="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500 mt-6">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium text-gray-700">Instant Confirmation</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium text-gray-700">Secure Booking</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="font-medium text-gray-700">Email Reminders</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Services Grid --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+                        @forelse($appointmentTypes as $type)
+                            <div
+                                wire:click="selectType({{ $type->id }})"
+                                class="group relative block text-left rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 bg-white border border-gray-200 cursor-pointer"
+                            >
+                                {{-- Service Image --}}
+                                <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                                    @if($type->image_url)
+                                        <img src="{{ Storage::url($type->image_url) }}" alt="{{ $type->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center" style="background: linear-gradient(135deg, {{ $type->color }}15 0%, {{ $type->color }}30 100%)">
+                                            <svg class="w-16 h-16 opacity-30" style="color: {{ $type->color }}" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                            </svg>
+                                        </div>
+                                    @endif
+
+                                    {{-- Price Tag --}}
+                                    @if($type->price > 0)
+                                        <div class="absolute bottom-3 right-3 bg-white px-3 py-1.5 rounded-full shadow-md">
+                                            <span class="text-sm font-bold" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}">${{ number_format($type->price, 2) }}</span>
+                                        </div>
+                                    @else
+                                        <div class="absolute bottom-3 right-3 bg-green-500 px-3 py-1.5 rounded-full shadow-md">
+                                            <span class="text-sm font-bold text-white">Free</span>
+                                        </div>
                                     @endif
                                 </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </section>
-        @endif
 
-        {{-- Footer --}}
-        <footer class="border-t border-[var(--wiq-border)] bg-white">
-            <div class="max-w-6xl mx-auto px-6 py-12 grid sm:grid-cols-3 gap-8 text-sm">
-                <div>
-                    <p class="wiq-serif text-lg font-medium mb-2">{{ $bookingSetting->display_name }}</p>
-                    @if($bookingSetting->welcome_message)
-                        <p class="text-[var(--wiq-muted)]">{{ Str::limit($bookingSetting->welcome_message, 100) }}</p>
-                    @endif
-                </div>
-                @if($bookingSetting->business_address || $bookingSetting->business_city)
-                    <div>
-                        <p class="font-medium mb-2">Location</p>
-                        <p class="text-[var(--wiq-muted)]">
-                            {{ collect([$bookingSetting->business_address, $bookingSetting->business_city, $bookingSetting->business_country])->filter()->implode(', ') }}
-                        </p>
-                    </div>
-                @endif
-                <div>
-                    <p class="font-medium mb-2">Book with us</p>
-                    <a href="#services" class="wiq-accent-text font-medium">View services →</a>
-                </div>
-            </div>
-        </footer>
+                                {{-- Service Details --}}
+                                <div class="p-5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ $type->color }}"></div>
+                                        <h3 class="text-lg font-bold text-gray-900 line-clamp-1">{{ $type->name }}</h3>
+                                    </div>
 
-        {{-- Sticky mobile CTA --}}
-        <div class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-[var(--wiq-border)] p-3" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
-            <a href="#services" class="flex items-center justify-center w-full py-3 rounded-full font-semibold wiq-btn-primary">
-                Book an appointment
-            </a>
-        </div>
+                                    @if($type->description)
+                                        <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ $type->description }}</p>
+                                    @endif
 
-    @else
-        {{-- ============ BOOKING FLOW (steps 2 / 2.5 / 3) ============ --}}
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-            {{-- Compact header --}}
-            <div class="flex items-center gap-3 mb-8">
-                @if($bookingSetting->logo_url)
-                    <img src="{{ Storage::url($bookingSetting->logo_url) }}" alt="" class="h-9 w-9 rounded-full object-cover">
-                @endif
-                <a href="{{ route('booking.public', ['slug' => $bookingSetting->booking_slug]) }}" class="wiq-serif font-medium hover:wiq-accent-text transition-colors">
-                    {{ $bookingSetting->display_name }}
-                </a>
-            </div>
+                                    @if($type->review_count > 0)
+                                        <div class="mb-4 flex items-center gap-2 text-xs text-gray-600">
+                                            <span class="font-semibold text-gray-900">{{ number_format($type->approved_reviews_avg_rating, 1) }}</span>
+                                            <span class="tracking-wide text-yellow-500">{{ str_repeat('*', (int) round($type->approved_reviews_avg_rating)) }}</span>
+                                            <span>({{ $type->review_count }})</span>
+                                        </div>
+                                    @endif
 
-            {{-- Progress --}}
-            <div class="mb-8">
-                <div class="flex items-center justify-between">
-                    @php($steps = ['Select Service', 'Choose Time', 'Your Info'])
-                    @foreach($steps as $index => $label)
-                        <div class="flex items-center {{ $index < count($steps) - 1 ? 'flex-1' : '' }}">
-                            <div class="flex items-center">
-                                <div
-                                    class="flex items-center justify-center w-7 h-7 rounded-full font-semibold text-xs transition-all
-                                    {{ $currentStep > ($index + 1) ? 'bg-emerald-500 text-white' : ($currentStep === ($index + 1) ? 'text-white' : 'bg-[var(--wiq-border)] text-[var(--wiq-muted)]') }}"
-                                    style="{{ $currentStep === ($index + 1) ? 'background-color: var(--wiq-accent)' : '' }}"
-                                >
-                                    @if($currentStep > ($index + 1)) ✓ @else {{ $index + 1 }} @endif
+                                    <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                    <div class="flex items-center gap-4 text-sm text-gray-500">
+                                        <span class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span class="font-medium">{{ $type->duration_minutes }} min</span>
+                                        </span>
+
+                                        @if($type->appointment_format)
+                                            <span class="flex items-center gap-1.5">
+                                                @if($type->appointment_format === 'online')
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                    <span class="font-medium">Online</span>
+                                                @elseif($type->appointment_format === 'in_person')
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    </svg>
+                                                    <span class="font-medium">In-Person</span>
+                                                @elseif($type->appointment_format === 'hybrid')
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                                                    </svg>
+                                                    <span class="font-medium">Hybrid</span>
+                                                @endif
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <a
+                                        href="{{ route('booking.service.detail', ['slug' => $bookingSetting->booking_slug, 'serviceId' => $type->id]) }}"
+                                        onclick="event.stopPropagation()"
+                                        class="text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0 ml-2"
+                                    >Details →</a>
                                 </div>
-                                <span class="ml-2 text-xs font-medium {{ $currentStep === ($index + 1) ? 'text-[var(--wiq-ink)]' : 'text-[var(--wiq-muted)]' }} hidden sm:inline">
-                                    {{ $label }}
-                                </span>
+                                </div>
                             </div>
-                            @if($index < count($steps) - 1)
-                                <div class="flex-1 h-px mx-3 {{ $currentStep > ($index + 1) ? 'bg-emerald-500' : 'bg-[var(--wiq-border)]' }}"></div>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+                        @empty
+                            <div class="col-span-full text-center py-16 text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                </svg>
+                                <p class="text-lg font-medium">No services available for booking at this time.</p>
+                            </div>
+                        @endforelse
+                    </div>
 
-            <div class="bg-white rounded-2xl border border-[var(--wiq-border)] p-6 sm:p-8">
-                @if($currentStep === 2)
+                    @if($recentReviews->isNotEmpty())
+                        <div class="mt-10 border-t border-gray-200 pt-8">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Recent reviews</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                @foreach($recentReviews as $review)
+                                    <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div class="font-semibold text-gray-900">{{ $review->display_name }}</div>
+                                            <div class="text-sm text-yellow-500">{{ str_repeat('*', $review->rating) }}</div>
+                                        </div>
+                                        @if($review->appointmentType)
+                                            <div class="mt-1 text-xs text-gray-500">{{ $review->appointmentType->name }}</div>
+                                        @endif
+                                        @if($review->comment)
+                                            <p class="mt-3 text-sm text-gray-700">{{ Str::limit($review->comment, 150) }}</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                @elseif($currentStep === 2)
+                    {{-- Step 2: Select Date and Time --}}
                     <div class="mb-6">
-                        <button wire:click="goBack" class="text-[var(--wiq-muted)] hover:text-[var(--wiq-ink)] flex items-center gap-1 text-sm transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        <button
+                            wire:click="goBack"
+                            class="text-gray-600 hover:text-gray-900 flex items-center gap-1 text-sm transition-colors"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
                             Back
                         </button>
                     </div>
 
-                    <h2 class="wiq-serif text-xl font-medium mb-1">Choose date & time</h2>
-                    <p class="text-[var(--wiq-muted)] text-sm mb-6">{{ $selectedType->name }} · {{ $selectedType->duration_minutes }} minutes</p>
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">Choose Date & Time</h2>
+                    <p class="text-gray-600 mb-6">{{ $selectedType->name }} - {{ $selectedType->duration_minutes }} minutes</p>
 
                     <div class="grid md:grid-cols-2 gap-8">
+                        {{-- Calendar --}}
                         <div>
-                            <h3 class="font-medium mb-4 flex items-center gap-2 text-sm">
-                                <svg class="w-4 h-4 text-[var(--wiq-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                Select date
+                            <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                Select Date
                             </h3>
 
-                            @php($calendarDates = array_column($availableDates, 'date'))
-                            <div x-data="bookingCalendar(@js($calendarDates), '{{ $bookingSetting->brand_color ?? '#3B82F6' }}', @js($selectedDate))" class="bg-white border border-[var(--wiq-border)] rounded-xl overflow-hidden relative">
+                            @php $calendarDates = array_column($availableDates, 'date'); @endphp
+                            <div
+                                x-data="bookingCalendar(@js($calendarDates), '{{ $bookingSetting->brand_color ?? '#3B82F6' }}', @js($selectedDate))"
+                                class="bg-white border border-gray-200 rounded-xl overflow-hidden relative"
+                            >
+                                {{-- Loading overlay --}}
                                 <div wire:loading wire:target="selectType" class="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
-                                    <svg class="animate-spin h-6 w-6 wiq-accent-text" fill="none" viewBox="0 0 24 24">
+                                    <svg class="animate-spin h-7 w-7" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                 </div>
 
-                                <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--wiq-border)]">
-                                    <button @click="prevMonth()" :disabled="!canPrev" type="button" class="p-1.5 rounded-lg hover:bg-[var(--wiq-bg)] disabled:opacity-30 disabled:cursor-not-allowed">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                {{-- Month navigation --}}
+                                <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                                    <button @click="prevMonth()" :disabled="!canPrev" type="button"
+                                        class="p-1.5 rounded-lg transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed">
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
                                     </button>
-                                    <span class="text-sm font-medium" x-text="monthLabel"></span>
-                                    <button @click="nextMonth()" :disabled="!canNext" type="button" class="p-1.5 rounded-lg hover:bg-[var(--wiq-bg)] disabled:opacity-30 disabled:cursor-not-allowed">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    <span class="text-sm font-semibold text-gray-900" x-text="monthLabel"></span>
+                                    <button @click="nextMonth()" :disabled="!canNext" type="button"
+                                        class="p-1.5 rounded-lg transition-colors hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed">
+                                        <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                        </svg>
                                     </button>
                                 </div>
 
+                                {{-- Day-of-week headers --}}
                                 <div class="grid grid-cols-7 px-3 pt-3">
                                     <template x-for="h in ['Su','Mo','Tu','We','Th','Fr','Sa']">
-                                        <div class="text-center text-[10px] font-medium text-[var(--wiq-muted)] pb-2" x-text="h"></div>
+                                        <div class="text-center text-xs font-medium text-gray-400 pb-2" x-text="h"></div>
                                     </template>
                                 </div>
 
+                                {{-- Date grid --}}
                                 <div class="grid grid-cols-7 gap-0.5 px-3 pb-4">
                                     <template x-for="(day, idx) in calendarDays" :key="idx">
                                         <div class="flex items-center justify-center">
@@ -662,10 +617,10 @@
                                                     type="button"
                                                     :style="day.selected ? `background-color:${color};color:white;` : ''"
                                                     :class="{
-                                                        'hover:bg-[var(--wiq-bg)] font-medium cursor-pointer': day.clickable && !day.selected,
-                                                        'text-white font-semibold': day.selected,
-                                                        'opacity-25 cursor-not-allowed': day.past,
-                                                        'text-[var(--wiq-border)] cursor-not-allowed': !day.available && !day.past,
+                                                        'hover:bg-gray-100 text-gray-900 font-medium cursor-pointer': day.clickable && !day.selected,
+                                                        'text-white font-bold': day.selected,
+                                                        'opacity-25 cursor-not-allowed text-gray-400': day.past,
+                                                        'text-gray-300 cursor-not-allowed': !day.available && !day.past,
                                                     }"
                                                     class="w-9 h-9 rounded-full text-sm transition-all flex items-center justify-center"
                                                     x-text="day.num"
@@ -676,75 +631,97 @@
                                 </div>
 
                                 @if(empty($availableDates))
-                                    <p class="text-center pb-4 text-sm text-[var(--wiq-muted)]">No availability found for this service.</p>
+                                    <p class="text-center pb-4 text-sm text-gray-400">No availability found for this service.</p>
                                 @endif
                             </div>
                         </div>
 
+                        {{-- Available Time Slots --}}
                         <div>
-                            <h3 class="font-medium mb-4 flex items-center gap-2 text-sm">
-                                <svg class="w-4 h-4 text-[var(--wiq-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
                                 @if($selectedDate)
                                     {{ \Carbon\Carbon::parse($selectedDate)->format('l, M j, Y') }}
                                 @else
-                                    Select time
+                                    Select Time
                                 @endif
                             </h3>
 
                             @if($selectedDate)
                                 <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar relative">
+                                    {{-- Loading overlay for time slots --}}
                                     <div wire:loading wire:target="selectDate" class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
-                                        <svg class="animate-spin h-6 w-6 wiq-accent-text" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
+                                        <div class="text-center">
+                                            <svg class="animate-spin h-8 w-8 mx-auto mb-2" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            <p class="text-sm font-medium text-gray-700">Loading times...</p>
+                                        </div>
                                     </div>
                                     @forelse($availableSlots as $slotInfo)
                                         <button
                                             wire:click="selectTime('{{ $slotInfo['time'] }}')"
                                             wire:loading.attr="disabled"
                                             wire:target="selectTime"
-                                            wire:key="slot-{{ $slotInfo['time'] }}"
                                             type="button"
-                                            class="w-full text-center px-4 py-2.5 border rounded-lg font-medium text-sm transition-all disabled:opacity-50 disabled:cursor-wait
-                                            {{ $selectedTime === $slotInfo['time'] ? 'text-white' : 'border-[var(--wiq-border)] hover:border-[var(--wiq-ink)]' }}"
-                                            style="{{ $selectedTime === $slotInfo['time'] ? 'background-color: var(--wiq-accent); border-color: var(--wiq-accent)' : '' }}"
+                                            class="w-full text-center px-4 py-3 border-2 rounded-lg hover:shadow-sm transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-wait
+                                            {{ $selectedTime === $slotInfo['time'] ? 'ring-2 text-white' : 'border-gray-200 text-gray-700 hover:border-gray-300' }}"
+                                            style="{{ $selectedTime === $slotInfo['time'] ? 'background-color: ' . ($bookingSetting->brand_color ?? '#3B82F6') . '; border-color: ' . ($bookingSetting->brand_color ?? '#3B82F6') : '' }}"
                                         >
                                             {{ $slotInfo['formatted'] }}
                                         </button>
                                     @empty
-                                        <div class="text-center py-10 text-[var(--wiq-muted)] border border-dashed border-[var(--wiq-border)] rounded-lg text-sm">
-                                            No times available for this date
+                                        <div class="text-center py-12 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                                            <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <p class="text-sm">No times available for this date</p>
                                         </div>
                                     @endforelse
                                 </div>
                             @else
-                                <div class="text-center py-16 text-[var(--wiq-muted)] border border-dashed border-[var(--wiq-border)] rounded-lg text-sm">
-                                    Please select a date first
+                                <div class="text-center py-16 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+                                    <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="text-sm font-medium">Please select a date first</p>
                                 </div>
                             @endif
                         </div>
                     </div>
 
                 @elseif($currentStep == 2.5)
+                    {{-- Step 2.5: Select Venue (for in-person appointments) --}}
                     <div class="mb-6">
-                        <button wire:click="goBack" class="text-[var(--wiq-muted)] hover:text-[var(--wiq-ink)] flex items-center gap-1 text-sm transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        <button
+                            wire:click="goBack"
+                            class="text-gray-600 hover:text-gray-900 flex items-center gap-1 text-sm transition-colors"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
                             Back
                         </button>
                     </div>
 
-                    <h2 class="wiq-serif text-xl font-medium mb-1">Select location</h2>
-                    <p class="text-[var(--wiq-muted)] text-sm mb-6">
-                        {{ $selectedType->name }} · {{ \Carbon\Carbon::parse($selectedDate . ' ' . $selectedTime)->format('F j, Y \a\t g:i A') }}
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">Select Location</h2>
+                    <p class="text-gray-600 mb-6">
+                        {{ $selectedType->name }} - {{ \Carbon\Carbon::parse($selectedDate . ' ' . $selectedTime)->format('F j, Y \a\t g:i A') }}
                     </p>
 
                     <div class="space-y-3 relative">
+                        {{-- Loading overlay for venues --}}
                         <div wire:loading wire:target="selectTime" class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
-                            <svg class="animate-spin h-8 w-8 wiq-accent-text" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
+                            <div class="text-center">
+                                <svg class="animate-spin h-10 w-10 mx-auto mb-2" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <p class="text-sm font-medium text-gray-700">Loading venues...</p>
+                            </div>
                         </div>
 
                         @forelse($availableVenues as $venue)
@@ -752,133 +729,246 @@
                                 wire:click="selectVenue({{ $venue->id }})"
                                 wire:loading.attr="disabled"
                                 wire:target="selectVenue"
-                                wire:key="venue-{{ $venue->id }}"
                                 type="button"
-                                class="w-full text-left p-4 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-wait {{ $selectedVenueId == $venue->id ? '' : 'border-[var(--wiq-border)] hover:shadow-sm' }}"
-                                style="{{ $selectedVenueId == $venue->id ? 'border-color: var(--wiq-accent); box-shadow: 0 0 0 1px var(--wiq-accent)' : '' }}"
+                                class="w-full text-left p-5 border-2 rounded-xl hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-wait {{ $selectedVenueId == $venue->id ? 'ring-2' : 'border-gray-200' }}"
+                                style="{{ $selectedVenueId == $venue->id ? 'border-color: ' . ($bookingSetting->brand_color ?? '#3B82F6') . '; box-shadow: 0 0 0 1px ' . ($bookingSetting->brand_color ?? '#3B82F6') : '' }}"
                             >
                                 <div class="flex items-start justify-between">
                                     <div class="flex-1">
-                                        <h3 class="font-medium mb-1">{{ $venue->name }}</h3>
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <svg class="w-5 h-5 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                            <h3 class="text-lg font-semibold text-gray-900">{{ $venue->name }}</h3>
+                                        </div>
+
                                         @if($venue->full_address)
-                                            <p class="text-[var(--wiq-muted)] text-sm mb-1">{{ $venue->full_address }}</p>
+                                            <p class="text-gray-600 mb-2 text-sm">{{ $venue->full_address }}</p>
                                         @endif
+
                                         @if($venue->description)
-                                            <p class="text-[var(--wiq-muted)] text-sm">{{ Str::limit($venue->description, 100) }}</p>
+                                            <p class="text-gray-600 mb-3 text-sm">{{ Str::limit($venue->description, 100) }}</p>
                                         @endif
+
                                         @if($venue->google_maps_url)
-                                            <a href="{{ $venue->google_maps_url }}" target="_blank" onclick="event.stopPropagation();" class="inline-flex items-center gap-1 text-sm wiq-accent-text font-medium mt-1">
-                                                View on map →
+                                            <a 
+                                                href="{{ $venue->google_maps_url }}" 
+                                                target="_blank"
+                                                onclick="event.stopPropagation();"
+                                                class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                                </svg>
+                                                View on Map
                                             </a>
                                         @endif
                                     </div>
-                                    <svg class="w-5 h-5 text-[var(--wiq-muted)] flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+
+                                    <svg class="w-6 h-6 text-gray-400 flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
                                 </div>
                             </button>
                         @empty
-                            <div class="text-center py-10 text-[var(--wiq-muted)] border border-dashed border-[var(--wiq-border)] rounded-lg text-sm">
-                                <p>No venues available for this time slot</p>
-                                <button wire:click="goBack" class="mt-4 px-4 py-2 text-sm border border-[var(--wiq-border)] rounded-lg hover:bg-[var(--wiq-bg)] transition-colors">Go back</button>
+                            <div class="text-center py-12 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+                                <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <p class="text-sm font-medium">No venues available for this time slot</p>
+                                <p class="text-xs text-gray-400 mt-1">Please select a different time</p>
+                                <button
+                                    wire:click="goBack"
+                                    class="mt-4 px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg transition-colors"
+                                >
+                                    Go Back
+                                </button>
                             </div>
                         @endforelse
                     </div>
 
                 @elseif($currentStep === 3)
+                    {{-- Step 3: Contact Information --}}
                     <div class="mb-6">
-                        <button wire:click="goBack" class="text-[var(--wiq-muted)] hover:text-[var(--wiq-ink)] flex items-center gap-1 text-sm transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        <button
+                            wire:click="goBack"
+                            class="text-gray-600 hover:text-gray-900 flex items-center gap-1 text-sm transition-colors"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
                             Back
                         </button>
                     </div>
 
-                    <h2 class="wiq-serif text-xl font-medium mb-1">Your information</h2>
-                    <p class="text-[var(--wiq-muted)] text-sm mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">Your Information</h2>
+                    <p class="text-gray-600 mb-6">
                         {{ \Carbon\Carbon::parse($selectedDate . ' ' . $selectedTime)->format('F j, Y \a\t g:i A') }}
                     </p>
 
                     <form wire:submit.prevent="submitBooking" class="space-y-5 relative">
-                        <div wire:loading wire:target="submitBooking" class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
+                        {{-- Loading Overlay --}}
+                        <div wire:loading wire:target="submitBooking" class="absolute inset-0 bg-white/70 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
                             <div class="text-center">
-                                <svg class="animate-spin h-10 w-10 mx-auto mb-3 wiq-accent-text" fill="none" viewBox="0 0 24 24">
+                                <svg class="animate-spin h-12 w-12 mx-auto mb-3" style="color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <p class="font-medium">Creating your appointment…</p>
+                                <p class="text-lg font-semibold text-gray-900">Creating your appointment...</p>
+                                <p class="text-sm text-gray-600 mt-1">Please wait while we process your booking</p>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-2">Full name <span class="text-red-500">*</span></label>
-                            <input type="text" wire:model="attendeeName" wire:loading.attr="disabled" wire:target="submitBooking"
-                                class="w-full px-4 py-2.5 border border-[var(--wiq-border)] rounded-lg focus:outline-none focus:ring-2 wiq-accent-ring transition-all disabled:bg-[var(--wiq-bg)]"
-                                placeholder="Jane Doe" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Full Name <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                wire:model="attendeeName"
+                                wire:loading.attr="disabled"
+                                wire:target="submitBooking"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                placeholder="John Doe"
+                                required
+                            >
                             @error('attendeeName') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-2">Email <span class="text-red-500">*</span></label>
-                            <input type="email" wire:model="attendeeEmail" wire:loading.attr="disabled" wire:target="submitBooking"
-                                class="w-full px-4 py-2.5 border border-[var(--wiq-border)] rounded-lg focus:outline-none focus:ring-2 wiq-accent-ring transition-all disabled:bg-[var(--wiq-bg)]"
-                                placeholder="jane@example.com" required>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Email <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                wire:model="attendeeEmail"
+                                wire:loading.attr="disabled"
+                                wire:target="submitBooking"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                placeholder="john@example.com"
+                                required
+                            >
                             @error('attendeeEmail') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium mb-2">Phone number @if($selectedType->require_phone)<span class="text-red-500">*</span>@endif</label>
-                            <input type="tel" wire:model="attendeePhone" wire:loading.attr="disabled" wire:target="submitBooking"
-                                class="w-full px-4 py-2.5 border border-[var(--wiq-border)] rounded-lg focus:outline-none focus:ring-2 wiq-accent-ring transition-all disabled:bg-[var(--wiq-bg)]"
-                                placeholder="+1 (555) 123-4567" {{ $selectedType->require_phone ? 'required' : '' }}>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Phone Number @if($selectedType->require_phone)<span class="text-red-500">*</span>@endif
+                            </label>
+                            <input
+                                type="tel"
+                                wire:model="attendeePhone"
+                                wire:loading.attr="disabled"
+                                wire:target="submitBooking"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                placeholder="+1 (555) 123-4567"
+                                {{ $selectedType->require_phone ? 'required' : '' }}
+                            >
                             @error('attendeePhone') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
                         @if($selectedType->require_company)
                             <div>
-                                <label class="block text-sm font-medium mb-2">Company <span class="text-red-500">*</span></label>
-                                <input type="text" wire:model="attendeeCompany" wire:loading.attr="disabled" wire:target="submitBooking"
-                                    class="w-full px-4 py-2.5 border border-[var(--wiq-border)] rounded-lg focus:outline-none focus:ring-2 wiq-accent-ring transition-all disabled:bg-[var(--wiq-bg)]"
-                                    placeholder="Acme Inc." required>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Company <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    wire:model="attendeeCompany"
+                                    wire:loading.attr="disabled"
+                                    wire:target="submitBooking"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                    placeholder="Acme Inc."
+                                    required
+                                >
                                 @error('attendeeCompany') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
                         @endif
 
                         @if(in_array($selectedType->appointment_format ?? 'online', ['in_person', 'hybrid']))
                             <div>
-                                <label class="block text-sm font-medium mb-2">Location <span class="text-red-500">*</span></label>
-                                <input type="text" wire:model="location" wire:loading.attr="disabled" wire:target="submitBooking"
-                                    class="w-full px-4 py-2.5 border border-[var(--wiq-border)] rounded-lg focus:outline-none focus:ring-2 wiq-accent-ring transition-all disabled:bg-[var(--wiq-bg)]"
-                                    placeholder="123 Main St, City, State, ZIP" required>
-                                <p class="text-xs text-[var(--wiq-muted)] mt-1">Where should this appointment take place?</p>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Location <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    wire:model="location"
+                                    wire:loading.attr="disabled"
+                                    wire:target="submitBooking"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                    placeholder="Enter your address (e.g., 123 Main St, City, State, ZIP)"
+                                    required
+                                >
+                                <p class="text-sm text-gray-500 mt-1">
+                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Where should this appointment take place?
+                                </p>
                                 @error('location') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                             </div>
                         @endif
 
                         <div>
-                            <label class="block text-sm font-medium mb-2">Additional notes</label>
-                            <textarea wire:model="notes" wire:loading.attr="disabled" wire:target="submitBooking" rows="4"
-                                class="w-full px-4 py-2.5 border border-[var(--wiq-border)] rounded-lg focus:outline-none focus:ring-2 wiq-accent-ring transition-all resize-none disabled:bg-[var(--wiq-bg)]"
-                                placeholder="Anything we should know?"></textarea>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Additional Notes
+                            </label>
+                            <textarea
+                                wire:model="notes"
+                                wire:loading.attr="disabled"
+                                wire:target="submitBooking"
+                                rows="4"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                                placeholder="Anything we should know?"
+                            ></textarea>
                             @error('notes') <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> @enderror
                         </div>
 
-                        <button type="submit" wire:loading.attr="disabled" wire:target="submitBooking"
-                            class="w-full px-6 py-3.5 rounded-lg font-semibold wiq-btn-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                            <span wire:loading.remove wire:target="submitBooking">Confirm booking</span>
-                            <span wire:loading wire:target="submitBooking">Processing…</span>
-                        </button>
+                        <div class="pt-4">
+                            <button
+                                type="submit"
+                                wire:loading.attr="disabled"
+                                wire:target="submitBooking"
+                                class="w-full px-6 py-4 text-white font-semibold rounded-lg hover:opacity-90 transition-all shadow-md hover:shadow-lg transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none relative"
+                                style="background-color: {{ $bookingSetting->brand_color ?? '#3B82F6' }}"
+                            >
+                                <span wire:loading.remove wire:target="submitBooking" class="flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Confirm Booking
+                                </span>
+                                <span wire:loading wire:target="submitBooking" class="flex items-center justify-center gap-2">
+                                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Processing...
+                                </span>
+                            </button>
+                        </div>
                     </form>
                 @endif
             </div>
         </div>
-    @endif
 
-    {{-- Global loading indicator --}}
-    <div wire:loading wire:target="selectType,selectDate,selectTime,selectVenue" class="fixed top-4 right-4 z-50">
-        <div class="bg-white rounded-lg px-4 py-3 shadow-lg flex items-center gap-3 border border-[var(--wiq-border)]">
-            <svg class="animate-spin h-4 w-4 wiq-accent-text" fill="none" viewBox="0 0 24 24">
+        {{-- Footer --}}
+        <div class="text-center text-sm text-gray-500">
+            <p>Powered by {{ config('app.name') }}</p>
+        </div>
+    </div>
+
+    {{-- Loading Spinner - Inline --}}
+    <div wire:loading class="fixed top-4 right-4 z-50">
+        <div class="bg-white rounded-lg px-4 py-3 shadow-lg flex items-center gap-3">
+            <svg class="animate-spin h-5 w-5 text-primary-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span class="text-sm font-medium">Loading…</span>
+            <span class="text-sm font-medium text-gray-700">Loading...</span>
         </div>
     </div>
 </div>

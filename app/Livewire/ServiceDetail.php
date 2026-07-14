@@ -41,6 +41,6 @@ class ServiceDetail extends Component
 
     public function render()
     {
-        return view('livewire.service-detail')->layout('components.layouts.booking-public', ['bookingSetting' => $this->bookingSetting]);
+        return view('livewire.service-detail')->layout('components.layouts.app');
     }
 }

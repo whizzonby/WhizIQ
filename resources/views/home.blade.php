@@ -144,10 +144,7 @@
 
 {{-- ══════════════════════════════════════════════════════════
      0 · ANNOUNCEMENT BAR  (dismissible · session-gated)
-     Disabled 2026-07 — plans are now auto-assigned on onboarding,
-     so "claim your trial / no credit card required" no longer fits.
      ══════════════════════════════════════════════════════════ --}}
-{{--
 <div x-data="{ visible: !sessionStorage.getItem('wiq_ann_v2') }"
      x-show="visible"
      x-transition:leave="transition duration-200"
@@ -174,7 +171,6 @@
         </svg>
     </button>
 </div>
---}}
 
 
 {{-- ══════════════════════════════════════════════════════════
