@@ -276,7 +276,6 @@ class ClientInvoice extends Model
     {
         if ($this->is_overdue && $this->status !== 'paid' && $this->status !== 'cancelled') {
             $this->status = 'overdue';
-            $this->save();
         }
     }
 

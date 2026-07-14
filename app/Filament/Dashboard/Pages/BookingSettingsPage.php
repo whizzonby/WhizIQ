@@ -76,9 +76,14 @@ class BookingSettingsPage extends Page implements HasForms
             'booking_slug' => $this->settings->booking_slug,
             'display_name' => $this->settings->display_name,
             'welcome_message' => $this->settings->welcome_message,
+            'about_title' => $this->settings->about_title,
+            'about_text' => $this->settings->about_text,
             'business_address' => $this->settings->business_address,
             'business_city' => $this->settings->business_city,
             'business_country' => $this->settings->business_country,
+            'logo_url' => $this->settings->logo_url,
+            'cover_image_url' => $this->settings->cover_image_url,
+            'gallery_images' => $this->settings->gallery_images ?? [],
             'brand_color' => $this->settings->brand_color,
             'timezone' => $this->settings->timezone,
             'currency' => $this->settings->currency ?? 'USD',
@@ -110,7 +115,7 @@ class BookingSettingsPage extends Page implements HasForms
                         Forms\Components\TextInput::make('booking_slug')
                             ->label('Booking Page URL')
                             ->required()
-                            ->unique(BookingSetting::class, 'booking_slug', ignoreRecord: true)
+                            ->unique(BookingSetting::class, 'booking_slug', ignorable: fn () => $this->settings)
                             ->alphaDash()
                             ->maxLength(100)
                             ->prefix(url('/book/'))
@@ -149,6 +154,56 @@ class BookingSettingsPage extends Page implements HasForms
                             ->label('Brand Color')
                             ->helperText('Primary color for your booking page')
                             ->default('#3B82F6'),
+                    ])
+                    ->columns(2),
+
+                Section::make('Branding & About')
+                    ->description('Shown on your public booking page')
+                    ->icon('heroicon-o-photo')
+                    ->schema([
+                        Forms\Components\FileUpload::make('logo_url')
+                            ->label('Logo')
+                            ->image()
+                            ->imageEditor()
+                            ->directory('booking-settings/logo')
+                            ->visibility('public')
+                            ->maxSize(2048)
+                            ->helperText('Shown in your booking page header'),
+
+                        Forms\Components\FileUpload::make('cover_image_url')
+                            ->label('Cover Photo')
+                            ->image()
+                            ->imageEditor()
+                            ->directory('booking-settings/cover')
+                            ->visibility('public')
+                            ->maxSize(4096)
+                            ->helperText('Full-width banner photo at the top of your booking page'),
+
+                        Forms\Components\TextInput::make('about_title')
+                            ->label('About Section Heading')
+                            ->maxLength(150)
+                            ->placeholder('About Us')
+                            ->columnSpanFull(),
+
+                        Forms\Components\Textarea::make('about_text')
+                            ->label('About Text')
+                            ->rows(5)
+                            ->maxLength(2000)
+                            ->helperText('Tell clients who you are and what makes your business worth booking')
+                            ->columnSpanFull(),
+
+                        Forms\Components\FileUpload::make('gallery_images')
+                            ->label('Portfolio / Gallery')
+                            ->image()
+                            ->imageEditor()
+                            ->directory('booking-settings/gallery')
+                            ->visibility('public')
+                            ->multiple()
+                            ->reorderable()
+                            ->maxFiles(12)
+                            ->maxSize(2048)
+                            ->helperText('Photos of your work, space, or team (max 12 images)')
+                            ->columnSpanFull(),
                     ])
                     ->columns(2),
 

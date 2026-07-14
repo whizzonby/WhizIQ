@@ -16,6 +16,9 @@
     "finance_integrations": "false",
     "finance_auto_categorization": "false",
 
+    "finance_expenses_limit": "unlimited",
+    "finance_revenue_sources_limit": "unlimited",
+
     "tax_enabled": "false",
     "tax_documents_limit": "0",
     "tax_ocr": "false",
@@ -95,6 +98,9 @@
     "finance_forecasting": "basic",
     "finance_integrations": "false",
     "finance_auto_categorization": "false",
+
+    "finance_expenses_limit": "unlimited",
+    "finance_revenue_sources_limit": "unlimited",
 
     "tax_enabled": "true",
     "tax_documents_limit": "100",
@@ -176,6 +182,9 @@
     "finance_integrations": "true",
     "finance_auto_categorization": "true",
 
+    "finance_expenses_limit": "unlimited",
+    "finance_revenue_sources_limit": "unlimited",
+
     "tax_enabled": "true",
     "tax_documents_limit": "unlimited",
     "tax_ocr": "true",
@@ -239,6 +248,89 @@
     "integrations_social_oauth": "full",
 
     "support_level": "premium"
+  },
+
+  "LOCKED_TIER_METADATA": {
+    "crm_contacts_limit": "0",
+    "crm_deals_limit": "0",
+    "crm_segments": "false",
+    "crm_import_export": "false",
+    "crm_duplicate_detection": "false",
+    "crm_sentiment_analysis": "false",
+
+    "finance_invoices_limit": "0",
+    "finance_templates_limit": "0",
+    "finance_automated_reminders": "false",
+    "finance_forecasting": "false",
+    "finance_integrations": "false",
+    "finance_auto_categorization": "false",
+
+    "finance_expenses_limit": "0",
+    "finance_revenue_sources_limit": "0",
+
+    "tax_enabled": "false",
+    "tax_documents_limit": "0",
+    "tax_ocr": "false",
+    "tax_optimization_ai": "false",
+    "tax_forecasting_ai": "false",
+
+    "appointments_limit": "0",
+    "appointments_types_limit": "0",
+    "appointments_recurring": "false",
+    "appointments_calendar_sync": "false",
+    "appointments_meeting_platforms": "false",
+    "appointments_analytics": "false",
+
+    "email_templates_limit": "0",
+    "email_ai_generation": "false",
+    "email_scheduled": "false",
+    "email_campaigns_limit": "0",
+
+    "documents_storage_gb": "0",
+    "documents_ai_analysis": "false",
+    "documents_task_extraction": "false",
+    "documents_version_control": "false",
+    "documents_sharing": "false",
+
+    "passwords_limit": "0",
+    "passwords_health_monitoring": "false",
+    "passwords_audit_logs": "false",
+
+    "tasks_limit": "0",
+    "tasks_ai_priority": "false",
+    "tasks_kanban": "false",
+    "goals_enabled": "false",
+
+    "analytics_widgets_limit": "0",
+    "analytics_marketing": "false",
+    "analytics_social_integration": "false",
+    "analytics_staff_productivity": "false",
+
+    "ai_daily_limit": "0",
+    "ai_document_analysis_limit": "0",
+    "ai_email_features": "false",
+    "ai_task_features": "false",
+    "ai_swot_risk": "false",
+    "ai_anomaly_detection": "false",
+    "ai_forecasting": "false",
+    "ai_tax_optimization": "false",
+    "ai_ocr": "false",
+    "ai_sentiment": "false",
+    "ai_auto_categorization": "false",
+    "ai_marketing_insights": "false",
+    "ai_business_insights": "false",
+
+    "automation_reminders": "none",
+    "automation_scheduled_emails": "false",
+    "automation_expense_categorization": "false",
+    "automation_marketing_sync": "false",
+
+    "integrations_calendar": "false",
+    "integrations_meetings": "false",
+    "integrations_accounting": "false",
+    "integrations_social_oauth": "false",
+
+    "support_level": "none"
   },
 
   "HOW_TO_USE": {

@@ -370,7 +370,11 @@ class CustomOnboardingPage extends OnboardingPage
 
         $user = auth()->user();
 
-        if ($user && ! $user->isSubscribed()) {
+        if ($user
+            && ! $user->isSubscribed()
+            && config('app.trial_without_payment.enabled')
+            && app(\App\Services\SubscriptionService::class)->canUserHaveSubscriptionTrial($user)
+        ) {
             $trialPlan = \App\Models\Plan::where('is_active', true)
                 ->where('has_trial', true)
                 ->where('trial_interval_count', '>', 0)

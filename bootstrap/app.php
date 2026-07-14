@@ -11,6 +11,14 @@ return Illuminate\Foundation\Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Production runs behind AWS's load balancer, which terminates TLS and
+        // forwards plain HTTP to this instance. Without trusting its
+        // X-Forwarded-* headers, Laravel misjudges the request scheme/host,
+        // which breaks secure-cookie detection and signed URL validation
+        // (e.g. email verification links) since those are checked against
+        // the full absolute URL including scheme.
+        $middleware->trustProxies(at: '*', headers: Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB);
+
         $middleware->appendToGroup('web', [
             App\Http\Middleware\BlockedUser::class,
             App\Http\Middleware\UpdateUserLastSeenAt::class,

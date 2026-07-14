@@ -151,6 +151,15 @@ class SubscriptionService
             ]);
     }
 
+    public function convertLocalSubscriptionToPaymentProvider(Subscription $subscription, PaymentProvider $paymentProvider): Subscription
+    {
+        return $this->updateSubscription($subscription, [
+            'type' => SubscriptionType::PAYMENT_PROVIDER_MANAGED,
+            'payment_provider_id' => $paymentProvider->id,
+            'status' => SubscriptionStatus::PENDING->value,
+        ]);
+    }
+
     public function deleteAllNewSubscriptions(int $userId): void
     {
         Subscription::where('user_id', $userId)
@@ -506,13 +515,20 @@ class SubscriptionService
             $subscription->status === SubscriptionStatus::ACTIVE->value;
     }
 
-    public function getLocalSubscriptionExpiringIn(int $days)
+    /**
+     * Local trial subscriptions due for a reminder: reached (or passed)
+     * the days-out threshold, not yet expired, and not yet sent for this
+     * reminder slot. Range + null-check (not an exact-day match) so a
+     * reminder isn't lost forever if the daily job runs late or misses a day.
+     */
+    public function getLocalSubscriptionsDueForReminder(string $sentAtColumn, int $days): Collection
     {
         return Subscription::where('type', SubscriptionType::LOCALLY_MANAGED)
             ->where('status', SubscriptionStatus::ACTIVE->value)
             ->where('payment_provider_id', null)
-            // on that exact day
-            ->whereDate('ends_at', Carbon::now()->addDays($days)->toDateString())
+            ->whereNull($sentAtColumn)
+            ->where('ends_at', '>', now())
+            ->where('ends_at', '<=', Carbon::now()->addDays($days))
             ->get();
     }
 
@@ -553,6 +569,8 @@ class SubscriptionService
             $this->updateSubscription($subscription, [
                 'status' => SubscriptionStatus::INACTIVE->value,
             ]);
+
+            \App\Events\Subscription\LocalSubscriptionEnded::dispatch($subscription);
         });
     }
 

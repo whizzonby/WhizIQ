@@ -429,4 +429,8 @@ class ExpenseResource extends Resource
         return parent::getEloquentQuery()->where('user_id', auth()->id());
     }
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->canCreate(Expense::class, 'finance_expenses_limit') ?? false;
+    }
 }

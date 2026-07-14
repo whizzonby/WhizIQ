@@ -39,7 +39,7 @@ class SubscriptionPlansSeeder extends Seeder
         }
 
         // Validate required metadata keys exist
-        $requiredKeys = ['STARTER_PLAN_METADATA', 'PRO_PLAN_METADATA', 'PREMIUM_PLAN_METADATA'];
+        $requiredKeys = ['STARTER_PLAN_METADATA', 'PRO_PLAN_METADATA', 'PREMIUM_PLAN_METADATA', 'LOCKED_TIER_METADATA'];
         foreach ($requiredKeys as $key) {
             if (!isset($config[$key])) {
                 $this->command->error("❌ Missing metadata key in JSON: {$key}");
@@ -85,7 +85,7 @@ class SubscriptionPlansSeeder extends Seeder
                     'Standard Support',
                 ],
                 'is_popular' => false,
-                'is_default' => true,
+                'is_default' => false,
             ],
             [
                 'name' => 'Pro',
@@ -134,8 +134,29 @@ class SubscriptionPlansSeeder extends Seeder
             ],
         ];
 
-        // Ensure only Starter is the default product (reset others first)
+        // Ensure only the locked "no active plan" product below is the default
+        // (reset others first) — the default product must never be a paid,
+        // purchasable plan, since its metadata is what any user with zero
+        // active subscriptions gets, indefinitely, for free.
         Product::where('is_default', true)->update(['is_default' => false]);
+
+        $lockedMetadata = $config['LOCKED_TIER_METADATA'] ?? [];
+        if (empty($lockedMetadata)) {
+            $this->command->error('   ❌ ERROR: LOCKED_TIER_METADATA has NO metadata! Users with no subscription will get unrestricted access!');
+        } else {
+            Product::updateOrCreate(
+                ['slug' => 'no-active-plan'],
+                [
+                    'name' => 'No Active Plan',
+                    'description' => 'Fallback tier for users with no active subscription. Read-only access until a plan is chosen. This product intentionally has no purchasable plan attached.',
+                    'features' => [],
+                    'is_popular' => false,
+                    'is_default' => true,
+                    'metadata' => $lockedMetadata,
+                ]
+            );
+            $this->command->info('   ✓ Default fallback product set: No Active Plan (locked tier, no plan attached)');
+        }
 
         // Create products and plans
         foreach ($plans as $planConfig) {

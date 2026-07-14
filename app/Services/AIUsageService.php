@@ -257,7 +257,7 @@ class AIUsageService
     protected function isUnlimitedUser(User $user): bool
     {
         // Check if user is admin
-        if (method_exists($user, 'is_admin') && $user->is_admin) {
+        if ($user->is_admin) {
             return true;
         }
 

@@ -199,4 +199,8 @@ class RevenueSourceResource extends Resource
         return parent::getEloquentQuery()->where('user_id', auth()->id());
     }
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->canCreate(RevenueSource::class, 'finance_revenue_sources_limit') ?? false;
+    }
 }

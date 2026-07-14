@@ -93,6 +93,9 @@ class DashboardPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::BODY_START,
                 fn (): string => Blade::render("@livewire('announcement.view', ['placement' => '".AnnouncementPlacement::USER_DASHBOARD->value."'])")
             )
+            ->renderHook(PanelsRenderHook::BODY_START,
+                fn (): string => Blade::render("@livewire('subscription-status-banner')")
+            )
             ->authMiddleware([
                 Authenticate::class,
                 EnsureEmailIsVerifiedUnlessAdmin::class,
