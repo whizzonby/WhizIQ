@@ -11,14 +11,13 @@ return Illuminate\Foundation\Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // DNS for whizziq.com resolves directly to this server (no ALB or
-        // reverse proxy in front) and Apache terminates TLS itself, so
-        // Laravel already sees the real scheme/host without any help.
-        // Trusting X-Forwarded-* headers here would let a client spoof them
-        // directly, misleading secure-cookie detection and breaking session
-        // persistence, CSRF, and OAuth state checks - do not re-add this
-        // without confirming there is an actual proxy terminating TLS in
-        // front of this instance.
+        // Production runs behind AWS's load balancer, which terminates TLS and
+        // forwards plain HTTP to this instance. Without trusting its
+        // X-Forwarded-* headers, Laravel misjudges the request scheme/host,
+        // which breaks secure-cookie detection and signed URL validation
+        // (e.g. email verification links) since those are checked against
+        // the full absolute URL including scheme.
+        $middleware->trustProxies(at: '*', headers: Illuminate\Http\Request::HEADER_X_FORWARDED_AWS_ELB);
 
         $middleware->appendToGroup('web', [
             App\Http\Middleware\BlockedUser::class,
