@@ -15,10 +15,14 @@ class BookingSetting extends Model
         'is_booking_enabled',
         'display_name',
         'welcome_message',
+        'about_title',
+        'about_text',
         'business_address',
         'business_city',
         'business_country',
         'logo_url',
+        'cover_image_url',
+        'gallery_images',
         'brand_color',
         'timezone',
         'currency',
@@ -43,6 +47,7 @@ class BookingSetting extends Model
     ];
 
     protected $casts = [
+        'gallery_images' => 'array',
         'is_booking_enabled' => 'boolean',
         'require_approval' => 'boolean',
         'min_booking_notice_hours' => 'integer',

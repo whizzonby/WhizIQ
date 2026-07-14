@@ -1,11 +1,15 @@
-import Alpine from 'alpinejs'
 import './tour'
 import intersect from '@alpinejs/intersect'
 
-// plugins have to be imported before Alpine is started
-Alpine.plugin(intersect)
-window.Alpine = Alpine
-Alpine.start()
+// Livewire bundles and starts its own Alpine instance (via @livewireScripts).
+// Registering plugins here — instead of importing a separate Alpine and
+// calling Alpine.start() ourselves — avoids two competing Alpine instances,
+// which previously left wire:click/wire:model non-functional on pages using
+// this layout (Livewire's directives are only registered on Livewire's own
+// Alpine instance).
+document.addEventListener('alpine:init', () => {
+    window.Alpine.plugin(intersect)
+})
 
 document.addEventListener('DOMContentLoaded', function () {
     assignTabSliderEvents();

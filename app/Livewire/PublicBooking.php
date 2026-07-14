@@ -255,6 +255,39 @@ class PublicBooking extends Component
             ->value('id');
     }
 
+    /**
+     * Soonest genuinely bookable slot across the next couple of weeks, used
+     * as the hero's "Next available" moment - real data, not a placeholder.
+     */
+    protected function getNextAvailableSlot(BookingSetting $bookingSetting, $appointmentTypes): ?array
+    {
+        $type = $appointmentTypes->first();
+
+        if (! $type) {
+            return null;
+        }
+
+        for ($dayOffset = 0; $dayOffset <= 13; $dayOffset++) {
+            $date = now()->copy()->addDays($dayOffset)->startOfDay();
+
+            $slots = $this->availabilityService->getAvailableSlots(
+                $bookingSetting->user_id,
+                $date,
+                (int) $type->total_duration_minutes,
+                (int) ($bookingSetting->min_booking_notice_hours ?? 0)
+            );
+
+            if (! empty($slots)) {
+                return [
+                    'date' => $date,
+                    'time' => $slots[0]['formatted'],
+                ];
+            }
+        }
+
+        return null;
+    }
+
     public function render()
     {
         $bookingSetting = $this->getBookingSetting();
@@ -271,14 +304,21 @@ class PublicBooking extends Component
             ->approved()
             ->with('appointmentType')
             ->latest()
-            ->limit(3)
+            ->limit(9)
             ->get();
+
+        $businessHours = \App\Models\AvailabilitySchedule::where('user_id', $bookingSetting->user_id)
+            ->orderBy('day_of_week')
+            ->get()
+            ->keyBy('day_of_week');
 
         return view('livewire.public-booking', [
             'bookingSetting' => $bookingSetting,
             'selectedType' => $selectedType,
             'appointmentTypes' => $appointmentTypes,
             'recentReviews' => $recentReviews,
-        ])->layout('components.layouts.app');
+            'businessHours' => $businessHours,
+            'nextAvailableSlot' => $this->getNextAvailableSlot($bookingSetting, $appointmentTypes),
+        ])->layout('components.layouts.booking-public', ['bookingSetting' => $bookingSetting]);
     }
 }
