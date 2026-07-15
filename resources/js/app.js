@@ -1,5 +1,4 @@
 import Alpine from 'alpinejs'
-import './tour'
 import intersect from '@alpinejs/intersect'
 
 // plugins have to be imported before Alpine is started
