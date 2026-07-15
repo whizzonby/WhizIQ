@@ -39,7 +39,7 @@ class SubscriptionPlansSeeder extends Seeder
         }
 
         // Validate required metadata keys exist
-        $requiredKeys = ['STARTER_PLAN_METADATA', 'PRO_PLAN_METADATA', 'PREMIUM_PLAN_METADATA'];
+        $requiredKeys = ['STARTER_PLAN_METADATA', 'PRO_PLAN_METADATA', 'PREMIUM_PLAN_METADATA', 'LOCKED_TIER_METADATA'];
         foreach ($requiredKeys as $key) {
             if (!isset($config[$key])) {
                 $this->command->error("❌ Missing metadata key in JSON: {$key}");
@@ -85,7 +85,7 @@ class SubscriptionPlansSeeder extends Seeder
                     'Standard Support',
                 ],
                 'is_popular' => false,
-                'is_default' => true,
+                'is_default' => false,
             ],
             [
                 'name' => 'Pro',
@@ -134,8 +134,21 @@ class SubscriptionPlansSeeder extends Seeder
             ],
         ];
 
-        // Ensure only Starter is the default product (reset others first)
+        // Ensure only the locked "no active plan" product is the default.
+        // This metadata is used for users with no active subscription.
         Product::where('is_default', true)->update(['is_default' => false]);
+
+        Product::updateOrCreate(
+            ['slug' => 'no-active-plan'],
+            [
+                'name' => 'No Active Plan',
+                'description' => 'Fallback tier for users with no active subscription. This product has no purchasable plans.',
+                'features' => [],
+                'is_popular' => false,
+                'is_default' => true,
+                'metadata' => $config['LOCKED_TIER_METADATA'],
+            ]
+        );
 
         // Create products and plans
         foreach ($plans as $planConfig) {
@@ -209,6 +222,8 @@ class SubscriptionPlansSeeder extends Seeder
             $this->command->info("   ✓ Price set: $" . number_format($planConfig['price'] / 100, 2));
             $this->command->info("   ✅ {$planConfig['name']} plan complete!\n");
         }
+
+        $this->call(YearlyPlansSeeder::class);
 
         // Display summary
         $this->displaySummary($config);

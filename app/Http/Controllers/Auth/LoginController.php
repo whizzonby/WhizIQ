@@ -36,8 +36,8 @@ class LoginController extends Controller
 
     public function showLoginForm()
     {
-        if (url()->previous() != route('register') && url()->previous() != route('login') && Redirect::getIntendedUrl() === null) {
-            Redirect::setIntendedUrl(url()->previous()); // make sure we redirect back to the page we came from
+        if (Redirect::getIntendedUrl() === null) {
+            $this->rememberIntendedUrl(url()->previous()); // make sure we redirect back to a safe page we came from
         }
 
         return view('auth.login', [

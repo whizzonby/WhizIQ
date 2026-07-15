@@ -8,6 +8,7 @@ use App\Filament\Dashboard\Pages\TwoFactorAuth\ConfirmTwoFactorAuth;
 use App\Filament\Dashboard\Pages\TwoFactorAuth\EnableTwoFactorAuth;
 use App\Filament\Dashboard\Pages\TwoFactorAuth\TwoFactorAuth;
 use App\Http\Middleware\EnsureEmailIsVerifiedUnlessAdmin;
+use App\Http\Middleware\EnsureDashboardSubscriptionIsActive;
 use App\Http\Middleware\UpdateUserLastSeenAt;
 use App\Livewire\AddressForm;
 use Filament\Actions\Action;
@@ -96,6 +97,7 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 EnsureEmailIsVerifiedUnlessAdmin::class,
+                EnsureDashboardSubscriptionIsActive::class,
             ])
             ->plugins([
                 BreezyCore::make()

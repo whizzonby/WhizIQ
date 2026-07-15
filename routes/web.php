@@ -43,6 +43,10 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
             return redirect()->route('filament.dashboard.pages.onboarding');
         }
 
+        if (! $user->isSubscribed() && ! $user->isTrialing()) {
+            return redirect()->to(\App\Filament\Dashboard\Resources\Subscriptions\SubscriptionResource::getUrl('index'));
+        }
+
         return redirect()->route('filament.dashboard.pages.dashboard');
     }
 

@@ -10,9 +10,15 @@
             </div>
         @endif
 
-        <div class="plan-switcher tabs tabs-box justify-center w-full bg-neutral-200  mb-4 dark:bg-gray-800 max-w-fit m-auto">
+        <div class="plan-switcher tabs tabs-box justify-center w-full bg-neutral-200 mb-4 dark:bg-gray-800 max-w-fit m-auto">
             @foreach($groupedPlans as $interval => $plans)
-                <a class="tab dark:text-black {{$preselectedInterval == $interval ? 'tab-active': ''}}" data-target="plans-{{$interval}}" aria-selected="{{$preselectedInterval == $interval ? 'true' : 'false'}}">{{str($interval)->title()}}</a>
+                <a class="tab gap-2 dark:text-black {{$preselectedInterval == $interval ? 'tab-active': ''}}" data-target="plans-{{$interval}}" aria-selected="{{$preselectedInterval == $interval ? 'true' : 'false'}}">
+                    {{ ucfirst(__($plans[0]?->interval?->adverb ?? $interval)) }}
+
+                    @if(isset($intervalSavingPercentage[$interval]) && $intervalSavingPercentage[$interval] > 0)
+                        <span class="badge badge-primary badge-sm">{{ __('Save') }} {{ $intervalSavingPercentage[$interval] }}%</span>
+                    @endif
+                </a>
             @endforeach
         </div>
 
@@ -20,7 +26,7 @@
             @foreach($groupedPlans as $interval => $plans)
                 <div class="plans-container plans-{{$interval}} {{$preselectedInterval == $interval ? '': 'hidden'}}  grid max-w-md gap-10 row-gap-5 lg:max-w-(--breakpoint-lg) sm:row-gap-10 lg:grid-cols-3 xl:max-w-(--breakpoint-lg) sm:mx-auto dark:text-white pt-5 pb-5">
                     @foreach($plans as $plan)
-                        <x-filament.plans.one :plan="$plan" :subscription="$subscription" :buyRoute="$buyRoute" />
+                        <x-filament.plans.one :plan="$plan" :subscription="$subscription" :buyRoute="$buyRoute" :plan-product-ranks="$planProductRanks ?? []" />
                     @endforeach
                 </div>
             @endforeach
@@ -28,10 +34,9 @@
 
             <div class="grid max-w-md gap-10 row-gap-5 lg:max-w-(--breakpoint-lg) sm:row-gap-10 lg:grid-cols-3 xl:max-w-(--breakpoint-lg) sm:mx-auto dark:text-white">
                 @foreach($plans as $plan)
-                        <x-filament.plans.one :plan="$plan" :subscription="$subscription" :featured="$featured == $plan->product->slug" :buyRoute="$buyRoute"/>
+                        <x-filament.plans.one :plan="$plan" :subscription="$subscription" :featured="$featured == $plan->product->slug" :buyRoute="$buyRoute" :plan-product-ranks="$planProductRanks ?? []"/>
                 @endforeach
             </div>
         @endif
 
 </section>
-

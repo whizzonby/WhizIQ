@@ -2,12 +2,31 @@
     'subscription' => null,
     'buyRoute' => 'subscription.change-plan',
     'plan',
+    'planProductRanks' => [],
 ])
 
 @inject('planService', 'App\Services\PlanService')
 
 @php
     $price = $planService->getPlanPrice($plan);
+    $isCurrentPlan = $subscription !== null && $subscription->plan_id === $plan->id;
+    $isSameProduct = $subscription !== null && $subscription->plan?->product_id === $plan->product_id;
+    $currentRank = $subscription ? ($planProductRanks[$subscription->plan?->product_id] ?? null) : null;
+    $targetRank = $planProductRanks[$plan->product_id] ?? null;
+
+    if ($isCurrentPlan) {
+        $buttonLabel = __('Current plan');
+    } elseif ($subscription === null) {
+        $buttonLabel = __('Buy') . ' ' . ($plan->product ? $plan->product->name : __('Plan'));
+    } elseif ($isSameProduct) {
+        $buttonLabel = __('Switch billing');
+    } elseif ($currentRank !== null && $targetRank !== null && $targetRank > $currentRank) {
+        $buttonLabel = __('Upgrade to') . ' ' . ($plan->product ? $plan->product->name : __('Plan'));
+    } elseif ($currentRank !== null && $targetRank !== null && $targetRank < $currentRank) {
+        $buttonLabel = __('Downgrade to') . ' ' . ($plan->product ? $plan->product->name : __('Plan'));
+    } else {
+        $buttonLabel = __('Change to') . ' ' . ($plan->product ? $plan->product->name : __('Plan'));
+    }
 @endphp
 
 
@@ -71,9 +90,8 @@
     </div>
     <div class="w-full">
         <a class="btn btn-block bg-primary-500 dark:bg-primary-500 text-white px-6 mt-6 border-0 hover:bg-primary-500/90"
-           {{$subscription !== null && $subscription->plan_id === $plan->id ? 'disabled' : ''}}
-           href="{{ route($buyRoute, ['planSlug' => $plan->slug, 'subscriptionUuid' => $subscription?->uuid]) }}">
-            {{__('Buy')}} {{ $plan->product ? $plan->product->name : __('Plan') }}
+           @if($isCurrentPlan) aria-disabled="true" disabled @else href="{{ route($buyRoute, ['planSlug' => $plan->slug, 'subscriptionUuid' => $subscription?->uuid]) }}" @endif>
+            {{ $buttonLabel }}
         </a>
         <p class="max-w-xs mt-6 text-xs text-gray-600 sm:text-sm sm:text-center sm:max-w-sm sm:mx-auto dark:text-zinc-400">
             {{ $plan->product && $plan->product->description ? $plan->product->description : '' }}

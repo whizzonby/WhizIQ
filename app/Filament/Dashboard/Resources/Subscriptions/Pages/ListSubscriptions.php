@@ -18,7 +18,9 @@ class ListSubscriptions extends ListRecords
 
     public function getView(): string
     {
-        if ($this->getTableRecords()->count() === 0) {
+        $user = auth()->user();
+
+        if ($user && ! $user->isSubscribed() && ! $user->isTrialing()) {
             return 'filament.dashboard.resources.subscription-resource.pages.subscriptions';
         }
 
