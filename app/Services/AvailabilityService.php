@@ -191,13 +191,8 @@ class AvailabilityService
         $hasLocalAppointment = Appointment::where('user_id', $userId)
             ->whereIn('status', ['scheduled', 'confirmed'])
             ->where(function ($query) use ($start, $end) {
-                // Check for overlapping appointments
-                $query->whereBetween('start_datetime', [$start, $end])
-                    ->orWhereBetween('end_datetime', [$start, $end])
-                    ->orWhere(function ($q) use ($start, $end) {
-                        $q->where('start_datetime', '<=', $start)
-                          ->where('end_datetime', '>=', $end);
-                    });
+                $query->where('start_datetime', '<', $end)
+                    ->where('end_datetime', '>', $start);
             })
             ->exists();
 
@@ -276,13 +271,8 @@ class AvailabilityService
         $hasBooking = Appointment::where('venue_id', $venueId)
             ->whereIn('status', ['scheduled', 'confirmed'])
             ->where(function ($query) use ($start, $end) {
-                // Check for overlapping appointments
-                $query->whereBetween('start_datetime', [$start, $end])
-                    ->orWhereBetween('end_datetime', [$start, $end])
-                    ->orWhere(function ($q) use ($start, $end) {
-                        $q->where('start_datetime', '<=', $start)
-                          ->where('end_datetime', '>=', $end);
-                    });
+                $query->where('start_datetime', '<', $end)
+                    ->where('end_datetime', '>', $start);
             })
             ->exists();
 
@@ -295,21 +285,8 @@ class AvailabilityService
             $concurrentBookings = Appointment::where('venue_id', $venueId)
                 ->whereIn('status', ['scheduled', 'confirmed'])
                 ->where(function ($query) use ($start, $end) {
-                    // Check for any overlapping appointments
-                    $query->whereBetween('start_datetime', [$start, $end])
-                        ->orWhereBetween('end_datetime', [$start, $end])
-                        ->orWhere(function ($q) use ($start, $end) {
-                            $q->where('start_datetime', '<=', $start)
-                              ->where('end_datetime', '>=', $end);
-                        })
-                        ->orWhere(function ($q) use ($start, $end) {
-                            $q->where('start_datetime', '>=', $start)
-                              ->where('start_datetime', '<', $end);
-                        })
-                        ->orWhere(function ($q) use ($start, $end) {
-                            $q->where('end_datetime', '>', $start)
-                              ->where('end_datetime', '<=', $end);
-                        });
+                    $query->where('start_datetime', '<', $end)
+                        ->where('end_datetime', '>', $start);
                 })
                 ->count();
 
@@ -339,12 +316,8 @@ class AvailabilityService
         $appointments = Appointment::whereIn('venue_id', $venues->pluck('id'))
             ->whereIn('status', ['scheduled', 'confirmed'])
             ->where(function ($query) use ($start, $end) {
-                $query->whereBetween('start_datetime', [$start, $end])
-                    ->orWhereBetween('end_datetime', [$start, $end])
-                    ->orWhere(function ($q) use ($start, $end) {
-                        $q->where('start_datetime', '<=', $start)
-                          ->where('end_datetime', '>=', $end);
-                    });
+                $query->where('start_datetime', '<', $end)
+                    ->where('end_datetime', '>', $start);
             })
             ->get(['id', 'venue_id', 'start_datetime', 'end_datetime']);
 
