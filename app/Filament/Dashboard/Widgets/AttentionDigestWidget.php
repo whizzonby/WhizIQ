@@ -188,7 +188,7 @@ class AttentionDigestWidget extends Widget
                     'type'         => 'campaign_feedback',
                     'border_color' => '#0f766e',
                     'title'        => 'How did ' . $feedback['name'] . ' perform?',
-                    'subtitle'     => 'Your feedback helps WhizIQ improve future campaign drafts.',
+                    'subtitle'     => 'Your feedback helps WhizzIQ improve future campaign drafts.',
                     'action_label' => 'Worked',
                     'action_color' => '#dcfce7',
                     'action_text'  => '#166534',
@@ -451,7 +451,7 @@ class AttentionDigestWidget extends Widget
 
         Notification::make()
             ->title('Campaign draft dismissed')
-            ->body('WhizIQ will pause this audience for a few days before suggesting it again.')
+            ->body('WhizzIQ will pause this audience for a few days before suggesting it again.')
             ->success()
             ->send();
 
@@ -478,7 +478,7 @@ class AttentionDigestWidget extends Widget
 
         Notification::make()
             ->title('Campaign feedback saved')
-            ->body('WhizIQ will use this to improve future campaign drafts.')
+            ->body('WhizzIQ will use this to improve future campaign drafts.')
             ->success()
             ->send();
 

@@ -23,9 +23,9 @@ class WeeklyMarketingDigestNotification extends Notification implements ShouldQu
     public function toMail(object $notifiable): MailMessage
     {
         $mail = (new MailMessage)
-            ->subject('Your weekly WhizIQ marketing digest')
+            ->subject('Your weekly WhizzIQ marketing digest')
             ->greeting('Hello!')
-            ->line('Here is what WhizIQ found in your marketing activity this week.');
+            ->line('Here is what WhizzIQ found in your marketing activity this week.');
 
         if ($this->digest['recommended']) {
             $mail->line('Top recommendation: ' . $this->digest['recommended']['name'] . ' - ' . $this->digest['recommended']['reason']);
@@ -50,7 +50,7 @@ class WeeklyMarketingDigestNotification extends Notification implements ShouldQu
 
             return $mail
                 ->action('Review Ready Draft', $this->digest['actions']['review_draft_url'])
-                ->line('WhizIQ will keep watching for the next best campaign to review.');
+                ->line('WhizzIQ will keep watching for the next best campaign to review.');
         }
 
         if ($this->digest['actions']['improve_weakest_segment_url'] ?? null) {
@@ -58,7 +58,7 @@ class WeeklyMarketingDigestNotification extends Notification implements ShouldQu
 
             return $mail
                 ->action('Improve Weakest Segment', $this->digest['actions']['improve_weakest_segment_url'])
-                ->line('WhizIQ will keep watching for the next best campaign to review.');
+                ->line('WhizzIQ will keep watching for the next best campaign to review.');
         }
 
         if ($this->digest['actions']['snooze_recommendation_url'] ?? null) {
@@ -66,12 +66,12 @@ class WeeklyMarketingDigestNotification extends Notification implements ShouldQu
 
             return $mail
                 ->action('Snooze Recommendation', $this->digest['actions']['snooze_recommendation_url'])
-                ->line('WhizIQ will keep watching for the next best campaign to review.');
+                ->line('WhizzIQ will keep watching for the next best campaign to review.');
         }
 
         return $mail
             ->action('Open Campaign Reports', $this->digest['report_url'])
-            ->line('WhizIQ will keep watching for the next best campaign to review.');
+            ->line('WhizzIQ will keep watching for the next best campaign to review.');
     }
 
     public function toArray(object $notifiable): array

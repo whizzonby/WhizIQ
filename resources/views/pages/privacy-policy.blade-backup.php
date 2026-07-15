@@ -9,7 +9,7 @@
     </x-heading.h1>
 
     <p class="mb-6">
-        {{ config('app.name', 'WhizIQ') }} (“us”, “we”, or “our”) operates the {{ config('app.url', '') }} website (the “Service”).
+        {{ config('app.name', 'WhizzIQ') }} (“us”, “we”, or “our”) operates the {{ config('app.url', '') }} website (the “Service”).
         This page informs you of our policies regarding the collection, use, and disclosure of personal data when you use our Service and the choices you have associated with that data.
     </p>
 

@@ -56,7 +56,7 @@ class NotificationSettingsPage extends Page implements HasForms
         return $schema
             ->schema([
                 Section::make('Your Contact Details')
-                    ->description('WhizIQ will send alerts and your daily digest to this number.')
+                    ->description('WhizzIQ will send alerts and your daily digest to this number.')
                     ->icon('heroicon-o-device-phone-mobile')
                     ->schema([
                         Grid::make(2)->schema([
@@ -127,7 +127,7 @@ class NotificationSettingsPage extends Page implements HasForms
 
                             Toggle::make('alert_campaign_draft_prepared')
                                 ->label('Campaign drafts ready')
-                                ->helperText('Notify me when WhizIQ prepares a campaign draft for review'),
+                                ->helperText('Notify me when WhizzIQ prepares a campaign draft for review'),
                         ]),
                     ]),
 
@@ -178,7 +178,7 @@ class NotificationSettingsPage extends Page implements HasForms
 
                     $sent = app(MessagingService::class)->sendSms(
                         $phone,
-                        "👋 Test message from WhizIQ — your alerts are working correctly!"
+                        "👋 Test message from WhizzIQ — your alerts are working correctly!"
                     );
 
                     if ($sent) {

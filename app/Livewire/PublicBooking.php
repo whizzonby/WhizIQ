@@ -66,7 +66,15 @@ class PublicBooking extends Component
 
     protected function getSelectedType(): ?AppointmentType
     {
-        return $this->selectedTypeId ? AppointmentType::find($this->selectedTypeId) : null;
+        if (! $this->selectedTypeId) {
+            return null;
+        }
+
+        $bookingSetting = $this->getBookingSetting();
+
+        return AppointmentType::where('user_id', $bookingSetting->user_id)
+            ->where('is_active', true)
+            ->find($this->selectedTypeId);
     }
 
     public function mount($slug)
@@ -81,22 +89,38 @@ class PublicBooking extends Component
             abort(404, 'Booking page not found or is currently disabled.');
         }
 
-        // Check if a service was preselected (from service detail page via query param)
-        if (request()->has('service')) {
-            $preselectedId = request()->get('service');
-            $this->selectType($preselectedId);
-        }
-
         $this->sourceCampaign = request()->string('campaign')->trim()->value() ?: null;
         $this->sourceContactId = request()->integer('contact') ?: null;
         $this->sourceAudienceId = request()->integer('audience') ?: null;
         $this->rescheduleToken = request()->string('reschedule')->trim()->value() ?: null;
+
+        $preselectedId = request()->integer('service') ?: null;
+        if ($preselectedId) {
+            $this->selectType($preselectedId);
+        }
+
+        $preselectedDate = request()->string('date')->trim()->value() ?: null;
+        if ($preselectedId && $preselectedDate) {
+            $this->selectDate($preselectedDate);
+        }
+
+        $preselectedTime = request()->string('time')->trim()->value() ?: null;
+        if ($preselectedId && $preselectedDate && $preselectedTime) {
+            $this->selectTime($preselectedTime);
+        }
     }
 
     public function selectType($typeId)
     {
-        $this->selectedTypeId = $typeId;
         $bookingSetting = $this->getBookingSetting();
+        $type = AppointmentType::where('user_id', $bookingSetting->user_id)
+            ->where('is_active', true)
+            ->findOrFail($typeId);
+
+        $this->selectedTypeId = $type->id;
+        $this->selectedDate = null;
+        $this->selectedTime = null;
+        $this->availableSlots = [];
 
         $this->availableDates = $this->availabilityService->getAvailableDates(
             $bookingSetting->user_id,
@@ -108,9 +132,27 @@ class PublicBooking extends Component
 
     public function selectDate($date)
     {
-        $this->selectedDate = $date;
-        $bookingSetting = $this->getBookingSetting();
         $selectedType = $this->getSelectedType();
+        if (! $selectedType) {
+            abort(404, 'Selected service is no longer available.');
+        }
+
+        if (empty($this->availableDates)) {
+            $this->selectType($selectedType->id);
+        }
+
+        $availableDateValues = collect($this->availableDates)->pluck('date');
+        if (! $availableDateValues->contains($date)) {
+            $this->availableSlots = [];
+            $this->selectedDate = null;
+            $this->selectedTime = null;
+            session()->flash('error', 'That date is not available. Please choose another date.');
+            return;
+        }
+
+        $this->selectedDate = $date;
+        $this->selectedTime = null;
+        $bookingSetting = $this->getBookingSetting();
         $minNoticeHours = $bookingSetting->min_booking_notice_hours ?? 0;
 
         $this->availableSlots = $this->availabilityService->getAvailableSlots(
@@ -123,6 +165,16 @@ class PublicBooking extends Component
 
     public function selectTime($time)
     {
+        if (empty($this->availableSlots) && $this->selectedDate) {
+            $this->selectDate($this->selectedDate);
+        }
+
+        if (! collect($this->availableSlots)->contains(fn ($slot) => ($slot['time'] ?? null) === $time)) {
+            session()->flash('error', 'That time is no longer available. Please choose another time.');
+            $this->currentStep = 2;
+            return;
+        }
+
         $this->selectedTime = $time;
 
         // NEW: Skip venue selection - go directly to contact info
@@ -134,6 +186,22 @@ class PublicBooking extends Component
     {
         $this->selectedVenueId = $venueId;
         $this->currentStep = 3;
+    }
+
+    public function bookingFlowUrl(array $overrides = []): string
+    {
+        $parameters = array_merge([
+            'slug' => $this->bookingSlug,
+            'service' => $this->selectedTypeId,
+            'date' => $this->selectedDate,
+            'time' => $this->selectedTime,
+            'campaign' => $this->sourceCampaign,
+            'contact' => $this->sourceContactId,
+            'audience' => $this->sourceAudienceId,
+            'reschedule' => $this->rescheduleToken,
+        ], $overrides);
+
+        return route('booking.public', array_filter($parameters, fn ($value) => filled($value)));
     }
 
     public function goBack()

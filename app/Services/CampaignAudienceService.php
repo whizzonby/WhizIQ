@@ -294,7 +294,7 @@ class CampaignAudienceService
             'user_id' => $audience->user_id,
             'campaign_audience_id' => $audience->id,
             'name' => 'Suggested: ' . $audience->name,
-            'description' => 'Prepared automatically by WhizIQ from campaign recommendation signals. Review before sending.',
+            'description' => 'Prepared automatically by WhizzIQ from campaign recommendation signals. Review before sending.',
             'subject' => $prefill['subject'],
             'body' => $prefill['body'],
             'recipient_type' => 'individual',

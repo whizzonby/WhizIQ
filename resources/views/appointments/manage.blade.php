@@ -91,7 +91,7 @@
     <x-slot name="right">
         <div class="flex h-full flex-col justify-center px-8 py-12">
             <h2 class="text-3xl font-semibold text-white">
-                WhizIQ
+                WhizzIQ
             </h2>
             <p class="mt-4 max-w-md text-white/80">
                 Keep your booking details handy, add the event to your calendar, or cancel if you can no longer attend.

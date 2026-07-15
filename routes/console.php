@@ -131,7 +131,7 @@ Schedule::command('marketing:sync')
     ->name('sync-marketing-data')
     ->withoutOverlapping();
 
-// ── WhizIQ Automated SMS/WhatsApp Notifications ───────────────────────────────
+// ── WhizzIQ Automated SMS/WhatsApp Notifications ──────────────────────────────
 
 // Daily business digest — runs every 5 minutes so each user's digest_time is hit
 Schedule::command('whiziq:daily-digest')

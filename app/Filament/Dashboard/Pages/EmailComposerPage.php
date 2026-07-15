@@ -264,7 +264,7 @@ class EmailComposerPage extends Page implements HasForms
                             ->label('Prepared Segments')
                             ->content(function (): string {
                                 if (empty($this->draftSegmentVariants)) {
-                                    return 'WhizIQ will use the same message for every selected recipient.';
+                                    return 'WhizzIQ will use the same message for every selected recipient.';
                                 }
 
                                 return collect($this->draftSegmentVariants)
@@ -343,7 +343,7 @@ class EmailComposerPage extends Page implements HasForms
                     ->columns(3)
                     ->collapsed(! $this->campaignDraftId)
                     ->visible(fn (): bool => (bool) $this->campaignDraftId)
-                    ->description('Tune WhizIQ prepared drafts before sending.'),
+                    ->description('Tune WhizzIQ prepared drafts before sending.'),
 
 Section::make('Recipients')
                     ->schema([
@@ -938,7 +938,7 @@ TextInput::make('reply_to')
         if (! $this->campaignDraftId) {
             Notification::make()
                 ->title('No Prepared Draft')
-                ->body('Open a WhizIQ prepared draft before using draft rewrite prompts.')
+                ->body('Open a WhizzIQ prepared draft before using draft rewrite prompts.')
                 ->warning()
                 ->send();
 
@@ -960,7 +960,7 @@ TextInput::make('reply_to')
 
         Notification::make()
             ->title('Rewriting Draft...')
-            ->body('WhizIQ is tuning your prepared campaign draft.')
+            ->body('WhizzIQ is tuning your prepared campaign draft.')
             ->info()
             ->send();
 

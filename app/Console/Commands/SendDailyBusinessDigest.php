@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class SendDailyBusinessDigest extends Command
 {
-    protected $signature = 'whiziq:daily-digest';
+    protected $signature = 'WhizzIQ:daily-digest';
 
     protected $description = 'Send the daily business digest to all owners who have it enabled';
 
@@ -98,7 +98,7 @@ class SendDailyBusinessDigest extends Command
             ->whereNotIn('status', ['completed', 'cancelled'])
             ->count();
 
-        $lines = ["☀️ Good morning! Here's your WhizIQ brief for {$today}"];
+        $lines = ["☀️ Good morning! Here's your WhizzIQ brief for {$today}"];
         $lines[] = '';
 
         if ($todayAppointments > 0) {
@@ -131,7 +131,7 @@ class SendDailyBusinessDigest extends Command
         }
 
         $lines[] = '';
-        $lines[] = 'Have a great day! — WhizIQ';
+        $lines[] = 'Have a great day! — WhizzIQ';
 
         return implode("\n", $lines);
     }

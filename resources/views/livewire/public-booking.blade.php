@@ -569,7 +569,18 @@
                                 Select Date
                             </h3>
 
-                            @php $calendarDates = array_column($availableDates, 'date'); @endphp
+                            @php
+                                $calendarDates = array_column($availableDates, 'date');
+                                $bookingFlowBaseUrl = route('booking.public', ['slug' => $bookingSetting->booking_slug]);
+                                $trackingQuerySuffix = collect([
+                                    'campaign' => $sourceCampaign,
+                                    'contact' => $sourceContactId,
+                                    'audience' => $sourceAudienceId,
+                                    'reschedule' => $rescheduleToken,
+                                ])->filter(fn ($value) => filled($value))
+                                    ->map(fn ($value, $key) => '&' . $key . '=' . urlencode((string) $value))
+                                    ->implode('');
+                            @endphp
                             <div
                                 x-data="bookingCalendar(@js($calendarDates), '{{ $bookingSetting->brand_color ?? '#3B82F6' }}', @js($selectedDate))"
                                 class="bg-white border border-gray-200 rounded-xl overflow-hidden relative"
@@ -612,10 +623,9 @@
                                         <div class="flex items-center justify-center">
                                             <template x-if="day.empty"><div class="w-9 h-9"></div></template>
                                             <template x-if="!day.empty">
-                                                <button
-                                                    @click="if (day.clickable) { selectedDate = day.date; $wire.selectDate(day.date) }"
-                                                    :disabled="!day.clickable"
-                                                    type="button"
+                                                <a
+                                                    :href="day.clickable ? '{{ $bookingFlowBaseUrl }}?service={{ $selectedTypeId }}&date=' + encodeURIComponent(day.date) + '{{ $trackingQuerySuffix }}' : '#'"
+                                                    @click="if (!day.clickable) $event.preventDefault()"
                                                     :style="day.selected ? `background-color:${color};color:white;` : ''"
                                                     :class="{
                                                         'hover:bg-gray-100 text-gray-900 font-medium cursor-pointer': day.clickable && !day.selected,
@@ -625,7 +635,7 @@
                                                     }"
                                                     class="w-9 h-9 rounded-full text-sm transition-all flex items-center justify-center"
                                                     x-text="day.num"
-                                                ></button>
+                                                ></a>
                                             </template>
                                         </div>
                                     </template>
@@ -663,17 +673,17 @@
                                         </div>
                                     </div>
                                     @forelse($availableSlots as $slotInfo)
-                                        <button
-                                            wire:click="selectTime('{{ $slotInfo['time'] }}')"
+                                        <a
+                                            href="{{ $this->bookingFlowUrl(['time' => $slotInfo['time']]) }}"
+                                            wire:click.prevent="selectTime('{{ $slotInfo['time'] }}')"
                                             wire:loading.attr="disabled"
                                             wire:target="selectTime"
-                                            type="button"
-                                            class="w-full text-center px-4 py-3 border-2 rounded-lg hover:shadow-sm transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-wait
+                                            class="block w-full text-center px-4 py-3 border-2 rounded-lg hover:shadow-sm transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-wait
                                             {{ $selectedTime === $slotInfo['time'] ? 'ring-2 text-white' : 'border-gray-200 text-gray-700 hover:border-gray-300' }}"
                                             style="{{ $selectedTime === $slotInfo['time'] ? 'background-color: ' . ($bookingSetting->brand_color ?? '#3B82F6') . '; border-color: ' . ($bookingSetting->brand_color ?? '#3B82F6') : '' }}"
                                         >
                                             {{ $slotInfo['formatted'] }}
-                                        </button>
+                                        </a>
                                     @empty
                                         <div class="text-center py-12 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
                                             <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -809,7 +819,21 @@
                         {{ \Carbon\Carbon::parse($selectedDate . ' ' . $selectedTime)->format('F j, Y \a\t g:i A') }}
                     </p>
 
-                    <form wire:submit.prevent="submitBooking" class="space-y-5 relative">
+                    <form
+                        method="POST"
+                        action="{{ route('booking.public.submit', ['slug' => $bookingSetting->booking_slug]) }}"
+                        wire:submit.prevent="submitBooking"
+                        class="space-y-5 relative"
+                    >
+                        @csrf
+                        <input type="hidden" name="service" value="{{ $selectedType->id }}">
+                        <input type="hidden" name="date" value="{{ $selectedDate }}">
+                        <input type="hidden" name="time" value="{{ $selectedTime }}">
+                        <input type="hidden" name="campaign" value="{{ $sourceCampaign }}">
+                        <input type="hidden" name="contact" value="{{ $sourceContactId }}">
+                        <input type="hidden" name="audience" value="{{ $sourceAudienceId }}">
+                        <input type="hidden" name="reschedule" value="{{ $rescheduleToken }}">
+
                         {{-- Loading Overlay --}}
                         <div wire:loading wire:target="submitBooking" class="absolute inset-0 bg-white/70 backdrop-blur-sm rounded-lg z-10 flex items-center justify-center">
                             <div class="text-center">
@@ -828,6 +852,7 @@
                             </label>
                             <input
                                 type="text"
+                                name="attendee_name"
                                 wire:model="attendeeName"
                                 wire:loading.attr="disabled"
                                 wire:target="submitBooking"
@@ -844,6 +869,7 @@
                             </label>
                             <input
                                 type="email"
+                                name="attendee_email"
                                 wire:model="attendeeEmail"
                                 wire:loading.attr="disabled"
                                 wire:target="submitBooking"
@@ -860,6 +886,7 @@
                             </label>
                             <input
                                 type="tel"
+                                name="attendee_phone"
                                 wire:model="attendeePhone"
                                 wire:loading.attr="disabled"
                                 wire:target="submitBooking"
@@ -877,6 +904,7 @@
                                 </label>
                                 <input
                                     type="text"
+                                    name="attendee_company"
                                     wire:model="attendeeCompany"
                                     wire:loading.attr="disabled"
                                     wire:target="submitBooking"
@@ -895,6 +923,7 @@
                                 </label>
                                 <input
                                     type="text"
+                                    name="location"
                                     wire:model="location"
                                     wire:loading.attr="disabled"
                                     wire:target="submitBooking"
@@ -918,6 +947,7 @@
                                 Additional Notes
                             </label>
                             <textarea
+                                name="notes"
                                 wire:model="notes"
                                 wire:loading.attr="disabled"
                                 wire:target="submitBooking"

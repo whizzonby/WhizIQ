@@ -371,7 +371,7 @@ class CalendarSyncService
     }
 
     /**
-     * Push a WhizIQ appointment to Google Calendar (TWO-WAY SYNC)
+     * Push a WhizzIQ appointment to Google Calendar (TWO-WAY SYNC)
      */
     public function pushAppointmentToCalendar($appointment, bool $forceCreate = false): array
     {
@@ -566,7 +566,7 @@ class CalendarSyncService
             }
         }
 
-        // Check existing WhizIQ appointments
+        // Check existing WhizzIQ appointments
         $existingAppointments = \App\Models\Appointment::where('user_id', $user->id)
             ->whereIn('status', ['scheduled', 'confirmed'])
             ->where(function ($query) use ($startTime, $endTime) {
@@ -584,8 +584,8 @@ class CalendarSyncService
 
         foreach ($existingAppointments->get() as $existing) {
             $conflicts[] = [
-                'type' => 'whiziq_appointment',
-                'source' => 'WhizIQ Appointment',
+                'type' => 'WhizzIQ_appointment',
+                'source' => 'WhizzIQ Appointment',
                 'title' => $existing->title,
                 'start' => $existing->start_datetime->toDateTimeString(),
                 'end' => $existing->end_datetime->toDateTimeString(),
@@ -627,7 +627,7 @@ class CalendarSyncService
         $description = $appointment->description ?? '';
 
         $description .= "\n\n---\n";
-        $description .= "WhizIQ Appointment Details:\n";
+        $description .= "WhizzIQ Appointment Details:\n";
 
         if ($appointment->attendee_name) {
             $description .= "Attendee: {$appointment->attendee_name}\n";

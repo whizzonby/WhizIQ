@@ -168,7 +168,7 @@ class SendWeeklyMarketingDigestCommand extends Command
 
     protected function buildOwnerMessage(array $digest): string
     {
-        $lines = ['WhizIQ weekly marketing digest'];
+        $lines = ['WhizzIQ weekly marketing digest'];
 
         if ($digest['recommended']) {
             $lines[] = 'Next campaign: ' . $digest['recommended']['name'];

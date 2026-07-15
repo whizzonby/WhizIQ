@@ -45,7 +45,7 @@ class SendTaskReminders extends Command
 
                     $messaging->notifyOwner(
                         $task->user,
-                        "📋 Task due: {$task->title}\nDue: {$dueLabel}\n\n— WhizIQ"
+                        "📋 Task due: {$task->title}\nDue: {$dueLabel}\n\n— WhizzIQ"
                     );
                 }
 

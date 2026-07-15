@@ -24,9 +24,9 @@ class CampaignDraftRescuedNotification extends Notification implements ShouldQue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('WhizIQ improved a campaign draft before it expired')
+            ->subject('WhizzIQ improved a campaign draft before it expired')
             ->greeting('Hello!')
-            ->line("WhizIQ noticed this campaign draft was close to expiring: {$this->campaign->name}.")
+            ->line("WhizzIQ noticed this campaign draft was close to expiring: {$this->campaign->name}.")
             ->line('The subject, body, and available segment variants were refreshed so it is easier to review and send.')
             ->action('Review rescued draft', $this->reviewUrl())
             ->line('Nothing has been sent to clients yet.');

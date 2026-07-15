@@ -291,7 +291,7 @@
             @else
                 <p class="text-gray-600 text-sm">Thank you for considering our services!</p>
             @endif
-            <p class="text-gray-400 text-xs mt-2">Generated with WhizIQ Quote Builder</p>
+            <p class="text-gray-400 text-xs mt-2">Generated with WhizzIQ Quote Builder</p>
         </div>
     </div>
 </div>

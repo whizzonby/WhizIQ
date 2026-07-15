@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     @if($campaignDraftId)
         <div class="mb-4 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-800 dark:border-primary-800 dark:bg-primary-950 dark:text-primary-200">
-            WhizIQ prepared this campaign draft from your recommendation signals. Review the recipients and message before sending or scheduling.
+            WhizzIQ prepared this campaign draft from your recommendation signals. Review the recipients and message before sending or scheduling.
         </div>
     @elseif($campaignPreset)
         <div class="mb-4 rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-800 dark:border-primary-800 dark:bg-primary-950 dark:text-primary-200">

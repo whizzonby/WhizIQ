@@ -19,7 +19,7 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::where('email', 'demo@whiziq.com')->first();
+        $user = User::where('email', 'demo@WhizzIQ.com')->first();
 
         if (! $user) {
             $this->command->error('Demo user not found. Create it first with the tinker command.');
@@ -91,7 +91,7 @@ class DemoDataSeeder extends Seeder
                 'ops_employee_count'   => 8,
                 'ops_location'         => 'Accra, Ghana',
                 'ops_hours'            => 'Mon–Fri, 8am–6pm',
-                'ops_systems'          => ['WhizIQ', 'Google Workspace', 'Slack'],
+                'ops_systems'          => ['WhizzIQ', 'Google Workspace', 'Slack'],
                 'rev_monthly_avg'      => 18500,
                 'rev_yoy_change'       => 34,
                 'rev_payment_methods'  => ['Bank Transfer', 'Mobile Money', 'Card'],
@@ -592,8 +592,8 @@ class DemoDataSeeder extends Seeder
                 'progress_percentage' => 33,
             ],
             [
-                'title'               => 'Launch WhizIQ-Powered Client Reporting Feature',
-                'description'         => 'Use WhizIQ to auto-generate monthly performance reports for all retainer clients.',
+                'title'               => 'Launch WhizzIQ-Powered Client Reporting Feature',
+                'description'         => 'Use WhizzIQ to auto-generate monthly performance reports for all retainer clients.',
                 'type'                => 'quarterly',
                 'category'            => 'product',
                 'start_date'          => Carbon::now()->startOfQuarter(),
@@ -647,7 +647,7 @@ class DemoDataSeeder extends Seeder
             ],
             [
                 'title'       => 'Prepare Q2 performance report for Mensah Group',
-                'description' => 'Pull analytics from Google Ads, Meta, and SEO tools. Present in WhizIQ report format.',
+                'description' => 'Pull analytics from Google Ads, Meta, and SEO tools. Present in WhizzIQ report format.',
                 'priority'    => 'high',
                 'status'      => 'pending',
                 'due_date'    => Carbon::now()->addDays(5),

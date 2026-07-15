@@ -24,9 +24,9 @@ class CampaignDraftPreparedNotification extends Notification implements ShouldQu
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('WhizIQ prepared a campaign draft for you')
+            ->subject('WhizzIQ prepared a campaign draft for you')
             ->greeting('Hello!')
-            ->line("WhizIQ prepared a campaign draft: {$this->campaign->name}.")
+            ->line("WhizzIQ prepared a campaign draft: {$this->campaign->name}.")
             ->line('It is ready for you to review, edit, send, or schedule.')
             ->action('Review draft', $this->reviewUrl())
             ->line('Nothing has been sent to clients yet.');

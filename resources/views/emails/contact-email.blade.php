@@ -48,7 +48,7 @@
         </div>
 
         <div class="email-footer">
-            <p>Sent via WhizIQ CRM</p>
+            <p>Sent via WhizzIQ CRM</p>
         </div>
     </div>
 </body>

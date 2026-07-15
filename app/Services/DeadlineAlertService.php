@@ -294,13 +294,13 @@ class DeadlineAlertService
         $message .= "Description: {$deadline['description']}\n\n";
         
         if ($urgency === 'overdue' || $urgency === 'critical') {
-            $message .= "🚨 ACTION REQUIRED: Please log into your WhizIQ dashboard and file your taxes immediately.\n\n";
+            $message .= "🚨 ACTION REQUIRED: Please log into your WhizzIQ dashboard and file your taxes immediately.\n\n";
         } else {
-            $message .= "💡 TIP: Log into your WhizIQ dashboard to review and file your taxes.\n\n";
+            $message .= "💡 TIP: Log into your WhizzIQ dashboard to review and file your taxes.\n\n";
         }
         
         $message .= "Best regards,\n";
-        $message .= "WhizIQ Tax Team";
+        $message .= "WhizzIQ Tax Team";
         
         return $message;
     }

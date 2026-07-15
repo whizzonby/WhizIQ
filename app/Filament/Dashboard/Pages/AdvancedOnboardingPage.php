@@ -107,7 +107,7 @@ class AdvancedOnboardingPage extends OnboardingPage
                     ->icon('heroicon-o-cog-6-tooth')
                     ->schema([
                         Section::make('Revenue & Preferences')
-                            ->description('Help us tailor WhizIQ to your needs')
+                            ->description('Help us tailor WhizzIQ to your needs')
                             ->schema([
                                     TextInput::make('rev_monthly_avg')
                                         ->label('Average Monthly Revenue')

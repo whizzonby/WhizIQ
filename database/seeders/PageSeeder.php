@@ -83,7 +83,7 @@ class PageSeeder extends Seeder
 
     private function getPrivacyPolicyContent(): string
     {
-        $appName = config('app.name', 'WhizIQ');
+        $appName = config('app.name', 'WhizzIQ');
         $appUrl = config('app.url', '');
         $supportEmail = config('app.support_email', '');
 
@@ -159,7 +159,7 @@ HTML;
 
     private function getTermsOfServiceContent(): string
     {
-        $appName = config('app.name', 'WhizIQ');
+        $appName = config('app.name', 'WhizzIQ');
         $appUrl = config('app.url', '');
         $supportEmail = config('app.support_email', '');
 
@@ -229,7 +229,7 @@ HTML;
 
     private function getCookiePolicyContent(): string
     {
-        $appName = config('app.name', 'WhizIQ');
+        $appName = config('app.name', 'WhizzIQ');
 
         return <<<HTML
 <p class="mb-6">

@@ -245,7 +245,7 @@ class Deal extends Model
                     $amount = $this->value ? ' — £' . number_format($this->value, 0) : '';
                     app(MessagingService::class)->notifyOwner(
                         $this->user,
-                        "{$emoji} {$label}: {$this->title}{$amount}\n\n— WhizIQ"
+                        "{$emoji} {$label}: {$this->title}{$amount}\n\n— WhizzIQ"
                     );
                 }
             } catch (\Exception $e) {

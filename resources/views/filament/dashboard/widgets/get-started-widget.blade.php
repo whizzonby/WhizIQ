@@ -16,7 +16,7 @@
             <div>
                 <h2 class="text-base font-semibold text-gray-950 dark:text-white">Launch your booking flow</h2>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Complete these essentials so clients can book you and you can start operating from WhizIQ.
+                    Complete these essentials so clients can book you and you can start operating from WhizzIQ.
                 </p>
             </div>
         </div>

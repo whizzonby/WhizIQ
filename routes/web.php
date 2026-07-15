@@ -217,6 +217,7 @@ Route::controller(InvoiceController::class)
 Route::get('/book/{slug}/service/{serviceId}', \App\Livewire\ServiceDetail::class)->name('booking.service.detail');
 
 Route::get('/book/{slug}', \App\Livewire\PublicBooking::class)->name('booking.public');
+Route::post('/book/{slug}', \App\Http\Controllers\PublicBookingSubmissionController::class)->name('booking.public.submit');
 
 
 // Appointment Calendar Download

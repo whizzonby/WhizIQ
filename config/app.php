@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'SaaSykit'),
+    'name' => env('APP_NAME', 'WhizzIQ'),
 
     'description' => env('APP_DESCRIPTION', ''),
 

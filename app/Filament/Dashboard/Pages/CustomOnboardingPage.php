@@ -185,7 +185,7 @@ class CustomOnboardingPage extends OnboardingPage
                     ->icon('heroicon-o-bell')
                     ->schema([
                         Section::make('Get notified instantly')
-                            ->description('WhizIQ alerts you the moment a booking comes in, an invoice is overdue, or a deal goes stale.')
+                            ->description('WhizzIQ alerts you the moment a booking comes in, an invoice is overdue, or a deal goes stale.')
                             ->schema([
                                 TextInput::make('owner_phone')
                                     ->label('Your Phone Number')
