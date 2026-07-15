@@ -17,7 +17,7 @@ trait RedirectAwareTrait
 
         // Skip email verification and onboarding for admins
         if ($user->is_admin) {
-            if (Redirect::getIntendedUrl() !== null && rtrim(Redirect::getIntendedUrl(), '/') !== rtrim((route('home')), '/')) {
+            if ($this->hasUsableIntendedUrl()) {
                 return Redirect::getIntendedUrl();
             }
             return route('filament.admin.pages.dashboard');
@@ -32,10 +32,24 @@ trait RedirectAwareTrait
             return route('filament.dashboard.pages.onboarding');
         }
 
-        if (Redirect::getIntendedUrl() !== null && rtrim(Redirect::getIntendedUrl(), '/') !== rtrim((route('home')), '/')) {
+        if ($this->hasUsableIntendedUrl()) {
             return Redirect::getIntendedUrl();
         }
 
         return route('filament.dashboard.pages.dashboard');
+    }
+
+    protected function hasUsableIntendedUrl(): bool
+    {
+        $intended = Redirect::getIntendedUrl();
+
+        if ($intended === null) {
+            return false;
+        }
+
+        $intended = rtrim($intended, '/');
+
+        return $intended !== rtrim(route('home'), '/')
+            && $intended !== rtrim(route('login'), '/');
     }
 }

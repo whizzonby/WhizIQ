@@ -30,7 +30,9 @@ class OAuthController extends Controller
             return redirect()->route('home');
         }
 
-        Redirect::setIntendedUrl(url()->previous());
+        if (url()->previous() != route('login') && Redirect::getIntendedUrl() === null) {
+            Redirect::setIntendedUrl(url()->previous());
+        }
 
         return Socialite::driver($provider)->redirect();
     }
