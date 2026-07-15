@@ -423,13 +423,12 @@
                     {{-- Services Grid --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
                         @forelse($appointmentTypes as $type)
-                            <button
-                                type="button"
+                            <a
+                                href="{{ route('booking.public', ['slug' => $bookingSetting->booking_slug, 'service' => $type->id]) }}"
                                 wire:key="booking-service-{{ $type->id }}"
                                 wire:click.prevent="selectType({{ $type->id }})"
-                                wire:loading.attr="disabled"
                                 wire:target="selectType"
-                                class="group relative block w-full text-left rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 bg-white border border-gray-200 cursor-pointer disabled:cursor-wait disabled:opacity-70"
+                                class="group relative block w-full text-left rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 bg-white border border-gray-200 cursor-pointer"
                             >
                                 {{-- Service Image --}}
                                 <div class="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
@@ -510,7 +509,7 @@
                                     </span>
                                 </div>
                                 </div>
-                            </button>
+                            </a>
                         @empty
                             <div class="col-span-full text-center py-16 text-gray-500">
                                 <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
