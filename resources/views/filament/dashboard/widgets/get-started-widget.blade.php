@@ -1,4 +1,16 @@
 <x-filament-widgets::widget>
+    <style>
+        .dark .whiziq-booking-step-label,
+        .fi-dark .whiziq-booking-step-label {
+            color: #ffffff !important;
+        }
+
+        .dark .whiziq-booking-step-status,
+        .fi-dark .whiziq-booking-step-status {
+            color: #d1d5db !important;
+        }
+    </style>
+
     <div class="rounded-lg border border-primary-200 bg-white p-6 shadow-sm dark:border-primary-800 dark:bg-gray-900 dark:text-gray-100">
         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
             <div>
@@ -21,10 +33,10 @@
                     </div>
 
                     <div class="min-w-0">
-                        <p class="text-sm font-semibold text-gray-950 group-hover:text-primary-700 dark:text-white dark:group-hover:text-primary-300">
+                        <p class="whiziq-booking-step-label text-sm font-semibold text-gray-950 group-hover:text-primary-700 dark:text-white dark:group-hover:text-primary-300">
                             {{ $step['label'] }}
                         </p>
-                        <p class="mt-0.5 text-xs font-medium text-gray-600 dark:text-gray-300">
+                        <p class="whiziq-booking-step-status mt-0.5 text-xs font-medium text-gray-600 dark:text-gray-300">
                             {{ $step['complete'] ? 'Done' : 'Set up now' }}
                         </p>
                     </div>
