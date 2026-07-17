@@ -6,6 +6,7 @@ use App\Models\ClientInvoice;
 use App\Models\InvoiceClient;
 use App\Models\ClientInvoiceItem;
 use App\Services\InvoicePDFService;
+use App\Filament\Dashboard\Resources\Subscriptions\SubscriptionResource;
 use Filament\Forms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -469,7 +470,7 @@ class InvoiceBuilderPage extends Page implements HasForms
                             ->actions([
                                 \Filament\Actions\Action::make('upgrade')
                                     ->label('View Plans')
-                                    ->url(route('filament.dashboard.pages.plans'))
+                                    ->url(SubscriptionResource::getUrl('index'))
                             ])
                             ->persistent()
                             ->send();
@@ -607,7 +608,7 @@ class InvoiceBuilderPage extends Page implements HasForms
                             ->actions([
                                 \Filament\Actions\Action::make('upgrade')
                                     ->label('View Plans')
-                                    ->url(route('filament.dashboard.pages.plans'))
+                                    ->url(SubscriptionResource::getUrl('index'))
                             ])
                             ->persistent()
                             ->send();
