@@ -467,7 +467,7 @@ class InvoiceBuilderPage extends Page implements HasForms
                             ->title('Invoice Limit Reached')
                             ->body("You've reached your monthly limit of {$limit} invoices. Upgrade to Pro for unlimited invoices!")
                             ->actions([
-                                \Filament\Notifications\Actions\Action::make('upgrade')
+                                \Filament\Actions\Action::make('upgrade')
                                     ->label('View Plans')
                                     ->url(route('filament.dashboard.pages.plans'))
                             ])
@@ -605,7 +605,7 @@ class InvoiceBuilderPage extends Page implements HasForms
                             ->title('Invoice Limit Reached')
                             ->body("You've reached your monthly limit of {$limit} invoices. Upgrade to Pro for unlimited invoices!")
                             ->actions([
-                                \Filament\Notifications\Actions\Action::make('upgrade')
+                                \Filament\Actions\Action::make('upgrade')
                                     ->label('View Plans')
                                     ->url(route('filament.dashboard.pages.plans'))
                             ])

@@ -74,7 +74,7 @@ class TaskReminderNotification extends Notification implements ShouldQueue
             ->icon('heroicon-o-bell')
             ->iconColor($this->task->priority_color)
             ->actions([
-                \Filament\Notifications\Actions\Action::make('view')
+                \Filament\Actions\Action::make('view')
                     ->label('View Task')
                     ->url(route('filament.dashboard.resources.tasks.view', ['record' => $this->task]))
                     ->markAsRead(),

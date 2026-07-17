@@ -133,7 +133,7 @@ class NewAppointmentBookedNotification extends Notification implements ShouldQue
             ->icon('heroicon-o-calendar-days')
             ->iconColor('success')
             ->actions([
-                \Filament\Notifications\Actions\Action::make('view')
+                \Filament\Actions\Action::make('view')
                     ->label('View Appointments')
                     ->url(route('filament.dashboard.resources.appointments.index'))
                     ->markAsRead(),
